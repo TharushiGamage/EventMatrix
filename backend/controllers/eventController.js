@@ -125,6 +125,8 @@ const createEvent = async (req, res, next) => {
             maxParticipants, isPaid, ticketPrice, description, ticketTypes
         } = req.body;
 
+        const image = req.file ? req.file.filename : null;
+
         const event = await Event.create({
             name,
             date,
@@ -137,6 +139,7 @@ const createEvent = async (req, res, next) => {
             ticketPrice: isPaid ? ticketPrice : null,
             ticketTypes: isPaid ? (ticketTypes || []) : [],
             description,
+            image,
         });
 
         res.status(201).json({
@@ -179,6 +182,10 @@ const updateEvent = async (req, res, next) => {
         event.ticketPrice = isPaid ? ticketPrice : null;
         event.ticketTypes = isPaid ? (ticketTypes || []) : [];
         event.description = description;
+
+        if (req.file) {
+            event.image = req.file.filename;
+        }
 
         await event.save();
 

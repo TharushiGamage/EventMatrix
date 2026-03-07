@@ -1,7 +1,7 @@
 # Smart Campus Event API Documentation
 
 **Base URL:** `http://localhost:5000`  
-**Content-Type:** `application/json`
+**Content-Type:** `application/json` (or `multipart/form-data` for endpoints supporting file upload)
 
 ---
 
@@ -12,6 +12,7 @@
   - [Get Feed Events](#get-feed-events)
   - [Get Feed Event Detail](#get-feed-event-detail)
   - [Get Calendar Events](#get-calendar-events)
+  - [Get Event Image](#get-event-image)
 - [Event Management Endpoints](#event-management-endpoints) _(admin CRUD)_
   - [Get All Events](#get-all-events)
   - [Get Event Stats](#get-event-stats)
@@ -94,7 +95,8 @@ GET /api/v1/feed?search=tech&filter=paid&category=upcoming&page=1&limit=10
             "issuingTimes": "09:00 to 17:00",
             "issuingVenues": "Main Campus Office"
           }
-        ]
+        ],
+        "image": "1678234567890-123456789.jpg"
       }
     ],
     "pagination": {
@@ -243,6 +245,67 @@ GET /api/v1/feed/calendar?month=3&year=2026
   "error": {
     "code": "VALIDATION_ERROR",
     "message": "month and year are required query parameters"
+  }
+}
+```
+
+---
+
+### Get Event Image
+
+```
+GET /api/v1/feed/:id/image
+```
+
+Returns the image details (filename and URL) for a specific event. Use this to retrieve the uploaded image associated with an event.
+
+#### Path Parameters
+
+| Parameter | Type     | Description              |
+|-----------|----------|--------------------------|
+| `id`      | `string` | UUID of the event        |
+
+#### Example Request
+
+```
+GET /api/v1/feed/a1b2c3d4-e5f6-7890-abcd-ef1234567890/image
+```
+
+#### Success Response — `200 OK`
+
+```json
+{
+  "success": true,
+  "data": {
+    "eventId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "image": "1678234567890-123456789.jpg",
+    "imageUrl": "/uploaded_images/1678234567890-123456789.jpg"
+  }
+}
+```
+
+> **Tip:** To display the image, use the full URL: `http://localhost:5000/uploaded_images/1678234567890-123456789.jpg`
+
+#### Error Response — `404 Not Found` (Event not found)
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "EVENT_NOT_FOUND",
+    "message": "Event with ID 'nonexistent-id' not found"
+  }
+}
+```
+
+#### Error Response — `404 Not Found` (No image uploaded)
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "IMAGE_NOT_FOUND",
+    "message": "No image uploaded for event 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'"
   }
 }
 ```
@@ -402,7 +465,7 @@ Checks if a proposed event intersects with existing events on the same date.
 POST /api/v1/events
 ```
 
-Creates a new event. All fields are validated by the `validateEvent` middleware.
+Creates a new event. To upload an image, send this request as `multipart/form-data`. Otherwise, `application/json` is fine. All fields are validated by the `validateEvent` middleware.
 
 #### Request Body
 
@@ -419,6 +482,9 @@ Creates a new event. All fields are validated by the `validateEvent` middleware.
 | `ticketPrice`     | `number`  | if paid  | (legacy) required & > 0 if `ticketTypes` missing|
 | `ticketTypes`     | `array`   | if paid  | array of objects; required if `isPaid` is true|
 | `description`     | `string`  | ✅       | max 2000 characters                  |
+| `image`           | `file`    | ❌       | optional image (JPEG/PNG/WEBP, max 5MB)|
+
+> **Note:** When using `multipart/form-data`, array/object fields like `ticketTypes` must be sent as stringified JSON. Number/boolean fields are automatically coerced.
 
 #### Example Request
 
@@ -479,7 +545,7 @@ Creates a new event. All fields are validated by the `validateEvent` middleware.
 PUT /api/v1/events/:id
 ```
 
-Updates all fields of an existing event. The full request body is required (same as [Create Event](#create-event)).
+Updates all fields of an existing event. The full request body is required (same as [Create Event](#create-event)). Like creation, use `multipart/form-data` to upload/replace the event's `image`.
 
 #### Success Response — `200 OK`
 
@@ -546,6 +612,7 @@ Permanently deletes an event.
 | `ticketPrice`     | `number`    | Legacy ticket cost (null for free events)  |
 | `ticketTypes`     | `array`     | Array of ticket objects (General, VIP, etc)|
 | `description`     | `string`    | Full description (max 2000 chars)          |
+| `image`           | `string`    | Image filename. Available at `/uploaded_images/<filename>` |
 | `createdAt`       | `datetime`  | Auto-generated creation timestamp          |
 | `updatedAt`       | `datetime`  | Auto-generated last-update timestamp       |
 
@@ -574,4 +641,5 @@ All error responses follow a consistent shape:
 |--------------------|-------------|--------------------------------|
 | `VALIDATION_ERROR` | `400`       | Request body validation failed |
 | `EVENT_NOT_FOUND`  | `404`       | No event matches the given ID  |
+| `IMAGE_NOT_FOUND`  | `404`       | No image uploaded for the event|
 | `INTERNAL_ERROR`   | `500`       | Unexpected server error        |

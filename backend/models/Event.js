@@ -62,6 +62,10 @@ const eventSchema = new mongoose.Schema(
             required: true,
             maxlength: 2000,
         },
+        image: {
+            type: String,
+            default: null,
+        },
     },
     {
         timestamps: true,

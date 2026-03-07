@@ -1,5 +1,24 @@
 const validateEvent = (req, res, next) => {
     const errors = [];
+
+    // Coerce multipart/form-data string values to proper types
+    if (typeof req.body.isPaid === 'string') {
+        req.body.isPaid = req.body.isPaid === 'true';
+    }
+    if (typeof req.body.maxParticipants === 'string') {
+        req.body.maxParticipants = parseInt(req.body.maxParticipants, 10);
+    }
+    if (typeof req.body.ticketPrice === 'string') {
+        req.body.ticketPrice = parseFloat(req.body.ticketPrice);
+    }
+    if (typeof req.body.ticketTypes === 'string') {
+        try {
+            req.body.ticketTypes = JSON.parse(req.body.ticketTypes);
+        } catch (_e) {
+            req.body.ticketTypes = [];
+        }
+    }
+
     const { name, date, startTime, endTime, venue, organizedBy, maxParticipants, isPaid, ticketPrice, description, ticketTypes } = req.body;
 
     // name

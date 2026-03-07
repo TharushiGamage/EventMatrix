@@ -1,7 +1,7 @@
 const Event = require('../models/Event');
 
 // Slim fields returned in the feed list
-const FEED_LIST_FIELDS = 'id name date time venue organizedBy isPaid ticketPrice';
+const FEED_LIST_FIELDS = 'id name date startTime endTime venue organizedBy isPaid ticketPrice ticketTypes image';
 
 // GET /api/v1/feed
 const getFeedEvents = async (req, res, next) => {
@@ -177,8 +177,49 @@ const getCalendarEvents = async (req, res, next) => {
     }
 };
 
+// GET /api/v1/feed/:id/image
+const getEventImage = async (req, res, next) => {
+    try {
+        const event = await Event.findOne({ id: req.params.id }).select('id image');
+
+        if (!event) {
+            return res.status(404).json({
+                success: false,
+                error: {
+                    code: 'EVENT_NOT_FOUND',
+                    message: `Event with ID '${req.params.id}' not found`,
+                },
+            });
+        }
+
+        if (!event.image) {
+            return res.status(404).json({
+                success: false,
+                error: {
+                    code: 'IMAGE_NOT_FOUND',
+                    message: `No image uploaded for event '${req.params.id}'`,
+                },
+            });
+        }
+
+        const imageUrl = `/uploaded_images/${event.image}`;
+
+        res.status(200).json({
+            success: true,
+            data: {
+                eventId: event.id,
+                image: event.image,
+                imageUrl,
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     getFeedEvents,
     getFeedEventDetail,
     getCalendarEvents,
+    getEventImage,
 };
