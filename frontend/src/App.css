@@ -1016,7 +1016,7 @@ body {
 .feed-item-img {
     position: relative;
     width: 100%;
-    height: 180px;
+    height: 400px;
     overflow: hidden;
 }
 
@@ -1029,6 +1029,17 @@ body {
 
 .feed-item:hover .feed-item-img img {
     transform: scale(1.06);
+}
+
+.feed-item-img-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+    color: var(--text-muted);
+    opacity: 0.5;
 }
 
 /* Date badge overlaid on image */
@@ -1414,7 +1425,7 @@ body {
     }
 
     .feed-item-img {
-        height: 160px;
+        height: 320px;
     }
 
     .feed-detail-grid {

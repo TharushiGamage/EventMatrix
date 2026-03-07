@@ -170,11 +170,28 @@ export default function Feed() {
                             onClick={() => navigate(`/feed/${event.id}`)}
                         >
                             <div className="feed-item-img">
-                                <img
-                                    src={`https://picsum.photos/seed/event${event.id || idx}/400/200`}
-                                    alt={event.name}
-                                    loading="lazy"
-                                />
+                                {event.image ? (
+                                    <img
+                                        src={`http://localhost:5000/uploaded_images/${event.image}`}
+                                        alt={event.name}
+                                        loading="lazy"
+                                        onError={(e) => {
+                                            e.target.style.display = 'none';
+                                            e.target.nextElementSibling && (e.target.nextElementSibling.style.display = 'flex');
+                                        }}
+                                    />
+                                ) : null}
+                                <div
+                                    className="feed-item-img-placeholder"
+                                    style={{ display: event.image ? 'none' : 'flex' }}
+                                >
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                        <line x1="16" y1="2" x2="16" y2="6" />
+                                        <line x1="8" y1="2" x2="8" y2="6" />
+                                        <line x1="3" y1="10" x2="21" y2="10" />
+                                    </svg>
+                                </div>
                                 <div className="feed-item-date-badge">
                                     <span className="feed-item-month">{new Date(event.date + 'T00:00:00').toLocaleString('en-US', { month: 'short' })}</span>
                                     <span className="feed-item-day">{new Date(event.date + 'T00:00:00').getDate()}</span>

@@ -27,12 +27,18 @@ export async function fetchEventById(id) {
 }
 
 export async function createEvent(eventData) {
-    const { data } = await api.post('/events', eventData);
+    const isFormData = eventData instanceof FormData;
+    const { data } = await api.post('/events', eventData, {
+        headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined
+    });
     return data.data;
 }
 
 export async function updateEvent(id, eventData) {
-    const { data } = await api.put(`/events/${id}`, eventData);
+    const isFormData = eventData instanceof FormData;
+    const { data } = await api.put(`/events/${id}`, eventData, {
+        headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined
+    });
     return data.data;
 }
 

@@ -21,9 +21,11 @@ export default function EventForm() {
             issuingDates: '', issuingTimes: '', issuingVenues: ''
         }],
         description: '',
+        image: null,
     };
 
     const [form, setForm] = useState(emptyForm);
+    const [currentImage, setCurrentImage] = useState(null);
     const [errors, setErrors] = useState({});
     const [touched, setTouched] = useState({});
     const [submitting, setSubmitting] = useState(false);
@@ -40,6 +42,7 @@ export default function EventForm() {
             try {
                 const event = await fetchEventById(id);
                 if (cancelled) return;
+                setCurrentImage(event.image || null);
                 setForm({
                     name: event.name || '',
                     date: event.date || '',
@@ -53,6 +56,7 @@ export default function EventForm() {
                         { name: '', price: event.ticketPrice || '', totalCount: '', issuingDates: '', issuingTimes: '', issuingVenues: '' }
                     ],
                     description: event.description || '',
+                    image: null,
                 });
             } catch (err) {
                 if (!cancelled) setApiError(err.message);
@@ -95,6 +99,9 @@ export default function EventForm() {
             }
         }
         if (!form.description.trim()) newErrors.description = 'Description is required';
+        if (form.image && form.image.size > 5 * 1024 * 1024) {
+            newErrors.image = 'Image size must be less than 5MB';
+        }
         return newErrors;
     };
 
@@ -108,6 +115,18 @@ export default function EventForm() {
             setErrors((prev) => {
                 const next = { ...prev };
                 delete next[name];
+                return next;
+            });
+        }
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        setForm(prev => ({ ...prev, image: file || null }));
+        if (touched.image) {
+            setErrors(prev => {
+                const next = { ...prev };
+                delete next.image;
                 return next;
             });
         }
@@ -191,7 +210,7 @@ export default function EventForm() {
             return;
         }
 
-        const payload = {
+        const payloadParams = {
             name: form.name.trim(),
             date: form.date,
             startTime: form.startTime,
@@ -211,12 +230,27 @@ export default function EventForm() {
             description: form.description.trim(),
         };
 
+        let finalPayload;
+        if (form.image) {
+            finalPayload = new FormData();
+            Object.entries(payloadParams).forEach(([key, value]) => {
+                if (key === 'ticketTypes') {
+                    finalPayload.append(key, JSON.stringify(value));
+                } else {
+                    finalPayload.append(key, value);
+                }
+            });
+            finalPayload.append('image', form.image);
+        } else {
+            finalPayload = payloadParams;
+        }
+
         try {
             setSubmitting(true);
             if (isEdit) {
-                await updateEvent(id, payload);
+                await updateEvent(id, finalPayload);
             } else {
-                await createEvent(payload);
+                await createEvent(finalPayload);
             }
             navigate('/');
         } catch (err) {
@@ -555,6 +589,35 @@ export default function EventForm() {
                         </button>
                     </div>
                 )}
+
+                {/* Image Upload */}
+                <div className="form-group">
+                    <label className="form-label" htmlFor="image">
+                        Event Image (Optional)
+                    </label>
+                    {isEdit && currentImage && (
+                        <div style={{ marginBottom: '10px' }}>
+                            <p style={{ fontSize: '0.85rem', color: '#666', margin: '0 0 5px 0' }}>Current Image:</p>
+                            <img src={`http://localhost:5000/uploaded_images/${currentImage}`} alt="Event" style={{ maxHeight: '150px', borderRadius: '8px' }} />
+                        </div>
+                    )}
+                    <input
+                        id="image"
+                        type="file"
+                        name="image"
+                        accept="image/jpeg, image/png, image/webp"
+                        className={`form-input ${errors.image && touched.image ? 'input-error' : ''}`}
+                        onChange={handleFileChange}
+                        onBlur={handleBlur}
+                        style={{ padding: '8px' }}
+                    />
+                    <small style={{ display: 'block', marginTop: '4px', color: '#666', fontSize: '0.8rem' }}>
+                        Supported formats: JPEG, PNG, WEBP. Max size: 5MB.
+                    </small>
+                    {errors.image && touched.image && (
+                        <span className="form-error">{errors.image}</span>
+                    )}
+                </div>
 
                 {/* Description */}
                 <div className="form-group">
