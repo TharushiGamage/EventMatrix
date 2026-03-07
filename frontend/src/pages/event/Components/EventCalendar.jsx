@@ -8,6 +8,8 @@ const MONTH_NAMES = [
     'July', 'August', 'September', 'October', 'November', 'December',
 ];
 
+const MAX_VISIBLE_EVENTS = 2;
+
 function getDaysInMonth(month, year) {
     return new Date(year, month, 0).getDate();
 }
@@ -28,6 +30,96 @@ function formatTime(t) {
     return `${h12}:${m} ${ampm}`;
 }
 
+function formatFullDate(year, month, day) {
+    const d = new Date(year, month - 1, day);
+    return d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+/* ─── Event Detail Dialog ─── */
+function EventDetailDialog({ event, dateLabel, onClose, onViewMore }) {
+    const dialogRef = useRef(null);
+
+    useEffect(() => {
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') onClose();
+        };
+        document.addEventListener('keydown', handleEscape);
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.removeEventListener('keydown', handleEscape);
+            document.body.style.overflow = '';
+        };
+    }, [onClose]);
+
+    if (!event) return null;
+
+    const colorClass = event.isPaid ? 'paid' : 'free';
+
+    return (
+        <div className="cal-dialog-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+            <div className={`cal-dialog cal-dialog-${colorClass}`} ref={dialogRef}>
+                {/* Close button */}
+                <button className="cal-dialog-close" onClick={onClose} aria-label="Close">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+
+                {/* Header */}
+                <div className="cal-dialog-header">
+                    <span className={`cal-dialog-badge cal-dialog-badge-${colorClass}`}>
+                        {event.isPaid ? 'Paid' : 'Free'}
+                    </span>
+                    <h3 className="cal-dialog-title">{event.name}</h3>
+                </div>
+
+                {/* Body */}
+                <div className="cal-dialog-body">
+                    <div className="cal-dialog-row">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+                        </svg>
+                        <span>{dateLabel}</span>
+                    </div>
+                    <div className="cal-dialog-row">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+                        </svg>
+                        <span>{formatTime(event.startTime)} – {formatTime(event.endTime)}</span>
+                    </div>
+                    <div className="cal-dialog-row">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
+                        </svg>
+                        <span>{event.venue}</span>
+                    </div>
+                    {event.organizer && (
+                        <div className="cal-dialog-row">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+                            </svg>
+                            <span>{event.organizer}</span>
+                        </div>
+                    )}
+                </div>
+
+                {/* Footer */}
+                <div className="cal-dialog-footer">
+                    <button className="btn btn-ghost" onClick={onClose}>Close</button>
+                    <button className="btn btn-primary" onClick={() => onViewMore(event.id)}>
+                        View More
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="9 6 15 12 9 18" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+/* ─── Main Calendar ─── */
 export default function EventCalendar() {
     const navigate = useNavigate();
     const today = new Date();
@@ -35,8 +127,8 @@ export default function EventCalendar() {
     const [currentYear, setCurrentYear] = useState(today.getFullYear());
     const [calendarData, setCalendarData] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [selectedDay, setSelectedDay] = useState(null);
-    const popupRef = useRef(null);
+    const [dialogEvent, setDialogEvent] = useState(null);
+    const [dialogDate, setDialogDate] = useState('');
 
     const loadCalendar = useCallback(async () => {
         try {
@@ -54,27 +146,12 @@ export default function EventCalendar() {
         loadCalendar();
     }, [loadCalendar]);
 
-    // Close popup on outside click
-    useEffect(() => {
-        function handleClick(e) {
-            if (popupRef.current && !popupRef.current.contains(e.target)) {
-                setSelectedDay(null);
-            }
-        }
-        if (selectedDay) {
-            document.addEventListener('mousedown', handleClick);
-        }
-        return () => document.removeEventListener('mousedown', handleClick);
-    }, [selectedDay]);
-
     const goToday = () => {
         setCurrentMonth(today.getMonth() + 1);
         setCurrentYear(today.getFullYear());
-        setSelectedDay(null);
     };
 
     const goPrev = () => {
-        setSelectedDay(null);
         if (currentMonth === 1) {
             setCurrentMonth(12);
             setCurrentYear((y) => y - 1);
@@ -84,13 +161,22 @@ export default function EventCalendar() {
     };
 
     const goNext = () => {
-        setSelectedDay(null);
         if (currentMonth === 12) {
             setCurrentMonth(1);
             setCurrentYear((y) => y + 1);
         } else {
             setCurrentMonth((m) => m + 1);
         }
+    };
+
+    const openEventDialog = (evt, day) => {
+        setDialogEvent(evt);
+        setDialogDate(formatFullDate(currentYear, currentMonth, day));
+    };
+
+    const closeDialog = () => {
+        setDialogEvent(null);
+        setDialogDate('');
     };
 
     const daysInMonth = getDaysInMonth(currentMonth, currentYear);
@@ -105,13 +191,6 @@ export default function EventCalendar() {
         );
     };
 
-    const handleDayClick = (day) => {
-        const dateStr = formatDateStr(currentYear, currentMonth, day);
-        if (events[dateStr]) {
-            setSelectedDay(selectedDay === day ? null : day);
-        }
-    };
-
     // Build grid cells
     const cells = [];
     // Leading blanks
@@ -123,66 +202,42 @@ export default function EventCalendar() {
         const dateStr = formatDateStr(currentYear, currentMonth, d);
         const dayEvents = events[dateStr] || [];
         const hasEvents = dayEvents.length > 0;
-        const hasPaid = dayEvents.some((e) => e.isPaid);
-        const hasFree = dayEvents.some((e) => !e.isPaid);
+        const visibleEvents = dayEvents.slice(0, MAX_VISIBLE_EVENTS);
+        const remaining = dayEvents.length - MAX_VISIBLE_EVENTS;
 
         cells.push(
             <div
                 key={d}
-                className={`cal-day${isToday(d) ? ' cal-day-today' : ''}${hasEvents ? ' cal-day-has-events' : ''}${selectedDay === d ? ' cal-day-selected' : ''}`}
-                onClick={() => handleDayClick(d)}
+                className={`cal-day${isToday(d) ? ' cal-day-today' : ''}${hasEvents ? ' cal-day-has-events' : ''}`}
             >
                 <span className="cal-day-number">{d}</span>
                 {hasEvents && (
-                    <div className="cal-day-indicators">
-                        {hasFree && <span className="cal-dot cal-dot-free" />}
-                        {hasPaid && <span className="cal-dot cal-dot-paid" />}
-                        {dayEvents.length > 1 && (
-                            <span className="cal-event-count">{dayEvents.length}</span>
-                        )}
-                    </div>
-                )}
-
-                {/* Day popup */}
-                {selectedDay === d && hasEvents && (
-                    <div className="cal-popup" ref={popupRef}>
-                        <div className="cal-popup-header">
-                            <span className="cal-popup-date">
-                                {MONTH_NAMES[currentMonth - 1]} {d}, {currentYear}
+                    <div className="cal-day-events">
+                        {visibleEvents.map((evt) => (
+                            <button
+                                key={evt.id}
+                                className={`cal-event-bar ${evt.isPaid ? 'cal-event-bar-paid' : 'cal-event-bar-free'}`}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    openEventDialog(evt, d);
+                                }}
+                                title={evt.name}
+                            >
+                                <span className="cal-event-bar-text">{evt.name}</span>
+                            </button>
+                        ))}
+                        {remaining > 0 && (
+                            <span
+                                className="cal-event-more"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    // Open dialog for the first remaining event
+                                    openEventDialog(dayEvents[MAX_VISIBLE_EVENTS], d);
+                                }}
+                            >
+                                +{remaining} more
                             </span>
-                            <span className="cal-popup-count">{dayEvents.length} event{dayEvents.length > 1 ? 's' : ''}</span>
-                        </div>
-                        <ul className="cal-popup-list">
-                            {dayEvents.map((evt) => (
-                                <li
-                                    key={evt.id}
-                                    className="cal-popup-item"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        navigate(`/feed/${evt.id}`);
-                                    }}
-                                >
-                                    <div className="cal-popup-item-top">
-                                        <span className={`cal-popup-dot ${evt.isPaid ? 'cal-dot-paid' : 'cal-dot-free'}`} />
-                                        <span className="cal-popup-name">{evt.name}</span>
-                                    </div>
-                                    <div className="cal-popup-item-meta">
-                                        <span>
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
-                                            </svg>
-                                            {formatTime(evt.startTime)} – {formatTime(evt.endTime)}
-                                        </span>
-                                        <span>
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
-                                            </svg>
-                                            {evt.venue}
-                                        </span>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
+                        )}
                     </div>
                 )}
             </div>
@@ -233,6 +288,19 @@ export default function EventCalendar() {
                         {cells}
                     </div>
                 </div>
+            )}
+
+            {/* Event Detail Dialog */}
+            {dialogEvent && (
+                <EventDetailDialog
+                    event={dialogEvent}
+                    dateLabel={dialogDate}
+                    onClose={closeDialog}
+                    onViewMore={(id) => {
+                        closeDialog();
+                        navigate(`/feed/${id}`);
+                    }}
+                />
             )}
         </section>
     );

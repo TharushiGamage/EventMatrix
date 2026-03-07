@@ -169,18 +169,20 @@ export default function Feed() {
                             style={{ animationDelay: `${idx * 0.04}s` }}
                             onClick={() => navigate(`/feed/${event.id}`)}
                         >
-                            <div className="feed-item-date-col">
-                                <span className="feed-item-month">{new Date(event.date + 'T00:00:00').toLocaleString('en-US', { month: 'short' })}</span>
-                                <span className="feed-item-day">{new Date(event.date + 'T00:00:00').getDate()}</span>
+                            <div className="feed-item-img">
+                                <img
+                                    src={`https://picsum.photos/seed/event${event.id || idx}/400/200`}
+                                    alt={event.name}
+                                    loading="lazy"
+                                />
+                                <div className="feed-item-date-badge">
+                                    <span className="feed-item-month">{new Date(event.date + 'T00:00:00').toLocaleString('en-US', { month: 'short' })}</span>
+                                    <span className="feed-item-day">{new Date(event.date + 'T00:00:00').getDate()}</span>
+                                </div>
                             </div>
-                            <div className="feed-item-content">
+                            <div className="feed-item-body">
                                 <div className="feed-item-top">
                                     <h3 className="feed-item-name">{event.name}</h3>
-                                    <div className="feed-item-badges">
-                                        <span className={`badge ${event.isPaid ? 'badge-paid' : 'badge-free'}`}>
-                                            {event.isPaid ? 'Paid' : 'Free'}
-                                        </span>
-                                    </div>
                                 </div>
                                 <div className="feed-item-meta">
                                     <span className="feed-meta-item">
@@ -196,14 +198,16 @@ export default function Feed() {
                                         {event.organizedBy}
                                     </span>
                                 </div>
-                            </div>
-                            <div className="feed-item-price">
-                                {event.isPaid ? (
-                                    <span className="feed-price-tag">₹{event.ticketPrice}</span>
-                                ) : (
-                                    <span className="feed-price-free">Free</span>
-                                )}
-                                <svg className="feed-item-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+                                <div className="feed-item-footer">
+                                    <span className={`badge ${event.isPaid ? 'badge-paid' : 'badge-free'}`}>
+                                        {event.isPaid ? 'Paid' : 'Free'}
+                                    </span>
+                                    {event.isPaid ? (
+                                        <span className="feed-price-tag">₹{event.ticketPrice}</span>
+                                    ) : (
+                                        <span className="feed-price-free">Free</span>
+                                    )}
+                                </div>
                             </div>
                         </article>
                     ))
