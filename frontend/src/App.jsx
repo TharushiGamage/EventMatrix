@@ -27,10 +27,14 @@ function App() {
         <Routes>
           {/* EventMatrix original routes */}
           <Route path="/" element={<Dashboard />} />
-          <Route path="/create" element={<EventForm />} />
-          <Route path="/edit/:id" element={<EventForm />} />
           <Route path="/feed" element={<Feed />} />
           <Route path="/feed/:id" element={<FeedDetail />} />
+
+          {/* Event create/edit — Organizer and Admin only */}
+          <Route element={<RoleBasedRoute allowedRoles={['Organizer', 'Admin']} redirectTo="/" />}>
+            <Route path="/create" element={<EventForm />} />
+            <Route path="/edit/:id" element={<EventForm />} />
+          </Route>
 
           {/* User Management public routes */}
           <Route path="/login" element={<Login />} />
