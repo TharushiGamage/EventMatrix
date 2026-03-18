@@ -5,6 +5,9 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 const eventRoutes = require('./routes/eventRoutes');
 const feedRoutes = require('./routes/feedRoutes');
+const authRoutes = require('./routes/authRoutes');
+const profileRoutes = require('./routes/profileRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -20,6 +23,10 @@ app.use('/uploaded_images', express.static(path.join(__dirname, 'uploaded_images
 // Routes
 app.use('/api/v1/events', eventRoutes);
 app.use('/api/v1/feed', feedRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/profile', profileRoutes);
+app.use('/api/admin', adminRoutes);
+
 
 // Health check
 app.get('/', (_req, res) => {

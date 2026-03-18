@@ -1,0 +1,118 @@
+.udash-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.udash-header {
+  margin-bottom: 2rem;
+}
+
+.udash-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #f3f4f6;
+  margin-bottom: 0.4rem;
+}
+
+.udash-header h1 span {
+  color: #818cf8;
+}
+
+.udash-header p {
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.udash-header p strong {
+  color: #9ca3af;
+}
+
+.udash-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.udash-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  background: rgba(17, 24, 39, 0.8);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.udash-card:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(30, 41, 59, 0.8);
+  transform: translateX(4px);
+}
+
+.udash-card-highlight {
+  border-color: rgba(56, 189, 248, 0.2);
+}
+
+.udash-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.udash-icon-purple { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
+.udash-icon-cyan   { background: rgba(34, 211, 238, 0.15); color: #22d3ee; }
+.udash-icon-blue   { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+
+.udash-text { flex: 1; }
+.udash-text h3 { font-size: 1rem; font-weight: 600; color: #f3f4f6; margin-bottom: 0.25rem; }
+.udash-text p  { font-size: 0.85rem; color: #6b7280; }
+
+.udash-arrow { color: #374151; margin-left: auto; flex-shrink: 0; }
+.udash-card:hover .udash-arrow { color: #6366f1; }
+
+.udash-info-strip {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  background: rgba(17, 24, 39, 0.6);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.info-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #4b5563;
+  font-weight: 600;
+}
+
+.info-item span:last-child {
+  font-size: 0.9rem;
+  color: #d1d5db;
+  font-weight: 500;
+}
+
+.role-pill {
+  background: rgba(99, 102, 241, 0.15) !important;
+  color: #818cf8 !important;
+  padding: 0.15rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.75rem !important;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}

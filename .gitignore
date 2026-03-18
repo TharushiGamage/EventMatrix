@@ -54,3 +54,5 @@ Thumbs.db
 # ========================
 coverage/
 *.tgz
+node_modules/
+.env
