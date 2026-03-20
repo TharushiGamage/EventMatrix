@@ -13,9 +13,10 @@ import FeedDetail from './pages/feed/FeedDetail';
 // User Management pages
 import Login from './pages/user/Login';
 import Register from './pages/user/Register';
-import UserDashboard from './pages/user/UserDashboard';
 import Profile from './pages/user/Profile';
 import AdminUsers from './pages/user/AdminUsers';
+import AdminLayout from './pages/user/AdminLayout';
+import AdminDashboard from './pages/user/AdminDashboard';
 
 import './App.css';
 
@@ -42,13 +43,15 @@ function App() {
 
           {/* User Management protected routes (logged-in users) */}
           <Route element={<ProtectedRoute />}>
-            <Route path="/user-dashboard" element={<UserDashboard />} />
             <Route path="/profile" element={<Profile />} />
           </Route>
 
           {/* Admin-only routes */}
           <Route element={<RoleBasedRoute allowedRoles={['Admin']} />}>
-            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route element={<AdminLayout />}>
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/users" element={<AdminUsers />} />
+            </Route>
           </Route>
         </Routes>
       </BrowserRouter>

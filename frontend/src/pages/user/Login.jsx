@@ -28,8 +28,9 @@ const Login = () => {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
+    <div className="auth-container">
+      <div className="auth-page">
+        <div className="auth-card">
         <div className="auth-icon-ring">
           <LogIn size={26} />
         </div>
@@ -55,6 +56,7 @@ const Login = () => {
         <p className="auth-footer">
           Don't have an account? <Link to="/register">Create one</Link>
         </p>
+      </div>
       </div>
     </div>
   );

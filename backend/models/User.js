@@ -43,7 +43,13 @@ const userSchema = new mongoose.Schema({
   profileImage: {
     type: String,
     default: 'default.png'
-  }
+  },
+  organizationName: { type: String, default: '' },
+  bio: { type: String, default: '' },
+  website: { type: String, default: '' },
+  phone: { type: String, default: '' },
+  otpCode: { type: String },
+  otpExpire: { type: Date }
 }, { timestamps: true });
 
 userSchema.pre('save', async function () {

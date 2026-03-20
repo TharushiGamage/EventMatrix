@@ -47,7 +47,16 @@ export const profileService = {
     if (current) localStorage.setItem('uems_user', JSON.stringify({ ...current, ...res.data.data }));
     return res.data;
   },
+  sendPasswordOtp: async (data) => (await api.post('/profile/send-otp', data)).data,
   changePassword: async (data) => (await api.put('/profile/change-password', data)).data,
+  uploadProfileImage: async (formData) => {
+    const res = await api.post('/profile/upload-image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    const current = JSON.parse(localStorage.getItem('uems_user'));
+    if (current) localStorage.setItem('uems_user', JSON.stringify({ ...current, ...res.data.data }));
+    return res.data;
+  },
 };
 
 export const adminService = {
@@ -55,6 +64,7 @@ export const adminService = {
   updateRole: async (userId, role) => (await api.put('/admin/user-role', { userId, role })).data,
   updateStatus: async (userId, status) => (await api.put('/admin/user-status', { userId, status })).data,
   unlockUser: async (userId) => (await api.put('/admin/unlock-user', { userId })).data,
+  getOrganizerEvents: async (userId) => (await api.get(`/admin/organizer-events/${userId}`)).data
 };
 
 export default api;

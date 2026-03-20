@@ -4,8 +4,8 @@ const generateToken = require('../utils/generateToken');
 // POST /api/auth/register
 const registerUser = async (req, res) => {
   try {
-    const { name, email, studentId, password } = req.body;
-    if (!name || !email || !studentId || !password)
+    const { name, email, studentId, password, phone } = req.body;
+    if (!name || !email || !studentId || !password || !phone)
       return res.status(400).json({ success: false, message: 'All fields are required' });
 
     const userExists = await User.findOne({ $or: [{ email }, { studentId }] });
@@ -14,7 +14,7 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ success: false, message: `${field} already exists` });
     }
 
-    const user = await User.create({ name, email, studentId, password });
+    const user = await User.create({ name, email, studentId, password, phone });
     res.status(201).json({
       success: true,
       message: 'Registration successful',

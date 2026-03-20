@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Event = require('../models/Event');
 
 // GET /api/admin/users?search=
 const getUsers = async (req, res) => {
@@ -66,4 +67,20 @@ const unlockUser = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, updateUserRole, updateUserStatus, unlockUser };
+// GET /api/admin/organizer-events/:userId
+const getOrganizerEvents = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    
+    // The Event's organizedBy field stores a string
+    const searchName = user.organizationName || user.name;
+    const events = await Event.find({ organizedBy: searchName }).sort({ date: -1 });
+    
+    res.json({ success: true, data: events });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { getUsers, updateUserRole, updateUserStatus, unlockUser, getOrganizerEvents };
