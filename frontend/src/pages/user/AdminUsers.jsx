@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { adminService } from '../../services/userApi';
 import { Search, Ban, CheckCircle, Unlock, ChevronDown, ChevronUp, Calendar, ExternalLink, Activity } from 'lucide-react';
 import './admin.css';
@@ -14,7 +15,18 @@ const AdminUsers = () => {
   const [orgEvents, setOrgEvents] = useState([]);
   const [loadingEvents, setLoadingEvents] = useState(false);
 
+  const location = useLocation();
+
   const tabs = ['All', 'Student', 'Organizer', 'Admin'];
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    if (tab && tabs.includes(tab)) {
+      setActiveTab(tab);
+      setExpandedUser(null);
+    }
+  }, [location.search]);
 
   const showToast = (msg, ok = true) => {
     setToast({ show: true, msg, ok });
@@ -24,17 +36,20 @@ const AdminUsers = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const res = await adminService.getUsers(search);
+      // request users from server, optionally filtered by role
+      const roleFilter = activeTab && activeTab !== 'All' ? activeTab : '';
+      const res = await adminService.getUsers(search, roleFilter);
       setUsers(res.data);
     } catch (err) {
-      showToast('Failed to load users', false);
+      const msg = err.response?.data?.message || err.message || 'Failed to load users';
+      showToast(msg, false);
     } finally { setLoading(false); }
   };
 
   useEffect(() => {
-    const t = setTimeout(fetchUsers, 400);
+    const t = setTimeout(fetchUsers, 300);
     return () => clearTimeout(t);
-  }, [search]);
+  }, [search, activeTab]);
 
   const isLocked = (u) => u.lockUntil && new Date(u.lockUntil) > new Date();
 

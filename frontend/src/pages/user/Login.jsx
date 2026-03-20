@@ -18,10 +18,15 @@ const Login = () => {
     if (!email || !password) { setError('Please fill in all fields'); return; }
     setLoading(true);
     try {
+      console.log('Attempting login for:', email);
       await login({ email, password });
+      console.log('Login successful');
       navigate('/user-dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      console.error('Login error caught:', err);
+      const errorMsg = err.response?.data?.message || err.message || 'Login failed';
+      console.log('Final error message:', errorMsg);
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }

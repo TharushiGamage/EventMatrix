@@ -68,13 +68,13 @@ const AdminLayout = () => {
 
           <div className="menu-section">
             <div className="menu-section-title">Settings</div>
-            <a href="#" className="admin-sidebar-link">
-              <div className="link-left">
-                <Settings size={20} />
-                <span>System Settings</span>
-              </div>
-              <ChevronRight className="caret-icon" size={16} />
-            </a>
+              <NavLink to="/admin/settings" className={({ isActive }) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+                <div className="link-left">
+                  <Settings size={20} />
+                  <span>System Settings</span>
+                </div>
+                <ChevronRight className="caret-icon" size={16} />
+              </NavLink>
           </div>
         </nav>
 

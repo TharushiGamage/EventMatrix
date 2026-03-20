@@ -2,21 +2,32 @@ const User = require('../models/User');
 const Event = require('../models/Event');
 const Registration = require('../models/Registration');
 
-// GET /api/admin/users?search=
+// GET /api/admin/users?search=&role=
 const getUsers = async (req, res) => {
   try {
-    const { search } = req.query;
+    const { search, role } = req.query;
     let query = {};
+
     if (search) {
-      query = { $or: [
+      query.$or = [
         { name: { $regex: search, $options: 'i' } },
         { email: { $regex: search, $options: 'i' } },
         { studentId: { $regex: search, $options: 'i' } }
-      ]};
+      ];
     }
+
+    if (role && ['Student', 'Organizer', 'Admin'].includes(role)) {
+      // combine with existing $or if present
+      query.role = role;
+    }
+    
+    console.log('getUsers query:', query);
     const users = await User.find(query).select('-password');
+    console.log(`Found ${users.length} users with role=${role || 'all'}`);
+    
     res.json({ success: true, data: users });
   } catch (error) {
+    console.error('getUsers error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -45,6 +56,17 @@ const updateUserStatus = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid status' });
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    // Do not allow admins to be suspended through the panel to avoid admin lockout.
+    if (user.role === 'Admin' && status === 'Suspended') {
+      return res.status(400).json({ success: false, message: 'Admin accounts cannot be suspended' });
+    }
+
+    // Extra guard to prevent a user from suspending their own account.
+    if (req.user && req.user._id && req.user._id.toString() === userId && status === 'Suspended') {
+      return res.status(400).json({ success: false, message: 'You cannot suspend your own account' });
+    }
+
     user.status = status;
     await user.save();
     res.json({ success: true, message: `User ${status.toLowerCase()}`, data: { _id: user._id, status: user.status } });
