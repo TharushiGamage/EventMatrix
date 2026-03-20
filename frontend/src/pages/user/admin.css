@@ -2,7 +2,7 @@
 /* Modern Admin Dashboard & User Management Styles */
 
 :root {
-  --primary-dark: #0f172a;
+  --primary-dark: #182543;
   --primary-blue: #2563eb;
   --primary-light: #f8fafc;
   --secondary-gray: #64748b;
@@ -69,19 +69,21 @@
 }
 
 .stat-card {
-  background: white;
+  background: #e6f6ff;
   border: 1px solid var(--border-color);
   border-radius: 14px;
-  padding: 1.5rem;
+  padding: 2.5rem 2.5rem 2.5rem 4.25rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 2rem;
   cursor: pointer;
   text-decoration: none;
   color: inherit;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  min-height: 280px;
+  justify-content: center;
 }
 
 .stat-card::before {
@@ -114,15 +116,19 @@
 }
 
 .stat-icon-wrapper {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
+  position: absolute;
+  top: 1.25rem;
+  left: 1.25rem;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--primary-light);
   color: var(--primary-blue);
   transition: all 0.3s ease;
+  z-index: 5;
 }
 
 .stat-card:hover .stat-icon-wrapper {
@@ -130,11 +136,11 @@
 }
 
 .stat-title {
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--secondary-gray);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
 }
 
 .stat-card-body {
@@ -144,7 +150,7 @@
 }
 
 .stat-number {
-  font-size: 2rem;
+  font-size: 2.75rem;
   font-weight: 900;
   color: var(--primary-dark);
   letter-spacing: -0.02em;
@@ -164,7 +170,7 @@
   justify-content: space-between;
   color: var(--primary-blue);
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   transition: all 0.3s ease;
 }
 
@@ -179,6 +185,31 @@
 .stat-card.stat-green .stat-icon-wrapper { background: #dcfce7; color: #16a34a; }
 .stat-card.stat-red .stat-icon-wrapper { background: #fee2e2; color: #dc2626; }
 .stat-card.stat-yellow .stat-icon-wrapper { background: #fef3c7; color: #d97706; }
+
+/* Background color variants for stat cards (slightly darker for better visibility) */
+.stat-card.stat-blue {
+  background: linear-gradient(180deg, #d1ecff, #b8ddff);
+  border-color: rgba(2, 132, 199, 0.16);
+}
+.stat-card.stat-blue .stat-title { color: #075985; }
+.stat-card.stat-blue .stat-number { color: var(--primary-dark); }
+.stat-card.stat-blue .stat-icon-wrapper { background: #e6f7ff; color: #0369a1; box-shadow: 0 6px 18px rgba(2,132,199,0.06); }
+
+.stat-card.stat-purple {
+  background: linear-gradient(180deg, #efe6ff, #e0ccff);
+  border-color: rgba(147, 51, 234, 0.16);
+}
+.stat-card.stat-purple .stat-title { color: #5b21b6; }
+.stat-card.stat-purple .stat-number { color: var(--primary-dark); }
+.stat-card.stat-purple .stat-icon-wrapper { background: #f6efff; color: #7c3aed; box-shadow: 0 6px 18px rgba(147,51,234,0.06); }
+
+.stat-card.stat-orange {
+  background: linear-gradient(180deg, #fff2e6, #ffd8b8);
+  border-color: rgba(234, 88, 12, 0.16);
+}
+.stat-card.stat-orange .stat-title { color: #9a3412; }
+.stat-card.stat-orange .stat-number { color: var(--primary-dark); }
+.stat-card.stat-orange .stat-icon-wrapper { background: #fff3e6; color: #ea580c; box-shadow: 0 6px 18px rgba(234,88,12,0.06); }
 
 /* Activity Section */
 .activity-section {
@@ -891,5 +922,25 @@
 
   .aep-grid {
     grid-template-columns: 1fr;
+  }
+
+  /* Mobile: restore smaller padding and icon size */
+  .stat-card {
+    padding-left: 2.5rem;
+  }
+
+  .stat-icon-wrapper {
+    top: 1rem;
+    left: 1rem;
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+  }
+  /* Mobile font-size adjustments */
+  .stat-title {
+    font-size: 0.95rem;
+  }
+  .stat-card-footer {
+    font-size: 0.9rem;
   }
 }

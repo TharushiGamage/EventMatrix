@@ -65,6 +65,8 @@ export const adminService = {
   updateStatus: async (userId, status) => (await api.put('/admin/user-status', { userId, status })).data,
   unlockUser: async (userId) => (await api.put('/admin/unlock-user', { userId })).data,
   getOrganizerEvents: async (userId) => (await api.get(`/admin/organizer-events/${userId}`)).data
+  ,
+  getStudentRegistrations: async () => (await api.get('/admin/student-registrations')).data
 };
 
 export default api;

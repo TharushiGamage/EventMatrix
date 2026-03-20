@@ -17,6 +17,7 @@ import Profile from './pages/user/Profile';
 import AdminUsers from './pages/user/AdminUsers';
 import AdminLayout from './pages/user/AdminLayout';
 import AdminDashboard from './pages/user/AdminDashboard';
+import AdminStudents from './pages/user/AdminStudents';
 
 import './App.css';
 
@@ -51,6 +52,7 @@ function App() {
             <Route element={<AdminLayout />}>
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/users" element={<AdminUsers />} />
+              <Route path="/admin/students" element={<AdminStudents />} />
             </Route>
           </Route>
         </Routes>

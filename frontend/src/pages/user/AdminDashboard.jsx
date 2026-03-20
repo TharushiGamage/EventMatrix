@@ -7,7 +7,7 @@ const AdminDashboard = () => {
       title: 'Total Students', 
       count: 24, 
       icon: Users, 
-      link: '/admin/users',
+      link: '/admin/students',
       color: 'stat-blue'
     },
     { 
@@ -32,7 +32,7 @@ const AdminDashboard = () => {
       <div className="dashboard-header">
         <div>
           <h1>Admin Dashboard</h1>
-          <p>Welcome back! Here's your system overview.</p>
+          <p>Welcome! Here's your system overview.</p>
         </div>
       </div>
 

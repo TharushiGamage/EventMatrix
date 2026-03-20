@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Event = require('../models/Event');
+const Registration = require('../models/Registration');
 
 // GET /api/admin/users?search=
 const getUsers = async (req, res) => {
@@ -83,4 +84,30 @@ const getOrganizerEvents = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, updateUserRole, updateUserStatus, unlockUser, getOrganizerEvents };
+// GET /api/admin/student-registrations
+const getStudentRegistrations = async (req, res) => {
+  try {
+    // fetch all students
+    const students = await User.find({ role: 'Student' }).select('-password');
+
+    // fetch registrations and populate event and user refs
+    const registrations = await Registration.find().populate('event').populate('user', '_id');
+
+    // map registrations per user id
+    const regMap = {};
+    registrations.forEach(r => {
+      if (!r.user) return;
+      const uid = r.user._id.toString();
+      if (!regMap[uid]) regMap[uid] = [];
+      if (r.event) regMap[uid].push(r.event);
+    });
+
+    const result = students.map(s => ({ user: s, events: regMap[s._id.toString()] || [] }));
+
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { getUsers, updateUserRole, updateUserStatus, unlockUser, getOrganizerEvents, getStudentRegistrations };
