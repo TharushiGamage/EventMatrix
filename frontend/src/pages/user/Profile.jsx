@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { profileService } from '../../services/userApi';
-import { User, Shield, CheckCircle, LayoutDashboard, Mail, Hash, Award, ArrowRight, Calendar, Activity, Camera, Briefcase, Globe, Phone, Building } from 'lucide-react';
+import { User, Shield, CheckCircle, LayoutDashboard, Mail, Hash, Award, ArrowRight, Calendar, Activity, Camera, Briefcase, Globe, Phone, Building, Lock } from 'lucide-react';
 import './profile.css';
+import './admin-settings.css';
 
 const Profile = () => {
   const { user, updateUser } = useAuth();
@@ -13,6 +14,8 @@ const Profile = () => {
   const [orgForm, setOrgForm] = useState({ organizationName: '', bio: '', website: '', phone: '' });
   const [toast, setToast] = useState({ show: false, msg: '', ok: true });
   const [activeTab, setActiveTab] = useState('overview'); // Will be used for both roles
+  const [editProfileMode, setEditProfileMode] = useState(false);
+  const [profileFormBackup, setProfileFormBackup] = useState({ name: '', email: '' });
 
   useEffect(() => {
     if (user) {
@@ -39,6 +42,8 @@ const Profile = () => {
       const res = await profileService.updateProfile(profileForm);
       updateUser(res.data);
       showToast('Profile updated successfully');
+      setProfileFormBackup(profileForm);
+      setEditProfileMode(false);
     } catch (err) {
       showToast(err.response?.data?.message || 'Update failed', false);
     }
@@ -348,97 +353,213 @@ const Profile = () => {
           {/* ---------------- GENERAL INFO TAB ---------------- */}
           {activeTab === 'general' && (
             <div className="profile-card-modern fade-in">
-              <div className="card-header-modern">
-                <h2>{isOrganizer ? 'Personal Settings' : 'Update Information'}</h2>
-                <p>Manage your underlying personal account details.</p>
+              <div className="settings-content">
+                {!editProfileMode ? (
+                  // View Mode — matches Admin Personal Information
+                  <div className="view-mode-section">
+                    <div className="form-section">
+                      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1.5rem'}}>
+                        <h3>{isOrganizer ? 'Personal Details' : 'Personal Details'}</h3>
+                        <button
+                          type="button"
+                          className="btn-edit"
+                          onClick={() => { setProfileFormBackup(profileForm); setEditProfileMode(true); }}
+                        >
+                          Edit Information
+                        </button>
+                      </div>
+
+                      <div className="view-grid">
+                        <div className="view-item">
+                          <label>Full Name</label>
+                          <div className="view-value">
+                            <User size={18} className="view-icon" />
+                            <span>{profileForm.name || '-'}</span>
+                          </div>
+                        </div>
+                        <div className="view-item">
+                          <label>Email Address</label>
+                          <div className="view-value">
+                            <Mail size={18} className="view-icon" />
+                            <span>{profileForm.email || '-'}</span>
+                          </div>
+                        </div>
+                        <div className="view-item">
+                          <label>Phone Number</label>
+                          <div className="view-value">
+                            <Phone size={18} className="view-icon" />
+                            <span>{user?.phone || 'Not provided'}</span>
+                          </div>
+                        </div>
+                        {isOrganizer && (
+                          <div className="view-item">
+                            <label>Organization Name</label>
+                            <div className="view-value">
+                              <Building size={18} className="view-icon" />
+                              <span>{user?.organizationName || 'Not provided'}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  // Edit Mode — matches Admin Edit Personal Details
+                  <form className="settings-form-grid" onSubmit={handleProfile}>
+                    <div className="form-section">
+                      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'1.5rem'}}>
+                        <h3>Edit Personal Details</h3>
+                      </div>
+
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label>Full Name</label>
+                          <div className="input-wrapper">
+                            <User size={18} className="input-icon" />
+                            <input
+                              type="text"
+                              placeholder="Enter your full name"
+                              value={profileForm.name}
+                              onChange={e => setProfileForm({ ...profileForm, name: e.target.value })}
+                            />
+                          </div>
+                        </div>
+                        <div className="form-group">
+                          <label>Email Address</label>
+                          <div className="input-wrapper">
+                            <Mail size={18} className="input-icon" />
+                            <input
+                              type="email"
+                              placeholder="Enter your email"
+                              value={profileForm.email}
+                              onChange={e => setProfileForm({ ...profileForm, email: e.target.value })}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="form-actions edit-mode">
+                        <button
+                          type="submit"
+                          className="btn-primary"
+                        >
+                          Save Changes
+                        </button>
+                        <button
+                          type="button"
+                          className="btn-secondary"
+                          onClick={() => { setProfileForm(profileFormBackup); setEditProfileMode(false); }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                )}
               </div>
-              <form onSubmit={handleProfile} className="profile-form-modern">
-                <div className="pf-group">
-                  <label>Full Name</label>
-                  <input 
-                    type="text" 
-                    value={profileForm.name} 
-                    onChange={e => setProfileForm({ ...profileForm, name: e.target.value })} 
-                    placeholder="e.g. Jane Doe"
-                  />
-                </div>
-                <div className="pf-group">
-                  <label>Email Address</label>
-                  <input 
-                    type="email" 
-                    value={profileForm.email} 
-                    onChange={e => setProfileForm({ ...profileForm, email: e.target.value })} 
-                    placeholder="you@university.edu"
-                  />
-                </div>
-                <div className="pf-action-row">
-                  <button type="submit" className="pf-btn-modern">Save Changes</button>
-                </div>
-              </form>
 
               <div className="prof-section-divider"></div>
 
-              <div className="card-header-modern">
-                <h2>Change Password</h2>
-                <p>Ensure your account is using a long, random password to stay secure. A verification code will be sent to your mobile.</p>
+              <div className="settings-content">
+                <div className="form-section">
+                  <h3>Change Password</h3>
+                  <p className="section-description">
+                    {otpSent
+                      ? 'Enter the verification code sent to your phone and your new password.'
+                      : 'Verify your identity with your current password to request a verification code.'}
+                  </p>
+                  <form onSubmit={otpSent ? handlePassword : handleSendOtp}>
+                    {!otpSent ? (
+                      <div className="form-column">
+                        <div className="form-group">
+                          <label>Current Password</label>
+                          <div className="input-wrapper">
+                            <Lock size={18} className="input-icon" />
+                            <input
+                              type="password"
+                              placeholder="Enter your current password"
+                              value={passForm.currentPassword}
+                              onChange={e => setPassForm({ ...passForm, currentPassword: e.target.value })}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="form-actions">
+                          <button type="submit" className="btn-primary">
+                            Request Verification Code
+                          </button>
+                          <p className="form-hint">A verification code will be sent to the phone number associated with your account.</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="form-column">
+                        <div className="otp-message-box">
+                          <CheckCircle size={20} />
+                          <p>Verification code sent successfully</p>
+                        </div>
+
+                        <div className="form-group">
+                          <label>Verification Code</label>
+                          <div className="input-wrapper">
+                            <Lock size={18} className="input-icon" />
+                            <input
+                              type="text"
+                              placeholder="Enter 6-digit verification code"
+                              maxLength="6"
+                              value={passForm.otpCode}
+                              onChange={e => setPassForm({ ...passForm, otpCode: e.target.value })}
+                            />
+                          </div>
+                          <p className="form-hint">Check your phone for the verification code</p>
+                        </div>
+
+                        <div className="form-group">
+                          <label>New Password</label>
+                          <div className="input-wrapper">
+                            <Lock size={18} className="input-icon" />
+                            <input
+                              type="password"
+                              placeholder="Enter a new password"
+                              value={passForm.newPassword}
+                              onChange={e => setPassForm({ ...passForm, newPassword: e.target.value })}
+                            />
+                          </div>
+                          <p className="form-hint">Minimum 6 characters</p>
+                        </div>
+
+                        <div className="form-group">
+                          <label>Confirm New Password</label>
+                          <div className="input-wrapper">
+                            <Lock size={18} className="input-icon" />
+                            <input
+                              type="password"
+                              placeholder="Confirm your new password"
+                              value={passForm.confirmNewPassword}
+                              onChange={e => setPassForm({ ...passForm, confirmNewPassword: e.target.value })}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="form-actions edit-mode">
+                          <button type="submit" className="btn-primary">
+                            Change Password
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-secondary"
+                            onClick={() => {
+                              setOtpSent(false);
+                              setPassForm({ currentPassword: '', newPassword: '', confirmNewPassword: '', otpCode: '' });
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </form>
+                </div>
               </div>
-              <form onSubmit={otpSent ? handlePassword : handleSendOtp} className="profile-form-modern">
-                <div className="pf-group">
-                  <label>Current Password</label>
-                  <input 
-                    type="password" 
-                    value={passForm.currentPassword} 
-                    onChange={e => setPassForm({ ...passForm, currentPassword: e.target.value })} 
-                    placeholder="••••••••" 
-                    disabled={otpSent}
-                  />
-                </div>
-
-                <div className="pf-group-split">
-                  <div className="pf-group">
-                    <label>New Password</label>
-                    <input 
-                      type="password" 
-                      value={passForm.newPassword} 
-                      onChange={e => setPassForm({ ...passForm, newPassword: e.target.value })} 
-                      placeholder="••••••••" 
-                      disabled={otpSent}
-                    />
-                  </div>
-                  <div className="pf-group">
-                    <label>Confirm Password</label>
-                    <input 
-                      type="password" 
-                      value={passForm.confirmNewPassword} 
-                      onChange={e => setPassForm({ ...passForm, confirmNewPassword: e.target.value })} 
-                      placeholder="••••••••" 
-                      disabled={otpSent}
-                    />
-                  </div>
-                </div>
-
-                {otpSent && (
-                  <div className="pf-group fade-in" style={{ marginTop: '0.5rem', padding: '1.5rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                    <label style={{ color: '#2563eb', marginBottom: '0.5rem' }}>6-Digit Verification Code</label>
-                    <input 
-                      type="text" 
-                      value={passForm.otpCode} 
-                      onChange={e => setPassForm({ ...passForm, otpCode: e.target.value })} 
-                      placeholder="e.g. 123456" 
-                      style={{ fontSize: '1.25rem', letterSpacing: '0.2rem', textAlign: 'center', fontWeight: 'bold' }}
-                      maxLength={6}
-                    />
-                  </div>
-                )}
-
-                <div className="pf-action-row">
-                  {!otpSent ? (
-                    <button type="submit" className="pf-btn-modern">Send Verification Code</button>
-                  ) : (
-                    <button type="submit" className="pf-btn-modern" style={{ background: '#16a34a' }}>Verify & Save Password</button>
-                  )}
-                </div>
-              </form>
             </div>
           )}
         </div>

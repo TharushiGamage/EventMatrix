@@ -84,7 +84,7 @@ const ProfileGeneral = () => {
           aria-label="Enable edit profile"
           disabled={isEditing}
         >
-          {isEditing ? 'Editing' : 'Edit'}
+          {isEditing ? 'Editing...' : 'Edit Information'}
         </button>
         <div className="profile-section">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
@@ -138,9 +138,12 @@ const ProfileGeneral = () => {
               placeholder="+1 (555) 000-0000"
             />
           </div>
-          <div className="pf-submit-row">
-            <button type="submit" className="pf-submit-btn" disabled={!isEditing}>Save Changes</button>
-          </div>
+          {isEditing && (
+            <div className="pf-submit-row">
+              <button type="submit" className="pf-submit-btn">Save Changes</button>
+              <button type="button" className="pf-submit-btn" style={{ background: '#f1f5f9', color: '#475569', marginLeft: '0.75rem' }} onClick={() => setIsEditing(false)}>Cancel</button>
+            </div>
+          )}
         </form>
       </div>
     </div>
