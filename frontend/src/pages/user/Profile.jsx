@@ -105,7 +105,15 @@ const Profile = () => {
   };
 
   const isOrganizer = user?.role === 'Organizer';
+ 
+  const [localTime, setLocalTime] = useState(new Date());
+  useEffect(() => {
+    const t = setInterval(() => setLocalTime(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
 
+  const timeString = localTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const dateString = localTime.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   return (
     <div className={`profile-container ${isOrganizer ? 'organizer-workspace' : ''}`}>
       <div className="profile-page">
@@ -138,11 +146,9 @@ const Profile = () => {
               />
             </label>
             <div className="profile-identity">
-              <h1>{isOrganizer && user?.organizationName ? user.organizationName : user?.name}</h1>
-              <p>{isOrganizer ? (user?.website || 'Creator Studio') : user?.email}</p>
-              <div className="profile-badges">
-                <span className="badge-role">{user?.role}</span>
-                {!isOrganizer && <span className="badge-id">ID: {user?.studentId}</span>}
+              <div className="profile-local-time">
+                <div className="local-time">{timeString}</div>
+                <div className="local-date">{dateString}</div>
               </div>
             </div>
           </div>
@@ -368,6 +374,31 @@ const Profile = () => {
                           Edit Information
                         </button>
                       </div>
+
+                          {/* Profile image + edit control inside General Settings */}
+                          <div className="profile-image-edit">
+                            <label className="profile-image-circle" htmlFor="profileImageUpload">
+                              {user?.profileImage && user.profileImage !== 'default.png' ? (
+                                <img src={`http://localhost:5000${user.profileImage}`} alt="Profile" />
+                              ) : (
+                                user?.name?.charAt(0).toUpperCase()
+                              )}
+                              <div className="profile-image-overlay">
+                                <Camera size={16} />
+                              </div>
+                            </label>
+                            <input
+                              id="profileImageUpload"
+                              type="file"
+                              style={{ display: 'none' }}
+                              accept="image/*"
+                              onChange={handleImageUpload}
+                            />
+                            <div className="profile-image-desc">
+                              <div className="pid-title">Profile Image</div>
+                              <div className="pid-note">Click the icon to change your profile picture</div>
+                            </div>
+                          </div>
 
                       <div className="view-grid">
                         <div className="view-item">

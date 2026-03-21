@@ -104,6 +104,24 @@ export const profileService = {
     if (current) localStorage.setItem('uems_user', JSON.stringify({ ...current, ...res.data.data }));
     return res.data;
   },
+  deleteProfileImage: async () => {
+    // Use fetch to avoid global axios response interceptor auto-logout on 401
+    const raw = localStorage.getItem('uems_user');
+    const token = raw ? JSON.parse(raw).token : null;
+    const response = await fetch(`${API_URL}/profile/delete-image`, {
+      method: 'DELETE',
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      const err = new Error(data.message || 'Delete failed');
+      err.response = { status: response.status, data };
+      throw err;
+    }
+    const current = JSON.parse(localStorage.getItem('uems_user'));
+    if (current && data.data) localStorage.setItem('uems_user', JSON.stringify({ ...current, ...data.data }));
+    return data;
+  },
 };
 
 export const adminService = {

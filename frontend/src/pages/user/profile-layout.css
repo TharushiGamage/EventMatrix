@@ -17,6 +17,7 @@
   display: flex;
   flex-direction: column;
   z-index: 10;
+}
 
 /* Inline toast shown near the profile section Save button */
 .profile-inline-toast {
@@ -94,9 +95,6 @@
   background: #b91c1c;
   box-shadow: 0 6px 15px rgba(220, 38, 38, 0.3);
 }
-  transition: all 0.3s ease;
-  box-shadow: 2px 0 8px rgba(15, 23, 42, 0.05);
-}
 
 .profile-sidebar.closed {
   width: 70px;
@@ -119,8 +117,25 @@
 
 .profile-sidebar-user {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  flex-direction: column;
+}
+
+/* Sidebar local time (replaces name/role) */
+.sidebar-local-time {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.sidebar-local-time-time {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--primary-dark, #0f172a);
+}
+
+.sidebar-local-time-date {
+  font-size: 0.75rem;
+  color: var(--secondary-gray, #64748b);
 }
 
 .profile-sidebar-avatar {
