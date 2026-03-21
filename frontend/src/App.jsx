@@ -21,6 +21,7 @@ import ProfileOverview from './pages/user/ProfileOverview';
 import ProfileGeneral from './pages/user/ProfileGeneral';
 import ProfileSecurity from './pages/user/ProfileSecurity';
 import OrganizerEvents from './pages/user/OrganizerEvents';
+import ForgotPassword from './pages/user/ForgotPassword';
 import AdminUsers from './pages/user/AdminUsers';
 import AdminOrganizers from './pages/user/AdminOrganizers';
 import AdminSettings from './pages/user/AdminSettings';
@@ -65,6 +66,7 @@ function App() {
           {/* User Management public routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
           {/* Profile — sidebar + topbar layout (mirroring admin dashboard) */}
           <Route element={<ProtectedRoute />}>

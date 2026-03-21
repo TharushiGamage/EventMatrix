@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { authService, profileService } from '../../services/userApi';
 import { CheckCircle, ShieldCheck, KeyRound } from 'lucide-react';
@@ -7,6 +8,7 @@ const ProfileSecurity = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('current');
   const [submitting, setSubmitting] = useState(false);
+  const navigate = useNavigate();
   const [currentFlow, setCurrentFlow] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [forgotFlow, setForgotFlow] = useState({
     identifier: user?.email || user?.phone || '',
@@ -151,25 +153,8 @@ const ProfileSecurity = () => {
         </h3>
         <p className="profile-section-desc">Reset your password either with your current password or with the forgot password flow.</p>
 
-        <div className="pw-tab-row" style={{ maxWidth: 480, marginBottom: '1rem' }}>
-          <button
-            type="button"
-            className={`pw-tab ${activeTab === 'current' ? 'active' : ''}`}
-            onClick={() => setActiveTab('current')}
-          >
-            Use Current Password
-          </button>
-          <button
-            type="button"
-            className={`pw-tab ${activeTab === 'forgot' ? 'active' : ''}`}
-            onClick={() => setActiveTab('forgot')}
-          >
-            Forgot Password
-          </button>
-        </div>
-
-        {activeTab === 'current' ? (
-          <form onSubmit={handleCurrentPasswordReset} className="profile-form">
+        {/* Current Password Form (always shown) */}
+        <form onSubmit={handleCurrentPasswordReset} className="profile-form">
             <div className="pf-field">
               <label>Current Password</label>
               <input
@@ -178,6 +163,16 @@ const ProfileSecurity = () => {
                 onChange={(e) => setCurrentFlow((prev) => ({ ...prev, currentPassword: e.target.value }))}
                 placeholder="Enter current password"
               />
+              <div style={{ marginTop: 8, fontSize: '0.95rem' }}>
+                <button
+                  type="button"
+                  className="link-like"
+                  onClick={() => navigate('/forgot-password')}
+                  style={{ border: 'none', background: 'transparent', color: '#2563eb', cursor: 'pointer', padding: 0 }}
+                >
+                  Forgot password?
+                </button>
+              </div>
             </div>
 
             <div className="pf-field">
@@ -206,73 +201,8 @@ const ProfileSecurity = () => {
               </button>
             </div>
           </form>
-        ) : (
-          <form onSubmit={handleForgotPasswordReset} className="profile-form">
-            <div className="pf-field">
-              <label>Email or Phone Number</label>
-              <div className="pw-inline-row">
-                <input
-                  type="text"
-                  value={forgotFlow.identifier}
-                  onChange={(e) => setForgotFlow((prev) => ({ ...prev, identifier: e.target.value }))}
-                  placeholder="you@example.com or 0771234567"
-                />
-                <button type="button" className="pw-secondary-btn" onClick={handleSendForgotCode} disabled={submitting}>
-                  {submitting ? 'Sending...' : 'Send Code'}
-                </button>
-              </div>
-            </div>
 
-            <div className="pf-field">
-              <label>6-Digit Verification Code</label>
-              <div className="pw-inline-row">
-                <input
-                  type="text"
-                  maxLength={6}
-                  value={forgotFlow.code}
-                  onChange={(e) => setForgotFlow((prev) => ({ ...prev, code: e.target.value }))}
-                  placeholder="Enter verification code"
-                />
-                <button
-                  type="button"
-                  className="pw-secondary-btn"
-                  onClick={handleVerifyForgotCode}
-                  disabled={submitting || !forgotFlow.codeSent}
-                >
-                  Verify
-                </button>
-              </div>
-            </div>
-
-            <div className="pf-field">
-              <label>New Password</label>
-              <input
-                type="password"
-                value={forgotFlow.newPassword}
-                onChange={(e) => setForgotFlow((prev) => ({ ...prev, newPassword: e.target.value }))}
-                placeholder="Enter new password"
-                disabled={!forgotFlow.verified}
-              />
-            </div>
-
-            <div className="pf-field">
-              <label>Confirm Password</label>
-              <input
-                type="password"
-                value={forgotFlow.confirmPassword}
-                onChange={(e) => setForgotFlow((prev) => ({ ...prev, confirmPassword: e.target.value }))}
-                placeholder="Re-enter new password"
-                disabled={!forgotFlow.verified}
-              />
-            </div>
-
-            <div className="pf-submit-row">
-              <button type="submit" className="pf-submit-btn success" disabled={submitting || !forgotFlow.verified}>
-                {submitting ? 'Resetting...' : 'Reset Password'}
-              </button>
-            </div>
-          </form>
-        )}
+        {/* Forgot password handled on separate page */}
 
         <div className="profile-section-desc" style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
           <KeyRound size={16} />
