@@ -1,10 +1,29 @@
-import { Outlet, NavLink, Link } from 'react-router-dom';
+import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom';
 import { Bell, LogOut, LayoutDashboard, Folder, Users, Star, Calendar, BookOpen, Settings, ChevronRight, Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import './admin-layout.css';
 
 const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    setShowLogoutConfirm(true);
+    setProfileDropdownOpen(false);
+  };
+
+  const confirmLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const cancelLogout = () => {
+    setShowLogoutConfirm(false);
+  };
 
   return (
     <div className="admin-layout">
@@ -77,13 +96,6 @@ const AdminLayout = () => {
               </NavLink>
           </div>
         </nav>
-
-        <div className="admin-sidebar-footer">
-          <button className="logout-button">
-            <LogOut size={18} />
-            <span>Logout</span>
-          </button>
-        </div>
       </aside>
 
       {/* Main Content Area */}
@@ -105,12 +117,21 @@ const AdminLayout = () => {
               </button>
             </div>
             <div className="topbar-divider"></div>
-            <div className="topbar-profile">
+            <div className="topbar-profile" onClick={() => setProfileDropdownOpen(!profileDropdownOpen)} style={{ cursor: 'pointer', position: 'relative' }}>
               <div className="profile-avatar">A</div>
               <div className="profile-info">
                 <div className="profile-name">Admin</div>
                 <div className="profile-role">System Administrator</div>
               </div>
+
+              {profileDropdownOpen && (
+                <div className="admin-profile-dropdown">
+                  <button className="admin-dropdown-logout" onClick={handleLogout}>
+                    <LogOut size={18} />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </header>
@@ -119,6 +140,29 @@ const AdminLayout = () => {
         <div className="admin-content-wrapper">
           <Outlet />
         </div>
+
+        {/* Logout Confirmation Dialog */}
+        {showLogoutConfirm && (
+          <div className="admin-logout-overlay">
+            <div className="admin-logout-dialog">
+              <div className="admin-logout-dialog-content">
+                <div className="admin-logout-dialog-icon">
+                  <LogOut size={32} />
+                </div>
+                <h3 className="admin-logout-dialog-title">Confirm Logout</h3>
+                <p className="admin-logout-dialog-message">Are you sure you want to logout from this account?</p>
+              </div>
+              <div className="admin-logout-dialog-actions">
+                <button className="admin-logout-cancel-btn" onClick={cancelLogout}>
+                  Cancel
+                </button>
+                <button className="admin-logout-confirm-btn" onClick={confirmLogout}>
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

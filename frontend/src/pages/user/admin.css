@@ -23,11 +23,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 2rem;
-  background: linear-gradient(135deg, var(--primary-blue), #1e40af);
-  border-radius: 16px;
-  color: white;
-  box-shadow: 0 8px 32px rgba(37, 99, 235, 0.15);
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  color: var(--primary-dark, #0f172a);
 }
 
 .dashboard-header h1 {
@@ -35,11 +34,13 @@
   font-weight: 900;
   margin-bottom: 0.5rem;
   letter-spacing: -0.02em;
+  color: var(--primary-blue, #2563eb);
 }
 
 .dashboard-header p {
   font-size: 0.95rem;
   opacity: 0.9;
+  color: var(--primary-blue, #2563eb);
 }
 
 .header-icon {

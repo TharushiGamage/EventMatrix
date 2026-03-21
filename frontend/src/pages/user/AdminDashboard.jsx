@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Users, Calendar, Activity, RefreshCw } from 'lucide-react';
+import { Users, Calendar, Activity } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { adminService } from '../../services/userApi';
 import { fetchEvents } from '../../services/eventService';
@@ -7,7 +7,6 @@ import { fetchEvents } from '../../services/eventService';
 const AdminDashboard = () => {
   const [counts, setCounts] = useState({ students: 0, organizers: 0, events: 0 });
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
 
   const fetchCounts = async () => {
@@ -40,7 +39,6 @@ const AdminDashboard = () => {
       setError(err.response?.data?.message || err.message || 'Failed to fetch dashboard counts');
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
   };
 
@@ -55,10 +53,7 @@ const AdminDashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleManualRefresh = async () => {
-    setRefreshing(true);
-    await fetchCounts();
-  };
+  
 
   const stats = [
     { 
@@ -92,26 +87,6 @@ const AdminDashboard = () => {
           <h1>Admin Dashboard</h1>
           <p>Welcome! Here's your system overview.</p>
         </div>
-        <button 
-          onClick={handleManualRefresh} 
-          disabled={refreshing}
-          style={{
-            padding: '8px 16px',
-            borderRadius: '6px',
-            border: 'none',
-            background: '#3b82f6',
-            color: 'white',
-            cursor: refreshing ? 'not-allowed' : 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            opacity: refreshing ? 0.6 : 1,
-            transition: 'all 0.3s ease'
-          }}
-        >
-          <RefreshCw size={16} style={{ animation: refreshing ? 'spin 1s linear infinite' : 'none' }} />
-          {refreshing ? 'Refreshing...' : 'Refresh'}
-        </button>
       </div>
 
       {/* Statistics Grid */}
@@ -142,12 +117,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
+      
     </div>
   );
 };

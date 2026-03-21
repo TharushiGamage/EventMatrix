@@ -209,6 +209,147 @@
   transform: translateY(-2px);
 }
 
+/* Admin Profile Dropdown */
+.admin-profile-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  z-index: 100;
+  min-width: 160px;
+}
+
+.admin-dropdown-logout {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: transparent;
+  color: var(--danger-color);
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.admin-dropdown-logout:hover {
+  background: rgba(220, 38, 38, 0.1);
+}
+
+/* Admin Logout Confirmation Dialog */
+.admin-logout-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.admin-logout-dialog {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.3);
+  padding: 2rem;
+  max-width: 420px;
+  width: 90%;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.admin-logout-dialog-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.admin-logout-dialog-icon {
+  color: var(--danger-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-logout-dialog-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--primary-dark, #0f172a);
+  margin: 0;
+}
+
+.admin-logout-dialog-message {
+  font-size: 0.95rem;
+  color: var(--secondary-gray, #64748b);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.admin-logout-dialog-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.admin-logout-cancel-btn,
+.admin-logout-confirm-btn {
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.admin-logout-cancel-btn {
+  background: #f1f5f9;
+  color: var(--secondary-gray, #64748b);
+  border: 1px solid var(--border-color);
+}
+
+.admin-logout-cancel-btn:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+}
+
+.admin-logout-confirm-btn {
+  background: var(--danger-color);
+  color: #ffffff;
+}
+
+.admin-logout-confirm-btn:hover {
+  background: #b91c1c;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(220, 38, 38, 0.3);
+}
+
 /* Main Content Area */
 .admin-main {
   flex: 1;

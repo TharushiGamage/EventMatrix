@@ -17,6 +17,83 @@
   display: flex;
   flex-direction: column;
   z-index: 10;
+
+/* Inline toast shown near the profile section Save button */
+.profile-inline-toast {
+  position: absolute;
+  bottom: 72px;
+  right: 140px;
+  padding: 0.9rem 1.25rem;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #16a34a;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 8px 30px rgba(15,23,42,0.06);
+  z-index: 30;
+}
+
+.profile-inline-toast.ptoast-err { color: #dc2626; }
+
+/* Centered toast inside profile section for important success messages */
+.profile-center-toast {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 2rem;
+  border-radius: 16px;
+  background: #ffffff;
+  color: #16a34a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  box-shadow: 0 20px 55px rgba(2,6,23,0.2);
+  z-index: 100;
+  border: 2px solid rgba(22, 163, 74, 0.2);
+}
+
+.profile-center-toast.ptoast-err {
+  color: #dc2626;
+  border-color: rgba(220, 38, 38, 0.2);
+}
+
+.profile-center-toast-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.profile-center-toast-btn {
+  padding: 0.7rem 2rem;
+  background: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profile-center-toast-btn:hover {
+  background: #15803d;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(22, 163, 74, 0.3);
+}
+
+.profile-center-toast.ptoast-err .profile-center-toast-btn {
+  background: #dc2626;
+}
+
+.profile-center-toast.ptoast-err .profile-center-toast-btn:hover {
+  background: #b91c1c;
+  box-shadow: 0 6px 15px rgba(220, 38, 38, 0.3);
+}
   transition: all 0.3s ease;
   box-shadow: 2px 0 8px rgba(15, 23, 42, 0.05);
 }
@@ -178,6 +255,11 @@
   gap: 0.75rem;
 }
 
+/* Sidebar Footer */
+.profile-sidebar-footer {
+  padding: 0.1rem 0.75rem 0.75rem 0.75rem;
+}
+
 /* ===================== Main Content ===================== */
 .profile-main {
   flex: 1;
@@ -313,6 +395,147 @@
   font-weight: 600;
 }
 
+/* Profile Dropdown */
+.p-profile-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: #ffffff;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  z-index: 100;
+  min-width: 160px;
+}
+
+.p-dropdown-logout {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: transparent;
+  color: #dc2626;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.p-dropdown-logout:hover {
+  background: rgba(220, 38, 38, 0.1);
+}
+
+/* Logout Confirmation Dialog */
+.p-logout-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.p-logout-dialog {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.3);
+  padding: 2rem;
+  max-width: 420px;
+  width: 90%;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.p-logout-dialog-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.p-logout-dialog-icon {
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.p-logout-dialog-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--primary-dark, #0f172a);
+  margin: 0;
+}
+
+.p-logout-dialog-message {
+  font-size: 0.95rem;
+  color: var(--secondary-gray, #64748b);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.p-logout-dialog-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.p-logout-cancel-btn,
+.p-logout-confirm-btn {
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.p-logout-cancel-btn {
+  background: #f1f5f9;
+  color: var(--secondary-gray, #64748b);
+  border: 1px solid var(--border-color, #e2e8f0);
+}
+
+.p-logout-cancel-btn:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+}
+
+.p-logout-confirm-btn {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.p-logout-confirm-btn:hover {
+  background: #b91c1c;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(220, 38, 38, 0.3);
+}
+
 /* Content Wrapper */
 .profile-content-wrapper {
   flex: 1;
@@ -366,6 +589,20 @@
   opacity: 0.85;
   color: #2563eb;
 }
+
+.profile-header-actions {
+  margin-top: 1.5rem;
+}
+
+.header-edit-btn {
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  color: #fff;
+  border-radius: 10px;
+  border: none;
+  font-weight: 700;
+}
+
+.header-edit-btn:hover { transform: translateY(-2px); }
 
 /* Create Event Button */
 .create-event-btn {
@@ -498,6 +735,52 @@
   padding: 2rem;
   margin-bottom: 1.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.profile-section-wrapper { position: relative; margin-top: 0.75rem; }
+
+.profile-section { position: relative; }
+
+.section-edit-btn-outside {
+  position: absolute;
+  top: -58px;
+  /* place button close to the page content's right edge (near highlighted area) */
+  right: 40px;
+  padding: 0.85rem 1.75rem;
+  font-size: 0.95rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  color: white;
+  border: none;
+  cursor: pointer;
+  z-index: 5;
+}
+
+.section-edit-btn-outside:hover { transform: translateY(-2px); }
+
+/* Make Save Changes and Edit buttons blue inside profile section */
+/* Stronger rules to ensure blue buttons inside profile section */
+.profile-section .pf-submit-btn,
+.section-edit-btn-outside {
+  background: linear-gradient(135deg, #2563eb, #1e40af) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
+  border: none !important;
+}
+
+.profile-section .pf-submit-btn:hover,
+.section-edit-btn-outside:hover {
+  background: linear-gradient(135deg, #1e40af, #1e3a8a) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Responsive adjustments to keep the button visible on smaller screens */
+@media (max-width: 1400px) {
+  .section-edit-btn-outside { right: 40px; top: -52px; }
+}
+
+@media (max-width: 1024px) {
+  .section-edit-btn-outside { right: 24px; top: -42px; }
 }
 
 .profile-section-title {
@@ -681,6 +964,27 @@
   transition: all 0.2s ease;
   resize: vertical;
 }
+
+/* Space for edit icon inside inputs */
+.input-with-edit { padding-right: 3rem; }
+
+.field-edit-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.field-edit-btn:hover { color: #2563eb; background: rgba(37,99,235,0.06); }
 
 .pf-field input:focus,
 .pf-field textarea:focus {

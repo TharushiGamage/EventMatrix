@@ -1,5 +1,5 @@
-import { Outlet, NavLink, useLocation } from 'react-router-dom';
-import { Bell, LayoutDashboard, User, ShieldCheck, Menu, X, Camera } from 'lucide-react';
+import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Bell, LayoutDashboard, User, ShieldCheck, Menu, X, Camera, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { profileService } from '../../services/userApi';
@@ -7,8 +7,11 @@ import './profile-layout.css';
 
 const ProfileLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const { user, updateUser } = useAuth();
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const { user, updateUser, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const isOrganizer = user?.role === 'Organizer';
 
@@ -23,6 +26,20 @@ const ProfileLayout = () => {
     } catch (err) {
       console.error('Image upload failed', err);
     }
+  };
+
+  const handleLogout = () => {
+    setShowLogoutConfirm(true);
+    setProfileDropdownOpen(false);
+  };
+
+  const confirmLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const cancelLogout = () => {
+    setShowLogoutConfirm(false);
   };
 
   // Derive page title from current route
@@ -89,8 +106,6 @@ const ProfileLayout = () => {
                 <span>Personal Security</span>
               </div>
             </NavLink>
-
-
           </div>
         </nav>
       </aside>
@@ -113,7 +128,7 @@ const ProfileLayout = () => {
               </button>
             </div>
             <div className="p-topbar-divider"></div>
-            <div className="p-topbar-profile">
+            <div className="p-topbar-profile" onClick={() => setProfileDropdownOpen(!profileDropdownOpen)} style={{ cursor: 'pointer', position: 'relative' }}>
               <div className="p-profile-avatar">
                 {user?.profileImage && user.profileImage !== 'default.png' ? (
                   <img src={`http://localhost:5000${user.profileImage}`} alt="Avatar" />
@@ -125,6 +140,15 @@ const ProfileLayout = () => {
                 <div className="p-profile-name">{user?.name}</div>
                 <div className="p-profile-role">{user?.role}</div>
               </div>
+
+              {profileDropdownOpen && (
+                <div className="p-profile-dropdown">
+                  <button className="p-dropdown-logout" onClick={handleLogout}>
+                    <LogOut size={18} />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </header>
@@ -133,6 +157,29 @@ const ProfileLayout = () => {
         <div className="profile-content-wrapper">
           <Outlet />
         </div>
+
+        {/* Logout Confirmation Dialog */}
+        {showLogoutConfirm && (
+          <div className="p-logout-overlay">
+            <div className="p-logout-dialog">
+              <div className="p-logout-dialog-content">
+                <div className="p-logout-dialog-icon">
+                  <LogOut size={32} />
+                </div>
+                <h3 className="p-logout-dialog-title">Confirm Logout</h3>
+                <p className="p-logout-dialog-message">Are you sure you want to logout from this account?</p>
+              </div>
+              <div className="p-logout-dialog-actions">
+                <button className="p-logout-cancel-btn" onClick={cancelLogout}>
+                  Cancel
+                </button>
+                <button className="p-logout-confirm-btn" onClick={confirmLogout}>
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
