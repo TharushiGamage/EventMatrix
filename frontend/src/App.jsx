@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { EventRefreshProvider } from './context/EventRefreshContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import RoleBasedRoute from './components/RoleBasedRoute';
 import UserNavbar from './components/UserNavbar';
@@ -19,6 +20,7 @@ import ProfileLayout from './pages/user/ProfileLayout';
 import ProfileOverview from './pages/user/ProfileOverview';
 import ProfileGeneral from './pages/user/ProfileGeneral';
 import ProfileSecurity from './pages/user/ProfileSecurity';
+import OrganizerEvents from './pages/user/OrganizerEvents';
 import AdminUsers from './pages/user/AdminUsers';
 import AdminOrganizers from './pages/user/AdminOrganizers';
 import AdminSettings from './pages/user/AdminSettings';
@@ -45,9 +47,10 @@ const ConditionalNavbar = () => {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <ConditionalNavbar />
-        <Routes>
+      <EventRefreshProvider>
+        <BrowserRouter>
+          <ConditionalNavbar />
+          <Routes>
           {/* EventMatrix original routes */}
           <Route path="/" element={<Dashboard />} />
           <Route path="/feed" element={<Feed />} />
@@ -70,6 +73,11 @@ function App() {
               <Route path="/profile/general" element={<ProfileGeneral />} />
               <Route path="/profile/security" element={<ProfileSecurity />} />
             </Route>
+          </Route>
+
+          {/* Organizer Events — view, edit, delete events */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/profile/events" element={<OrganizerEvents />} />
           </Route>
 
           {/* Registration & Payment — Student only */}
@@ -98,6 +106,7 @@ function App() {
         </Routes>
         <Footer />
       </BrowserRouter>
+      </EventRefreshProvider>
     </AuthProvider>
   );
 }

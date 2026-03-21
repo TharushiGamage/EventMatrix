@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Mail, Hash, Award, Calendar, Briefcase, Shield, ArrowRight, KeyRound, DollarSign, Clock, Users, CreditCard } from 'lucide-react';
+import { useEventRefresh } from '../../context/EventRefreshContext';
+import { Mail, Hash, Award, Calendar, Briefcase, Shield, ArrowRight, KeyRound, DollarSign, Clock, Users, CreditCard, Plus } from 'lucide-react';
 import { fetchEvents } from '../../services/eventService';
 
 const ProfileOverview = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { refreshTrigger } = useEventRefresh();
   const isOrganizer = user?.role === 'Organizer';
   const [organizerStats, setOrganizerStats] = useState({
     totalEvents: 0,
@@ -29,14 +32,22 @@ const ProfileOverview = () => {
 
       try {
         const events = await fetchEvents();
+        console.log('All events fetched:', events);
+        console.log('Current user:', user);
+        
         const identityKeys = [user.name, user.email, user.studentId]
           .filter(Boolean)
           .map((value) => String(value).toLowerCase().trim());
 
+        console.log('Identity keys for matching:', identityKeys);
+
         const organizerEvents = events.filter((event) => {
           const owner = String(event.organizedBy || '').toLowerCase().trim();
+          console.log(`Comparing event "${event.name}" organizedBy "${owner}" against keys:`, identityKeys);
           return owner && identityKeys.some((key) => owner === key || owner.includes(key));
         });
+
+        console.log('Filtered organizer events:', organizerEvents);
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -69,6 +80,7 @@ const ProfileOverview = () => {
           });
         }
       } catch (error) {
+        console.error('Error loading organizer stats:', error);
         if (active) {
           setOrganizerStats({ totalEvents: 0, pendingPayments: 0, upcomingEvents: 0, totalAttendance: 0, approvedPayments: 0 });
         }
@@ -79,7 +91,7 @@ const ProfileOverview = () => {
     return () => {
       active = false;
     };
-  }, [isOrganizer, user]);
+  }, [isOrganizer, user, refreshTrigger]);
 
   return (
     <div className="pf-fade-in">
@@ -89,6 +101,15 @@ const ProfileOverview = () => {
           <h1>{isOrganizer ? 'Creator Dashboard' : 'Dashboard Overview'}</h1>
           <p>{isOrganizer ? 'High-level metrics and quick actions for your events.' : 'A high-level view of your account status and quick actions.'}</p>
         </div>
+        {isOrganizer && (
+          <button
+            className="create-event-btn"
+            onClick={() => navigate('/create')}
+          >
+            <Plus size={20} />
+            Create Event
+          </button>
+        )}
       </div>
 
       {/* Stats Section */}
@@ -98,7 +119,19 @@ const ProfileOverview = () => {
         
         {isOrganizer ? (
           <div className="profile-stats-grid">
-            <div className="profile-stat-card org-card org-stat-blue">
+            <div
+              className="profile-stat-card org-card org-stat-blue"
+              onClick={() => navigate('/profile/events')}
+              style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.boxShadow = '0 12px 24px rgba(37, 99, 235, 0.2)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
               <div className="org-stat-icon-wrapper">
                 <Calendar size={24} />
               </div>

@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../../../context/AuthContext';
 import { createEvent, updateEvent, fetchEventById } from '../../../services/eventService';
+import { useEventRefresh } from '../../../context/EventRefreshContext';
 
 export default function EventForm() {
     const navigate = useNavigate();
     const { id } = useParams();
+    const { user } = useAuth();
+    const { triggerRefresh } = useEventRefresh();
     const isEdit = Boolean(id);
 
     const emptyForm = {
@@ -69,6 +73,15 @@ export default function EventForm() {
 
         return () => { cancelled = true; };
     }, [isEdit, id]);
+
+    // Auto-populate organizedBy with current user's name when creating new event
+    useEffect(() => {
+        if (isEdit || !user?.name) return;
+        setForm(prevForm => ({
+            ...prevForm,
+            organizedBy: user.name
+        }));
+    }, [user?.name, isEdit]);
 
     const validate = () => {
         const newErrors = {};
@@ -273,6 +286,7 @@ export default function EventForm() {
                 await updateEvent(id, finalPayload);
             } else {
                 await createEvent(finalPayload);
+                triggerRefresh();
             }
             navigate('/');
         } catch (err) {
@@ -491,6 +505,7 @@ export default function EventForm() {
                         value={form.organizedBy}
                         onChange={handleChange}
                         onBlur={handleBlur}
+                        readOnly
                     />
                     {errors.organizedBy && touched.organizedBy && (
                         <span className="form-error">{errors.organizedBy}</span>
