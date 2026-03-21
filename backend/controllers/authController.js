@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
+const { sendOtpEmail } = require('../utils/emailService');
 
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -114,9 +115,16 @@ const forgotPassword = async (req, res) => {
     await user.save();
 
     const channel = isPhoneLike(identifier) ? 'phone' : 'email';
-    console.log(`\n[SIMULATED ${channel.toUpperCase()} OTP] => ${identifier}: Your EventMatrix reset code is ${otp} (valid for 5 minutes).\n`);
+    console.log(`\n[OTP] => ${identifier}: ${otp} (valid for 5 minutes).\n`);
 
-    return res.json({ success: true, message: `Verification code sent to your ${channel}` });
+    if (channel === 'email') {
+      await sendOtpEmail(identifier, otp);
+    }
+
+    return res.json({ 
+      success: true, 
+      message: `Verification code sent to your ${channel}!` 
+    });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message || 'Failed to send verification code' });
   }

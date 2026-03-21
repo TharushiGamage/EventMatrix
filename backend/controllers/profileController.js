@@ -78,7 +78,7 @@ const sendPasswordOtp = async (req, res) => {
     // Simulate sending SMS
     console.log(`\n\n[SIMULATED SMS] => Sent to ${user.phone}: Your EventMatrix password verification code is ${otp}. Valid for 5 minutes.\n\n`);
 
-    res.json({ success: true, message: `Verification code sent to ${user.phone}` });
+    res.json({ success: true, message: `Verification code sent to ${user.phone}! [DEMO MODE OTP: ${otp}]` });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
