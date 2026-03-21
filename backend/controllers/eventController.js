@@ -122,7 +122,7 @@ const createEvent = async (req, res, next) => {
     try {
         const {
             name, date, startTime, endTime, venue, organizedBy,
-            maxParticipants, isPaid, ticketPrice, description, ticketTypes
+            maxParticipants, isPaid, ticketPrice, description, ticketTypes, additionalDates
         } = req.body;
 
         const image = req.file ? req.file.filename : null;
@@ -130,11 +130,12 @@ const createEvent = async (req, res, next) => {
         const event = await Event.create({
             name,
             date,
+            additionalDates: additionalDates || [],
             startTime,
-            endTime,
+            endTime: endTime || null,
             venue,
             organizedBy,
-            maxParticipants,
+            maxParticipants: maxParticipants || null,
             isPaid,
             ticketPrice: isPaid ? ticketPrice : null,
             ticketTypes: isPaid ? (ticketTypes || []) : [],
@@ -168,16 +169,17 @@ const updateEvent = async (req, res, next) => {
 
         const {
             name, date, startTime, endTime, venue, organizedBy,
-            maxParticipants, isPaid, ticketPrice, description, ticketTypes
+            maxParticipants, isPaid, ticketPrice, description, ticketTypes, additionalDates
         } = req.body;
 
         event.name = name;
         event.date = date;
+        event.additionalDates = additionalDates || [];
         event.startTime = startTime;
-        event.endTime = endTime;
+        event.endTime = endTime || null;
         event.venue = venue;
         event.organizedBy = organizedBy;
-        event.maxParticipants = maxParticipants;
+        event.maxParticipants = maxParticipants || null;
         event.isPaid = isPaid;
         event.ticketPrice = isPaid ? ticketPrice : null;
         event.ticketTypes = isPaid ? (ticketTypes || []) : [];

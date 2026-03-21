@@ -18,6 +18,13 @@ const validateEvent = (req, res, next) => {
             req.body.ticketTypes = [];
         }
     }
+    if (typeof req.body.additionalDates === 'string') {
+        try {
+            req.body.additionalDates = JSON.parse(req.body.additionalDates);
+        } catch (_e) {
+            req.body.additionalDates = [];
+        }
+    }
 
     const { name, date, startTime, endTime, venue, organizedBy, maxParticipants, isPaid, ticketPrice, description, ticketTypes } = req.body;
 
@@ -42,11 +49,11 @@ const validateEvent = (req, res, next) => {
         errors.push({ field: 'startTime', message: 'Start time must be in HH:mm 24-hour format' });
     }
 
-    // endTime — HH:mm (24h)
-    if (!endTime || typeof endTime !== 'string') {
-        errors.push({ field: 'endTime', message: 'Event end time is required' });
-    } else if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(endTime)) {
-        errors.push({ field: 'endTime', message: 'End time must be in HH:mm 24-hour format' });
+    // endTime — HH:mm (24h) — optional
+    if (endTime && typeof endTime === 'string' && endTime.trim().length > 0) {
+        if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(endTime)) {
+            errors.push({ field: 'endTime', message: 'End time must be in HH:mm 24-hour format' });
+        }
     }
 
     // Ensure endTime comes after startTime if both are valid formats
@@ -70,11 +77,11 @@ const validateEvent = (req, res, next) => {
         errors.push({ field: 'organizedBy', message: 'Organizer must be at most 200 characters' });
     }
 
-    // maxParticipants
-    if (maxParticipants === undefined || maxParticipants === null) {
-        errors.push({ field: 'maxParticipants', message: 'Max participants is required' });
-    } else if (!Number.isInteger(maxParticipants) || maxParticipants < 1) {
-        errors.push({ field: 'maxParticipants', message: 'Max participants must be an integer ≥ 1' });
+    // maxParticipants — optional
+    if (maxParticipants !== undefined && maxParticipants !== null && maxParticipants !== '') {
+        if (!Number.isInteger(maxParticipants) || maxParticipants < 1) {
+            errors.push({ field: 'maxParticipants', message: 'Max participants must be an integer ≥ 1' });
+        }
     }
 
     // isPaid
