@@ -24,7 +24,7 @@ const eventSchema = new mongoose.Schema(
         },
         endTime: {
             type: String,
-            required: true,
+            default: null,
         },
         venue: {
             type: String,
@@ -38,7 +38,7 @@ const eventSchema = new mongoose.Schema(
         },
         maxParticipants: {
             type: Number,
-            required: true,
+            default: null,
             min: 1,
         },
         isPaid: {
@@ -56,6 +56,9 @@ const eventSchema = new mongoose.Schema(
             issuingDates: { type: String, required: true },
             issuingTimes: { type: String, required: true },
             issuingVenues: { type: String, required: true }
+        }],
+        additionalDates: [{
+            type: String,
         }],
         description: {
             type: String,
