@@ -10,6 +10,7 @@ export default function EventForm() {
     const emptyForm = {
         name: '',
         date: '',
+        additionalDates: [],
         startTime: '',
         endTime: '',
         venue: '',
@@ -46,6 +47,7 @@ export default function EventForm() {
                 setForm({
                     name: event.name || '',
                     date: event.date || '',
+                    additionalDates: event.additionalDates || [],
                     startTime: event.startTime || '',
                     endTime: event.endTime || '',
                     venue: event.venue || '',
@@ -73,16 +75,12 @@ export default function EventForm() {
         if (!form.name.trim()) newErrors.name = 'Event name is required';
         if (!form.date) newErrors.date = 'Date is required';
         if (!form.startTime) newErrors.startTime = 'Start Time is required';
-        if (!form.endTime) {
-            newErrors.endTime = 'End Time is required';
-        } else if (form.startTime && form.endTime) {
-            if (form.endTime <= form.startTime) {
-                newErrors.endTime = 'End time must be after start time';
-            }
+        if (form.endTime && form.startTime && form.endTime <= form.startTime) {
+            newErrors.endTime = 'End time must be after start time';
         }
         if (!form.venue.trim()) newErrors.venue = 'Venue is required';
         if (!form.organizedBy.trim()) newErrors.organizedBy = 'Organizer is required';
-        if (!form.maxParticipants || parseInt(form.maxParticipants) < 1)
+        if (form.maxParticipants && parseInt(form.maxParticipants) < 1)
             newErrors.maxParticipants = 'Must be at least 1';
         if (form.isPaid) {
             if (!form.ticketTypes || form.ticketTypes.length === 0) {
@@ -197,6 +195,26 @@ export default function EventForm() {
         }));
     };
 
+    const addAdditionalDate = () => {
+        setForm(prev => ({
+            ...prev,
+            additionalDates: [...prev.additionalDates, '']
+        }));
+    };
+
+    const removeAdditionalDate = (index) => {
+        setForm(prev => ({
+            ...prev,
+            additionalDates: prev.additionalDates.filter((_, i) => i !== index)
+        }));
+    };
+
+    const handleAdditionalDateChange = (index, value) => {
+        const newDates = [...form.additionalDates];
+        newDates[index] = value;
+        setForm(prev => ({ ...prev, additionalDates: newDates }));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setApiError(null);
@@ -210,14 +228,17 @@ export default function EventForm() {
             return;
         }
 
+        const filteredAdditionalDates = form.additionalDates.filter(d => d);
+
         const payloadParams = {
             name: form.name.trim(),
             date: form.date,
+            additionalDates: filteredAdditionalDates,
             startTime: form.startTime,
-            endTime: form.endTime,
+            endTime: form.endTime || undefined,
             venue: form.venue.trim(),
             organizedBy: form.organizedBy.trim(),
-            maxParticipants: parseInt(form.maxParticipants),
+            maxParticipants: form.maxParticipants ? parseInt(form.maxParticipants) : undefined,
             isPaid: form.isPaid,
             ticketTypes: form.isPaid ? form.ticketTypes.map(t => ({
                 name: t.name.trim(),
@@ -234,7 +255,8 @@ export default function EventForm() {
         if (form.image) {
             finalPayload = new FormData();
             Object.entries(payloadParams).forEach(([key, value]) => {
-                if (key === 'ticketTypes') {
+                if (value === undefined) return;
+                if (key === 'ticketTypes' || key === 'additionalDates') {
                     finalPayload.append(key, JSON.stringify(value));
                 } else {
                     finalPayload.append(key, value);
@@ -350,7 +372,7 @@ export default function EventForm() {
                     {errors.name && touched.name && <span className="form-error">{errors.name}</span>}
                 </div>
 
-                {/* Date & Time */}
+                {/* Date & Additional Days */}
                 <div className="form-row">
                     <div className="form-group" style={{ flex: '1 1 100%' }}>
                         <label className="form-label" htmlFor="date">
@@ -367,6 +389,42 @@ export default function EventForm() {
                         />
                         {errors.date && touched.date && <span className="form-error">{errors.date}</span>}
                     </div>
+                </div>
+
+                {/* Additional Days */}
+                <div className="form-group">
+                    <label className="form-label">Additional Days</label>
+                    {form.additionalDates.map((d, index) => (
+                        <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                            <input
+                                type="date"
+                                className="form-input"
+                                value={d}
+                                onChange={(e) => handleAdditionalDateChange(index, e.target.value)}
+                                style={{ flex: 1 }}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => removeAdditionalDate(index)}
+                                style={{ background: 'none', border: 'none', color: '#dc3545', cursor: 'pointer', fontSize: '1.3rem', padding: '4px 8px', lineHeight: 1 }}
+                                title="Remove this day"
+                            >
+                                &times;
+                            </button>
+                        </div>
+                    ))}
+                    <button
+                        type="button"
+                        className="btn btn-ghost"
+                        onClick={addAdditionalDate}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', marginTop: '4px' }}
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        Add Another Day
+                    </button>
                 </div>
                 <div className="form-row">
                     <div className="form-group">
@@ -386,7 +444,7 @@ export default function EventForm() {
                     </div>
                     <div className="form-group">
                         <label className="form-label" htmlFor="endTime">
-                            End Time <span className="required">*</span>
+                            End Time
                         </label>
                         <input
                             id="endTime"
@@ -442,7 +500,7 @@ export default function EventForm() {
                 {/* Max Participants */}
                 <div className="form-group">
                     <label className="form-label" htmlFor="maxParticipants">
-                        Maximum Participation Count <span className="required">*</span>
+                        Maximum Participation Count
                     </label>
                     <input
                         id="maxParticipants"
@@ -512,7 +570,7 @@ export default function EventForm() {
                                         {errors[`ticket_${index}_name`] && <span className="form-error" style={{ fontSize: '0.8rem' }}>{errors[`ticket_${index}_name`]}</span>}
                                     </div>
                                     <div>
-                                        <label className="form-label" style={{ fontSize: '0.85rem', marginBottom: '4px' }}>Price (₹) <span className="required">*</span></label>
+                                        <label className="form-label" style={{ fontSize: '0.85rem', marginBottom: '4px' }}>Price (Rs) <span className="required">*</span></label>
                                         <input
                                             type="number"
                                             min="0"

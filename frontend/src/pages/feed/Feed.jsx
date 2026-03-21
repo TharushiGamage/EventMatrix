@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchFeedEvents } from '../../services/eventService';
+import EventCalendar from '../event/Components/EventCalendar';
 
 export default function Feed() {
     const navigate = useNavigate();
@@ -12,6 +13,7 @@ export default function Feed() {
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [showCalendar, setShowCalendar] = useState(false);
 
     const loadFeed = useCallback(async () => {
         try {
@@ -51,7 +53,8 @@ export default function Feed() {
     };
 
     const formatTimeRange = (start, end) => {
-        if (!start || !end) return '';
+        if (!start) return '';
+        if (!end) return formatTime(start);
         return `${formatTime(start)} - ${formatTime(end)}`;
     };
 
@@ -98,12 +101,49 @@ export default function Feed() {
                     <h1 className="feed-title">Campus Events</h1>
                     <p className="feed-subtitle">Discover what's happening on campus</p>
                 </div>
-                <div className="feed-header-meta">
+                <div className="feed-header-meta" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <button className="btn btn-outline" onClick={() => setShowCalendar(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', backgroundColor: '#fff', border: '1px solid #e2e8f0', color: '#475569', fontWeight: '500' }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        View Calendar
+                    </button>
                     {!loading && (
                         <span className="feed-count">{pagination.totalItems} event{pagination.totalItems !== 1 ? 's' : ''}</span>
                     )}
                 </div>
             </header>
+
+            {/* Calendar Modal */}
+            {showCalendar && (
+                <div className="calendar-modal-overlay" onClick={() => setShowCalendar(false)} style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 9999,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem',
+                    backdropFilter: 'blur(4px)'
+                }}>
+                    <div className="calendar-modal-content" onClick={(e) => e.stopPropagation()} style={{
+                        backgroundColor: '#fff', borderRadius: '16px', width: '100%', maxWidth: '900px',
+                        maxHeight: '90vh', overflowY: 'auto', position: 'relative',
+                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+                    }}>
+                        <button className="calendar-modal-close" onClick={() => setShowCalendar(false)} style={{
+                            position: 'absolute', top: '1rem', right: '1rem', background: 'var(--bg-secondary, #f1f5f9)', border: 'none',
+                            cursor: 'pointer', zIndex: 10, width: '32px', height: '32px', borderRadius: '50%',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b'
+                        }}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                        <EventCalendar />
+                    </div>
+                </div>
+            )}
 
             {/* Controls */}
             <section className="feed-controls">
@@ -214,16 +254,37 @@ export default function Feed() {
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
                                         {event.organizedBy}
                                     </span>
+                                    {event.maxParticipants && (
+                                        <span className="feed-meta-item">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+                                            Max {event.maxParticipants} capacity
+                                        </span>
+                                    )}
                                 </div>
                                 <div className="feed-item-footer">
-                                    <span className={`badge ${event.isPaid ? 'badge-paid' : 'badge-free'}`}>
-                                        {event.isPaid ? 'Paid' : 'Free'}
-                                    </span>
-                                    {event.isPaid ? (
-                                        <span className="feed-price-tag">₹{event.ticketPrice}</span>
-                                    ) : (
-                                        <span className="feed-price-free">Free</span>
-                                    )}
+                                    <div className="feed-item-footer-left">
+                                        <span className={`badge ${event.isPaid ? 'badge-paid' : 'badge-free'}`}>
+                                            {event.isPaid ? 'Paid' : 'Free'}
+                                        </span>
+                                        {event.isPaid ? (
+                                            <span className="feed-price-tag">Rs {event.ticketPrice}</span>
+                                        ) : (
+                                            <span className="feed-price-free">Free</span>
+                                        )}
+                                    </div>
+                                    <button
+                                        className="btn btn-register"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            alert(`Registration for "${event.name}" — coming soon!`);
+                                        }}
+                                    >
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" />
+                                            <line x1="20" y1="8" x2="20" y2="14" /><line x1="23" y1="11" x2="17" y2="11" />
+                                        </svg>
+                                        Register
+                                    </button>
                                 </div>
                             </div>
                         </article>

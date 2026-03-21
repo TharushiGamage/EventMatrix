@@ -1,7 +1,7 @@
 const Event = require('../models/Event');
 
 // Slim fields returned in the feed list
-const FEED_LIST_FIELDS = 'id name date startTime endTime venue organizedBy isPaid ticketPrice ticketTypes image';
+const FEED_LIST_FIELDS = 'id name date startTime endTime venue organizedBy isPaid ticketPrice ticketTypes image maxParticipants';
 
 // GET /api/v1/feed
 const getFeedEvents = async (req, res, next) => {

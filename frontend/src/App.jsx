@@ -3,6 +3,8 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import RoleBasedRoute from './components/RoleBasedRoute';
 import UserNavbar from './components/UserNavbar';
+import Header from './components/Header';
+import Footer from './components/Footer';
 
 // EventMatrix existing pages
 import Dashboard from './pages/event/Dashboard';
@@ -74,6 +76,7 @@ function App() {
             </Route>
           </Route>
         </Routes>
+        <Footer />
       </BrowserRouter>
     </AuthProvider>
   );
