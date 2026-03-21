@@ -1139,6 +1139,70 @@ body {
     letter-spacing: 0.04em;
 }
 
+.feed-item-footer-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Register Button */
+.btn-register {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+    white-space: nowrap;
+}
+
+.btn-register:hover {
+    background: linear-gradient(135deg, #5558e6, #7c4fe0);
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.45);
+    transform: translateY(-1px);
+}
+
+.btn-register:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
+}
+
+.btn-register svg {
+    flex-shrink: 0;
+}
+
+/* Large variant for detail page */
+.btn-register-lg {
+    padding: 14px 32px;
+    font-size: 1rem;
+    border-radius: var(--radius);
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+}
+
+.btn-register-lg:hover {
+    box-shadow: 0 6px 24px rgba(99, 102, 241, 0.5);
+    transform: translateY(-2px);
+}
+
+/* Detail page register section */
+.feed-detail-register {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    margin-bottom: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
 /* Empty state */
 .feed-empty {
     grid-column: 1 / -1;
