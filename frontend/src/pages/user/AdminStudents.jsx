@@ -12,8 +12,29 @@ const AdminStudents = () => {
   const fetchStudents = async () => {
     try {
       setLoading(true);
-      const res = await adminService.getStudentRegistrations();
-      setStudents(res.data || []);
+      // Fetch all students first - this ensures we get EVERY student registered in the system
+      const allStudentsRes = await adminService.getUsers('', 'Student');
+      const allStudents = allStudentsRes.data || [];
+
+      // Fetch registrations data
+      const registrationsRes = await adminService.getStudentRegistrations();
+      const registrationData = registrationsRes.data || [];
+
+      // Create a map of registration data by user ID
+      const regMap = {};
+      registrationData.forEach(item => {
+        if (item.user && item.user._id) {
+          regMap[item.user._id] = item.events || [];
+        }
+      });
+
+      // Map all students to include event registrations (or empty array if no registrations)
+      const students = allStudents.map(user => ({
+        user,
+        events: regMap[user._id] || []
+      }));
+
+      setStudents(students);
     } catch (err) {
       console.error('Failed to fetch student registrations', err);
     } finally {

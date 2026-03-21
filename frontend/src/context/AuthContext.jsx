@@ -36,10 +36,13 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
-  const register = async (userData) => {
+  const register = async (userData, options = {}) => {
+    const { persistSession = true } = options;
     setError(null);
-    const data = await authService.register(userData);
-    setUser(data.data);
+    const data = await authService.register(userData, { persistSession });
+    if (persistSession) {
+      setUser(data.data);
+    }
     return data;
   };
 

@@ -8,7 +8,7 @@ const Register = () => {
   const [form, setForm] = useState({ name: '', email: '', studentId: '', password: '', confirmPassword: '', phone: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  const { register, user } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => setForm({ ...form, [e.target.id]: e.target.value });
@@ -21,10 +21,19 @@ const Register = () => {
     if (form.password !== form.confirmPassword) { setError('Passwords do not match'); return; }
     setLoading(true);
     try {
-      await register({ name: form.name, email: form.email, studentId: form.studentId, password: form.password, phone: form.phone });
-      navigate('/user-dashboard');
+      console.log('Starting registration with:', form);
+      const isAdminCreatingStudent = user?.role === 'Admin';
+      await register(
+        { name: form.name, email: form.email, studentId: form.studentId, password: form.password, phone: form.phone },
+        { persistSession: !isAdminCreatingStudent }
+      );
+      console.log('Registration successful');
+      navigate(isAdminCreatingStudent ? '/admin' : '/user-dashboard');
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      console.error('Registration error caught:', err);
+      const errorMsg = err.response?.data?.message || err.message || 'Registration failed';
+      console.log('Final error message:', errorMsg);
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
