@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { EventRefreshProvider } from './context/EventRefreshContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -53,7 +53,7 @@ function App() {
           <ConditionalNavbar />
           <Routes>
           {/* EventMatrix original routes */}
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<Navigate to="/feed" replace />} />
           <Route path="/feed" element={<Feed />} />
           <Route path="/feed/:id" element={<FeedDetail />} />
 

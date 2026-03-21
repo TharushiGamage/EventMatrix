@@ -288,7 +288,7 @@ export default function EventForm() {
                 await createEvent(finalPayload);
                 triggerRefresh();
             }
-            navigate('/');
+            navigate('/profile/events');
         } catch (err) {
             setApiError(err.message);
         } finally {
@@ -310,12 +310,12 @@ export default function EventForm() {
     return (
         <div className="form-page">
             <div className="form-page-header">
-                <button className="btn btn-ghost" onClick={() => navigate('/')}>
+                <button className="btn btn-ghost" onClick={() => navigate('/profile/events')}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <line x1="19" y1="12" x2="5" y2="12" />
                         <polyline points="12 19 5 12 12 5" />
                     </svg>
-                    Back to Dashboard
+                    Back to My Events
                 </button>
                 <h1 className="form-page-title">{isEdit ? 'Edit Event' : 'Create New Event'}</h1>
                 <p className="form-page-subtitle">
@@ -714,7 +714,7 @@ export default function EventForm() {
 
                 {/* Actions */}
                 <div className="form-actions">
-                    <button type="button" className="btn btn-ghost" onClick={() => navigate('/')}>
+                    <button type="button" className="btn btn-ghost" onClick={() => navigate('/profile/events')}>
                         Cancel
                     </button>
                     <button type="submit" className="btn btn-primary" disabled={submitting}>
