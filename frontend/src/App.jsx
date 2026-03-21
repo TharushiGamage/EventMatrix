@@ -22,6 +22,7 @@ import AdminDashboard from './pages/user/AdminDashboard';
 import AdminStudents from './pages/user/AdminStudents';
 import AdminEvents from './pages/user/AdminEvents';
 
+import Layout from './components/layout/Layout';
 import './App.css';
 
 function App() {

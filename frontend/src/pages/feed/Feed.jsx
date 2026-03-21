@@ -120,7 +120,7 @@ export default function Feed() {
             {/* Calendar Modal */}
             {showCalendar && (
                 <div className="calendar-modal-overlay" onClick={() => setShowCalendar(false)} style={{
-                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
                     backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 9999,
                     display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem',
                     backdropFilter: 'blur(4px)'
