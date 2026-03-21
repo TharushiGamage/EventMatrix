@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import EventCard from './Components/EventCard';
 import EventCalendar from './Components/EventCalendar';
 import EventModal from './Components/EventModal';
@@ -7,6 +8,8 @@ import { fetchEvents, fetchEventStats, deleteEvent as deleteEventApi } from '../
 
 export default function Dashboard() {
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const canManageEvents = user?.role === 'Organizer' || user?.role === 'Admin';
     const [events, setEvents] = useState([]);
     const [stats, setStats] = useState({ totalEvents: 0, upcomingEvents: 0, paidEvents: 0, freeEvents: 0 });
     const [search, setSearch] = useState('');
@@ -68,13 +71,15 @@ export default function Dashboard() {
                     <h1 className="dashboard-title">Event Management</h1>
                     <p className="dashboard-subtitle">Create, manage, and track campus events</p>
                 </div>
-                <button className="btn btn-primary btn-lg" onClick={() => navigate('/create')}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19" />
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                    </svg>
-                    Create Event
-                </button>
+                {canManageEvents && (
+                    <button className="btn btn-primary btn-lg" onClick={() => navigate('/create')}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        Create Event
+                    </button>
+                )}
             </header>
 
             {/* Stats */}

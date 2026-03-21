@@ -1,0 +1,149 @@
+.user-navbar {
+  width: 100%;
+  background: #ffffff; /* Clean white background */
+  border-bottom: 1px solid #f1f5f9; /* Extremely subtle line, practically invisible */
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02); /* Extremely soft shadow */
+}
+
+.user-navbar-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 800; /* Bold */
+  font-size: 1.25rem;
+  color: #2563eb; /* Bright Blue */
+  text-decoration: none;
+}
+
+.user-navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem; /* Spacious gap */
+}
+
+.user-navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px; /* Pill shape */
+  color: #6b7280; /* Soft gray text */
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.user-nav-link:hover {
+  color: #1f2937;
+  background: #f8fafc;
+}
+
+.user-nav-link.active {
+  color: #1f2937; /* Dark slate text */
+  background: #f1f5f9; /* Soft gray/blue pill background */
+}
+
+.user-nav-link svg {
+  color: inherit; /* Icon matches text color */
+}
+
+.user-navbar-user-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-left: 1.5rem;
+  border-left: 1px solid #f1f5f9; /* Soft divider */
+}
+
+.user-badge {
+  background: #e0f2fe; /* Light blue pill bg */
+  color: #2563eb; /* Blue text */
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.user-name {
+  font-size: 0.9rem;
+  color: #111827; /* Very dark text */
+  font-weight: 700;
+}
+
+.user-logout-btn {
+  background: #fee2e2; /* Soft red bg */
+  color: #ef4444; /* Red icon */
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px; /* Soft rounded square */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 0.5rem;
+}
+
+.user-logout-btn:hover {
+  background: #fecaca;
+  color: #dc2626;
+}
+
+.user-navbar-auth {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 0.75rem;
+}
+
+.user-nav-signup, .user-nav-login {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.25rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.user-nav-signup {
+  background: #f0f9ff;
+  color: #2563eb;
+}
+
+.user-nav-signup:hover {
+  background: #e0f2fe;
+}
+
+.user-nav-login {
+  background: #2563eb; /* Solid Blue */
+  color: white;
+}
+
+.user-nav-login:hover {
+  background: #1d4ed8;
+}
