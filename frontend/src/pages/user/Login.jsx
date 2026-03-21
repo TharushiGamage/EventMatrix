@@ -50,7 +50,10 @@ const Login = () => {
             <input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@university.edu" />
           </div>
           <div className="auth-field">
-            <label htmlFor="password">Password</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <label htmlFor="password" style={{ marginBottom: 0 }}>Password</label>
+              <Link to="/forgot-password" style={{ fontSize: '13px', color: '#2563eb', textDecoration: 'none', fontWeight: '500' }}>Forgot password?</Link>
+            </div>
             <input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" />
           </div>
           <button type="submit" className="auth-btn" disabled={loading}>

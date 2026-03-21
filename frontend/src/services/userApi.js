@@ -59,6 +59,22 @@ export const authService = {
     }
   },
   logout: () => localStorage.removeItem('uems_user'),
+  forgotPassword: async (email) => {
+    try {
+      const res = await api.post('/auth/forgot-password', { email });
+      return res.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+  resetPassword: async (data) => {
+    try {
+      const res = await api.post('/auth/reset-password', data);
+      return res.data;
+    } catch (error) {
+      throw error;
+    }
+  }
 };
 
 export const profileService = {

@@ -51,6 +51,14 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const forgotPassword = async (email) => {
+    return await authService.forgotPassword(email);
+  };
+
+  const resetPassword = async (data) => {
+    return await authService.resetPassword(data);
+  };
+
   const updateUser = (updates) => {
     setUser(prev => {
       const updated = { ...prev, ...updates };
@@ -60,7 +68,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, login, register, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, loading, error, login, register, logout, updateUser, forgotPassword, resetPassword }}>
       {!loading && children}
     </AuthContext.Provider>
   );

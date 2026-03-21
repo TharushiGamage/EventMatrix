@@ -87,4 +87,61 @@ const logoutUser = (req, res) => {
   res.json({ success: true, message: 'Logged out successfully' });
 };
 
-module.exports = { registerUser, loginUser, logoutUser };
+// POST /api/auth/forgot-password
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ success: false, message: 'Please provide an email address' });
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    // Generate 6 digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    user.otpCode = otp;
+    user.otpExpire = Date.now() + 10 * 60 * 1000; // 10 minutes expiration
+    await user.save();
+
+    // Simulate sending Email/SMS
+    console.log(`\n\n[SIMULATED EMAIL/SMS] => Sent to ${user.email} (Phone: ${user.phone}): Your EventMatrix password reset code is ${otp}. Valid for 10 minutes.\n\n`);
+
+    res.json({ success: true, message: `Password reset code sent to your email/phone` });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message || 'Error processing request' });
+  }
+};
+
+// POST /api/auth/reset-password
+const resetPassword = async (req, res) => {
+  try {
+    const { email, otpCode, newPassword } = req.body;
+    if (!email || !otpCode || !newPassword) {
+      return res.status(400).json({ success: false, message: 'Please provide email, reset code, and new password' });
+    }
+
+    const user = await User.findOne({ email }).select('+password');
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    if (!user.otpCode || user.otpCode !== otpCode) {
+      return res.status(400).json({ success: false, message: 'Invalid reset code' });
+    }
+
+    if (Date.now() > user.otpExpire) {
+      return res.status(400).json({ success: false, message: 'Reset code has expired. Please request a new one.' });
+    }
+
+    if (newPassword.length < 6) return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
+
+    user.password = newPassword;
+    user.otpCode = undefined;
+    user.otpExpire = undefined;
+    await user.save();
+    
+    res.json({ success: true, message: 'Password reset successfully. You can now login.' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message || 'Error resetting password' });
+  }
+};
+
+module.exports = { registerUser, loginUser, logoutUser, forgotPassword, resetPassword };
