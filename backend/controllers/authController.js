@@ -1,12 +1,16 @@
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 
+const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
+
+const isPhoneLike = (value = '') => /\d{7,}/.test(value.replace(/\D/g, ''));
+
 // POST /api/auth/register
 const registerUser = async (req, res) => {
   try {
     const { name, email, studentId, password, phone } = req.body;
     console.log('Register request received for:', email);
-    
+
     if (!name || !email || !studentId || !password || !phone)
       return res.status(400).json({ success: false, message: 'All fields are required' });
 
@@ -35,7 +39,7 @@ const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
     console.log('Login request received for:', email);
-    
+
     if (!email || !password)
       return res.status(400).json({ success: false, message: 'Please provide email and password' });
 
@@ -90,58 +94,114 @@ const logoutUser = (req, res) => {
 // POST /api/auth/forgot-password
 const forgotPassword = async (req, res) => {
   try {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ success: false, message: 'Please provide an email address' });
+    const { identifier } = req.body;
+    if (!identifier) {
+      return res.status(400).json({ success: false, message: 'Please provide email or phone number' });
+    }
 
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    const query = isPhoneLike(identifier)
+      ? { phone: identifier }
+      : { email: identifier.toLowerCase().trim() };
 
-    // Generate 6 digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    
+    const user = await User.findOne(query);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'No account found for this email or phone number' });
+    }
+
+    const otp = generateOtp();
     user.otpCode = otp;
-    user.otpExpire = Date.now() + 10 * 60 * 1000; // 10 minutes expiration
+    user.otpExpire = Date.now() + 5 * 60 * 1000;
     await user.save();
 
-    // Simulate sending Email/SMS
-    console.log(`\n\n[SIMULATED EMAIL/SMS] => Sent to ${user.email} (Phone: ${user.phone}): Your EventMatrix password reset code is ${otp}. Valid for 10 minutes.\n\n`);
+    const channel = isPhoneLike(identifier) ? 'phone' : 'email';
+    console.log(`\n[SIMULATED ${channel.toUpperCase()} OTP] => ${identifier}: Your EventMatrix reset code is ${otp} (valid for 5 minutes).\n`);
 
-    res.json({ success: true, message: `Password reset code sent to your email/phone` });
+    return res.json({ success: true, message: `Verification code sent to your ${channel}` });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message || 'Error processing request' });
+    return res.status(500).json({ success: false, message: error.message || 'Failed to send verification code' });
+  }
+};
+
+// POST /api/auth/verify-reset-code
+const verifyResetCode = async (req, res) => {
+  try {
+    const { identifier, code } = req.body;
+    if (!identifier || !code) {
+      return res.status(400).json({ success: false, message: 'Please provide identifier and verification code' });
+    }
+
+    const query = isPhoneLike(identifier)
+      ? { phone: identifier }
+      : { email: identifier.toLowerCase().trim() };
+
+    const user = await User.findOne(query);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'No account found for this email or phone number' });
+    }
+
+    if (!user.otpCode || user.otpCode !== code) {
+      return res.status(400).json({ success: false, message: 'Invalid verification code' });
+    }
+
+    if (!user.otpExpire || Date.now() > user.otpExpire) {
+      return res.status(400).json({ success: false, message: 'Verification code has expired. Please request a new one.' });
+    }
+
+    return res.json({ success: true, message: 'Verification code is valid' });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message || 'Failed to verify code' });
   }
 };
 
 // POST /api/auth/reset-password
 const resetPassword = async (req, res) => {
   try {
-    const { email, otpCode, newPassword } = req.body;
-    if (!email || !otpCode || !newPassword) {
-      return res.status(400).json({ success: false, message: 'Please provide email, reset code, and new password' });
+    const { identifier, code, newPassword, confirmPassword } = req.body;
+    if (!identifier || !code || !newPassword || !confirmPassword) {
+      return res.status(400).json({ success: false, message: 'Please provide all required fields' });
     }
 
-    const user = await User.findOne({ email }).select('+password');
-    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-
-    if (!user.otpCode || user.otpCode !== otpCode) {
-      return res.status(400).json({ success: false, message: 'Invalid reset code' });
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ success: false, message: 'Passwords do not match' });
     }
 
-    if (Date.now() > user.otpExpire) {
-      return res.status(400).json({ success: false, message: 'Reset code has expired. Please request a new one.' });
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
     }
 
-    if (newPassword.length < 6) return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
+    const query = isPhoneLike(identifier)
+      ? { phone: identifier }
+      : { email: identifier.toLowerCase().trim() };
+
+    const user = await User.findOne(query).select('+password');
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'No account found for this email or phone number' });
+    }
+
+    if (!user.otpCode || user.otpCode !== code) {
+      return res.status(400).json({ success: false, message: 'Invalid verification code' });
+    }
+
+    if (!user.otpExpire || Date.now() > user.otpExpire) {
+      return res.status(400).json({ success: false, message: 'Verification code has expired. Please request a new one.' });
+    }
 
     user.password = newPassword;
     user.otpCode = undefined;
     user.otpExpire = undefined;
     await user.save();
-    
-    res.json({ success: true, message: 'Password reset successfully. You can now login.' });
+
+    return res.json({ success: true, message: 'Password reset successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message || 'Error resetting password' });
+    return res.status(500).json({ success: false, message: error.message || 'Failed to reset password' });
   }
 };
 
-module.exports = { registerUser, loginUser, logoutUser, forgotPassword, resetPassword };
+module.exports = {
+  registerUser,
+  loginUser,
+  logoutUser,
+  forgotPassword,
+  verifyResetCode,
+  resetPassword,
+};

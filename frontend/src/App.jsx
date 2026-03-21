@@ -13,11 +13,9 @@ import FeedDetail from './pages/feed/FeedDetail';
 // User Management pages
 import Login from './pages/user/Login';
 import Register from './pages/user/Register';
-import ForgotPassword from './pages/user/ForgotPassword';
 import ProfileLayout from './pages/user/ProfileLayout';
 import ProfileOverview from './pages/user/ProfileOverview';
 import ProfileGeneral from './pages/user/ProfileGeneral';
-import ProfileOrganization from './pages/user/ProfileOrganization';
 import ProfileSecurity from './pages/user/ProfileSecurity';
 import AdminUsers from './pages/user/AdminUsers';
 import AdminOrganizers from './pages/user/AdminOrganizers';
@@ -57,14 +55,12 @@ function App() {
           {/* User Management public routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
 
           {/* Profile — sidebar + topbar layout (mirroring admin dashboard) */}
           <Route element={<ProtectedRoute />}>
             <Route element={<ProfileLayout />}>
               <Route path="/profile" element={<ProfileOverview />} />
               <Route path="/profile/general" element={<ProfileGeneral />} />
-              <Route path="/profile/organization" element={<ProfileOrganization />} />
               <Route path="/profile/security" element={<ProfileSecurity />} />
             </Route>
           </Route>

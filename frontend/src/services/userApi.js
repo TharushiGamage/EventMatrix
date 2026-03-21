@@ -61,7 +61,15 @@ export const authService = {
   logout: () => localStorage.removeItem('uems_user'),
   forgotPassword: async (email) => {
     try {
-      const res = await api.post('/auth/forgot-password', { email });
+      const res = await api.post('/auth/forgot-password', { identifier: email });
+      return res.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+  verifyResetCode: async (payload) => {
+    try {
+      const res = await api.post('/auth/verify-reset-code', payload);
       return res.data;
     } catch (error) {
       throw error;
@@ -87,6 +95,7 @@ export const profileService = {
   },
   sendPasswordOtp: async (data) => (await api.post('/profile/send-otp', data)).data,
   changePassword: async (data) => (await api.put('/profile/change-password', data)).data,
+  changePasswordDirect: async (data) => (await api.put('/profile/change-password-direct', data)).data,
   uploadProfileImage: async (formData) => {
     const res = await api.post('/profile/upload-image', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }

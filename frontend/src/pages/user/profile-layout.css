@@ -368,7 +368,7 @@
 /* Stats Grid */
 .profile-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
@@ -399,10 +399,16 @@
   transition: transform 0.3s ease;
 }
 
-.profile-stat-card:hover {
+.profile-stat-card:hover:not(.org-card) {
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
   border-color: rgba(37, 99, 235, 0.2);
+}
+
+.profile-stat-card.org-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.1);
+  border-color: rgba(37, 99, 235, 0.3);
 }
 
 .profile-stat-card:hover::before {
@@ -752,35 +758,74 @@
 /* ===================== Organizer Overrides ===================== */
 .profile-stat-card.org-card {
   flex-direction: column;
-  align-items: flex-start;
-  gap: 0.5rem;
-  padding: 1.75rem;
+  align-items: stretch;
+  gap: 2rem;
+  padding: 2.5rem 2.5rem 2.5rem 4.25rem;
   position: relative;
+  overflow: hidden;
+  min-height: 280px;
+  justify-content: center;
+  border: 1px solid rgba(37, 99, 235, 0.16);
 }
 
-.profile-stat-card.org-card::after {
+.profile-stat-card.org-card::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
-  width: 4px;
-  height: 100%;
-  background: #4f46e5;
-  border-radius: 4px 0 0 4px;
+  width: 100%;
+  height: 4px;
+  background: var(--primary-blue, #2563eb);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.profile-stat-card.org-card:hover::before {
+  transform: scaleX(1);
+}
+
+.org-stat-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.org-stat-icon-wrapper {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.25rem;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-light, #f8fafc);
+  color: var(--primary-blue, #2563eb);
+  transition: all 0.3s ease;
+  z-index: 5;
+}
+
+.profile-stat-card.org-card:hover .org-stat-icon-wrapper {
+  transform: scale(1.1);
 }
 
 .org-stat-number {
-  font-size: 2.25rem;
-  font-weight: 800;
-  color: #0f172a;
+  font-size: 2.75rem;
+  font-weight: 900;
+  color: var(--primary-dark, #0f172a);
   line-height: 1;
   font-feature-settings: "tnum";
+  letter-spacing: -0.02em;
 }
 
 .org-stat-name {
-  font-size: 0.9rem;
-  color: #475569;
-  font-weight: 600;
+  font-size: 1rem;
+  color: var(--secondary-gray, #64748b);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .org-stat-meta {
@@ -788,15 +833,81 @@
   font-weight: 600;
   color: #64748b;
   padding: 0.25rem 0.5rem;
-  background: #f1f5f9;
+  background: transparent;
   border-radius: 6px;
   display: inline-block;
-  margin-top: 0.5rem;
+  margin-top: 0;
 }
 
 .org-stat-meta.positive {
   color: #047857;
-  background: #d1fae5;
+  background: transparent;
+}
+
+/* Color variants for organizer stat cards */
+.profile-stat-card.org-card.org-stat-blue {
+  background: linear-gradient(180deg, #d1ecff, #b8ddff);
+  border-color: rgba(2, 132, 199, 0.16);
+}
+.profile-stat-card.org-card.org-stat-blue .org-stat-icon-wrapper {
+  background: #e6f7ff;
+  color: #0369a1;
+  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.06);
+}
+.profile-stat-card.org-card.org-stat-blue .org-stat-name {
+  color: #075985;
+}
+
+.profile-stat-card.org-card.org-stat-purple {
+  background: linear-gradient(180deg, #efe6ff, #e0ccff);
+  border-color: rgba(147, 51, 234, 0.16);
+}
+.profile-stat-card.org-card.org-stat-purple .org-stat-icon-wrapper {
+  background: #f6efff;
+  color: #7c3aed;
+  box-shadow: 0 6px 18px rgba(147, 51, 234, 0.06);
+}
+.profile-stat-card.org-card.org-stat-purple .org-stat-name {
+  color: #5b21b6;
+}
+
+.profile-stat-card.org-card.org-stat-orange {
+  background: linear-gradient(180deg, #fff2e6, #ffd8b8);
+  border-color: rgba(234, 88, 12, 0.16);
+}
+.profile-stat-card.org-card.org-stat-orange .org-stat-icon-wrapper {
+  background: #fff3e6;
+  color: #ea580c;
+  box-shadow: 0 6px 18px rgba(234, 88, 12, 0.06);
+}
+.profile-stat-card.org-card.org-stat-orange .org-stat-name {
+  color: #9a3412;
+}
+
+.profile-stat-card.org-card.org-stat-teal {
+  background: linear-gradient(180deg, #ccfbf1, #99f6e4);
+  border-color: rgba(13, 148, 136, 0.16);
+}
+.profile-stat-card.org-card.org-stat-teal .org-stat-icon-wrapper {
+  background: #f0fdfa;
+  color: #0f766e;
+  box-shadow: 0 6px 18px rgba(13, 148, 136, 0.06);
+}
+.profile-stat-card.org-card.org-stat-teal .org-stat-name {
+  color: #115e59;
+}
+
+.profile-stat-card.org-card.org-stat-pink {
+  background: linear-gradient(180deg, #fce7f3, #fbcfe8);
+  border-color: rgba(219, 39, 119, 0.16);
+}
+.profile-stat-card.org-card.org-stat-pink .org-stat-icon-wrapper {
+  background: #fdf2f8;
+  color: #be185d;
+  box-shadow: 0 6px 18px rgba(219, 39, 119, 0.06);
+}
+.profile-stat-card.org-card.org-stat-pink .org-stat-name {
+  color: #9d174d;
 }
 
 /* Organizer CTA card */

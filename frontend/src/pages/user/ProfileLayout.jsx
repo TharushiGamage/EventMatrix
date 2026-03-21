@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
-import { Bell, LayoutDashboard, User, Building, ShieldCheck, Menu, X, Camera } from 'lucide-react';
+import { Bell, LayoutDashboard, User, ShieldCheck, Menu, X, Camera } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { profileService } from '../../services/userApi';
@@ -29,7 +29,7 @@ const ProfileLayout = () => {
   const getPageTitle = () => {
     if (location.pathname === '/profile/general') return 'General Settings';
     if (location.pathname === '/profile/security') return 'Personal Security';
-    if (location.pathname === '/profile/organization') return 'Public Profile';
+
     return 'My Profile';
   };
 
@@ -90,14 +90,7 @@ const ProfileLayout = () => {
               </div>
             </NavLink>
 
-            {isOrganizer && (
-              <NavLink to="/profile/organization" className={({ isActive }) => `profile-sidebar-link ${isActive ? 'active' : ''}`}>
-                <div className="p-link-left">
-                  <Building size={20} />
-                  <span>Public Profile</span>
-                </div>
-              </NavLink>
-            )}
+
           </div>
         </nav>
       </aside>

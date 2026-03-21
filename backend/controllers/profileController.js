@@ -118,6 +118,41 @@ const changePassword = async (req, res) => {
   }
 };
 
+// PUT /api/profile/change-password-direct
+const changePasswordDirect = async (req, res) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({ success: false, message: 'Please provide current password, new password, and confirm password' });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ success: false, message: 'New password and confirm password must match' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
+    }
+
+    const user = await User.findById(req.user._id).select('+password');
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: 'Incorrect current password' });
+    }
+
+    user.password = newPassword;
+    user.otpCode = undefined;
+    user.otpExpire = undefined;
+    await user.save();
+
+    return res.json({ success: true, message: 'Password updated successfully' });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // POST /api/profile/upload-image
 const uploadProfileImage = async (req, res) => {
   try {
@@ -154,4 +189,11 @@ const uploadProfileImage = async (req, res) => {
   }
 };
 
-module.exports = { getUserProfile, updateUserProfile, sendPasswordOtp, changePassword, uploadProfileImage };
+module.exports = {
+  getUserProfile,
+  updateUserProfile,
+  sendPasswordOtp,
+  changePassword,
+  changePasswordDirect,
+  uploadProfileImage,
+};
