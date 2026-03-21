@@ -33,7 +33,6 @@ import PaymentPage from './pages/registration/PaymentPage';
 import MyRegistrationsPage from './pages/registration/MyRegistrationsPage';
 import PendingReviewPage from './pages/registration/PendingReviewPage';
 
-import Layout from './components/layout/Layout';
 import './App.css';
 
 // Conditionally render UserNavbar — hide on profile & admin layout pages
