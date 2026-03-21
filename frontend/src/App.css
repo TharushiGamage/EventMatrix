@@ -483,6 +483,7 @@ body {
 .event-card-footer {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     padding-top: 14px;
     border-top: 1px solid var(--border);
 }
@@ -1894,4 +1895,688 @@ body {
         width: 95vw;
         border-radius: var(--radius);
     }
+}
+
+/* =====================================================================
+   REGISTRATION & PAYMENT FEATURE — Dushan's Feature CSS
+   ===================================================================== */
+
+/* ── Shared Page Layout ─────────────────────────────────────────────── */
+.reg-page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+.reg-page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    gap: 16px;
+}
+
+.reg-back-btn {
+    margin-bottom: 20px;
+}
+
+/* ── Event Summary Card (shared across register + payment pages) ────── */
+.reg-event-summary {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+}
+
+.reg-event-summary-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.reg-event-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.reg-event-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* ── Registration Form Card ─────────────────────────────────────────── */
+.reg-form-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+}
+
+.reg-form-header {
+    margin-bottom: 28px;
+}
+
+/* ── Status Badges ──────────────────────────────────────────────────── */
+.reg-status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+}
+
+.status-confirmed  { background: var(--success-bg);  color: var(--success);  border: 1px solid rgba(34,197,94,0.2);  }
+.status-pending    { background: var(--warning-bg);  color: var(--warning);  border: 1px solid rgba(245,158,11,0.2); }
+.status-approved   { background: var(--success-bg);  color: var(--success);  border: 1px solid rgba(34,197,94,0.2);  }
+.status-rejected   { background: var(--danger-bg);   color: var(--danger);   border: 1px solid rgba(239,68,68,0.2);  }
+.status-cancelled  { background: rgba(100,116,139,.12); color: var(--text-muted); border: 1px solid rgba(100,116,139,.2); }
+
+/* ── My Registrations List ──────────────────────────────────────────── */
+.my-reg-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.my-reg-card {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    transition: border-color .2s ease;
+}
+
+.my-reg-card:hover {
+    border-color: var(--accent);
+}
+
+.my-reg-event-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+}
+
+.my-reg-event-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.my-reg-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+}
+
+.my-reg-ticket {
+    font-size: 0.82rem;
+    color: var(--warning);
+}
+
+.my-reg-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.my-reg-review-notes {
+    font-size: 0.78rem;
+    color: var(--danger);
+    max-width: 200px;
+    text-align: right;
+}
+
+.btn-sm {
+    padding: 6px 14px;
+    font-size: 0.8rem;
+}
+
+/* ── Success banner ─────────────────────────────────────────────────── */
+.success-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--success-bg);
+    border: 1px solid rgba(34,197,94,.25);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    color: var(--success);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.success-banner button {
+    background: none; border: none; cursor: pointer;
+    color: var(--success); font-size: 1.1rem;
+}
+
+/* ── Error Banner ───────────────────────────────────────────────────── */
+.error-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--danger-bg);
+    border: 1px solid rgba(239,68,68,.25);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    color: var(--danger);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.error-banner button {
+    background: none; border: none; cursor: pointer;
+    color: var(--danger); font-size: 1.1rem;
+}
+
+/* ── Payment Page ───────────────────────────────────────────────────── */
+.payment-amount-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.payment-amount-label {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.payment-amount-value {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--warning);
+}
+
+.payment-instructions {
+    background: var(--info-bg);
+    border: 1px solid rgba(59,130,246,.2);
+    border-radius: var(--radius-sm);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+}
+
+.payment-instructions-title {
+    font-weight: 700;
+    color: var(--info);
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+}
+
+.payment-instructions ul {
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: var(--text-secondary);
+    font-size: 0.87rem;
+    line-height: 1.5;
+}
+
+/* Receipt upload zone */
+.receipt-dropzone {
+    display: block;
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: border-color .2s ease, background .2s ease;
+    overflow: hidden;
+    min-height: 180px;
+}
+
+.receipt-dropzone:hover {
+    border-color: var(--accent);
+    background: var(--bg-card-hover);
+}
+
+.receipt-dropzone-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 40px 20px;
+    color: var(--text-muted);
+}
+
+.receipt-dropzone-placeholder p {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.receipt-dropzone-placeholder span {
+    font-size: 0.78rem;
+}
+
+.receipt-preview-img {
+    width: 100%;
+    max-height: 300px;
+    object-fit: contain;
+    display: block;
+}
+
+.receipt-file-input {
+    display: none;
+}
+
+.receipt-filename {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.receipt-remove-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--danger); font-size: 0.8rem;
+    text-decoration: underline;
+}
+
+/* Payment success screen */
+.payment-success-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 60px 40px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.payment-success-icon {
+    font-size: 3rem;
+}
+
+.payment-success-card h2 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    background: var(--gradient-2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.payment-success-card p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    max-width: 420px;
+}
+
+/* ── Event Full Modal ───────────────────────────────────────────────── */
+.event-full-icon {
+    background: var(--warning-bg) !important;
+    color: var(--warning) !important;
+}
+
+/* ── Pending Review Page ────────────────────────────────────────────── */
+.pending-count-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 16px;
+    background: var(--warning-bg);
+    color: var(--warning);
+    border: 1px solid rgba(245,158,11,.25);
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.pending-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.pending-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    transition: border-color .2s ease;
+}
+
+.pending-card:hover {
+    border-color: var(--accent);
+}
+
+.pending-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.pending-event-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.pending-event-meta {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.pending-student-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+}
+
+.pending-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.pending-detail-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
+.pending-detail-value {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* Receipt preview */
+.pending-receipt-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.pending-receipt-thumb {
+    width: 120px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--border);
+    cursor: zoom-in;
+    transition: border-color .2s ease, transform .2s ease;
+}
+
+.pending-receipt-thumb:hover {
+    border-color: var(--accent);
+    transform: scale(1.04);
+}
+
+.pending-receipt-hint {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.pending-no-receipt {
+    font-size: 0.85rem;
+    color: var(--warning);
+    background: var(--warning-bg);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+}
+
+/* Actions row */
+.pending-actions-section {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    padding-top: 4px;
+}
+
+.pending-action-buttons {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.btn-success {
+    background: var(--gradient-2);
+    color: white;
+}
+
+.btn-success:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Fullscreen receipt modal */
+.receipt-fullscreen-wrapper {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+}
+
+.receipt-fullscreen-img {
+    max-width: 90vw;
+    max-height: 85vh;
+    border-radius: var(--radius);
+    display: block;
+}
+
+.receipt-fullscreen-close {
+    position: absolute;
+    top: -14px;
+    right: -14px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .2s;
+}
+
+.receipt-fullscreen-close:hover { background: var(--danger-bg); color: var(--danger); }
+
+/* ── Notification Bell ──────────────────────────────────────────────── */
+.notif-bell-wrapper {
+    position: relative;
+}
+
+.notif-bell-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all .2s ease;
+}
+
+.notif-bell-btn:hover {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border-color: var(--accent);
+}
+
+.notif-count {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 10px;
+    background: var(--danger);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.notif-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 360px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    z-index: 999;
+    overflow: hidden;
+    animation: modalPop .2s ease;
+}
+
+.notif-dropdown-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+}
+
+.notif-dropdown-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.notif-mark-all {
+    background: none; border: none; cursor: pointer;
+    font-size: 0.78rem;
+    color: var(--accent);
+    font-family: inherit;
+    font-weight: 600;
+}
+
+.notif-mark-all:hover { color: var(--accent-hover); text-decoration: underline; }
+
+.notif-list {
+    max-height: 380px;
+    overflow-y: auto;
+}
+
+.notif-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+}
+
+.notif-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background .15s ease;
+    position: relative;
+}
+
+.notif-item:last-child { border-bottom: none; }
+.notif-item:hover { background: var(--bg-card-hover); }
+
+.notif-item-unread {
+    background: rgba(99,102,241,.06);
+}
+
+.notif-icon { font-size: 1.1rem; flex-shrink: 0; }
+
+.notif-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.notif-message {
+    font-size: 0.84rem;
+    color: var(--text-primary);
+    line-height: 1.45;
+}
+
+.notif-time {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.notif-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    margin-top: 5px;
+}
+
+/* ── Spinner (small inline) ─────────────────────────────────────────── */
+.spinner-sm {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    display: inline-block;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .reg-event-summary { flex-direction: column; }
+    .my-reg-card { flex-direction: column; }
+    .my-reg-right { align-items: flex-start; flex-direction: row; flex-wrap: wrap; }
+    .pending-student-grid { grid-template-columns: repeat(2, 1fr); }
+    .pending-actions-section { flex-direction: column; align-items: stretch; }
+    .notif-dropdown { width: 300px; }
+    .reg-form-card { padding: 20px; }
 }

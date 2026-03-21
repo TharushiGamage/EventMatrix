@@ -1,6 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { LogOut, User as UserIcon, Shield, Calendar, Home, LogIn, UserPlus } from 'lucide-react';
+import { LogOut, User as UserIcon, Shield, Calendar, Home, LogIn, UserPlus, ClipboardList } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import NotificationBell from './NotificationBell';
 import './UserNavbar.css';
 
 const UserNavbar = () => {
@@ -39,12 +40,31 @@ const UserNavbar = () => {
                   <UserIcon size={16} /> <span>Profile</span>
                 </Link>
 
+                {/* Student-only nav links */}
+                {user.role === 'Student' && (
+                  <Link to="/my-registrations" className={`user-nav-link ${isActive('/my-registrations') ? 'active' : ''}`}>
+                    <ClipboardList size={16} /> <span>My Registrations</span>
+                  </Link>
+                )}
+
+                {/* Organizer-only nav links */}
+                {user.role === 'Organizer' && (
+                  <Link to="/organizer/pending" className={`user-nav-link ${isActive('/organizer/pending') ? 'active' : ''}`}>
+                    <ClipboardList size={16} /> <span>Pending Reviews</span>
+                  </Link>
+                )}
+
                 {user.role === 'Admin' && (
                   <Link to="/admin/users" className={`user-nav-link ${isActive('/admin/users') ? 'active' : ''}`}>
                     <Shield size={16} /> <span>Admin</span>
                   </Link>
                 )}
-                
+
+                {/* Notification bell (Student + Organizer) */}
+                {(user.role === 'Student' || user.role === 'Organizer') && (
+                  <NotificationBell />
+                )}
+
                 {/* User Info & Logout */}
                 <div className="user-navbar-user-section">
                   <span className="user-badge">{user.role}</span>

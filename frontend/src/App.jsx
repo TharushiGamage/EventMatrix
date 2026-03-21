@@ -19,6 +19,12 @@ import AdminLayout from './pages/user/AdminLayout';
 import AdminDashboard from './pages/user/AdminDashboard';
 import AdminStudents from './pages/user/AdminStudents';
 
+// Registration & Payment pages (Dushan's feature)
+import EventRegisterPage from './pages/registration/EventRegisterPage';
+import PaymentPage from './pages/registration/PaymentPage';
+import MyRegistrationsPage from './pages/registration/MyRegistrationsPage';
+import PendingReviewPage from './pages/registration/PendingReviewPage';
+
 import './App.css';
 
 function App() {
@@ -45,6 +51,18 @@ function App() {
           {/* User Management protected routes (logged-in users) */}
           <Route element={<ProtectedRoute />}>
             <Route path="/profile" element={<Profile />} />
+          </Route>
+
+          {/* Registration & Payment — Student only */}
+          <Route element={<RoleBasedRoute allowedRoles={['Student']} redirectTo="/login" />}>
+            <Route path="/register-event/:eventId" element={<EventRegisterPage />} />
+            <Route path="/pay/:registrationId" element={<PaymentPage />} />
+            <Route path="/my-registrations" element={<MyRegistrationsPage />} />
+          </Route>
+
+          {/* Pending Review — Organizer only */}
+          <Route element={<RoleBasedRoute allowedRoles={['Organizer']} redirectTo="/" />}>
+            <Route path="/organizer/pending" element={<PendingReviewPage />} />
           </Route>
 
           {/* Admin-only routes */}

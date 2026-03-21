@@ -1,7 +1,11 @@
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../context/AuthContext';
 
 export default function EventCard({ event, onDelete }) {
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const isStudent = user?.role === 'Student';
+    const canManage = user?.role === 'Organizer' || user?.role === 'Admin';
 
     const formatDate = (dateStr) => {
         if (!dateStr) return '';
@@ -37,6 +41,8 @@ export default function EventCard({ event, onDelete }) {
                     </span>
                     {isUpcoming && <span className="badge badge-upcoming">Upcoming</span>}
                 </div>
+                {/* Edit / Delete — Organizer & Admin only */}
+                {canManage && (
                 <div className="event-card-actions">
                     <button
                         className="icon-btn icon-btn-edit"
@@ -61,6 +67,7 @@ export default function EventCard({ event, onDelete }) {
                         </svg>
                     </button>
                 </div>
+                )}
             </div>
 
             <h3 className="event-card-title">{event.name}</h3>
@@ -110,6 +117,16 @@ export default function EventCard({ event, onDelete }) {
                     </svg>
                     <span>Max {event.maxParticipants} participants</span>
                 </div>
+
+                {/* Register button — Students only, upcoming events only */}
+                {isStudent && isUpcoming && (
+                    <button
+                        className="btn btn-primary btn-sm event-card-register-btn"
+                        onClick={() => navigate(`/register-event/${event.id}`)}
+                    >
+                        Register
+                    </button>
+                )}
             </div>
         </div>
     );
