@@ -90,7 +90,7 @@ export default function FeedDetail() {
             <article className="feed-detail">
                 {/* Event Image */}
                 {event.image && (
-                    <div className="feed-detail-image-wrapper" style={{ width: '100%', height: '400px', overflow: 'hidden', borderRadius: '12px', marginBottom: '24px' }}>
+                    <div className="feed-detail-image-wrapper" style={{ maxWidth: '700px', margin: '0 auto 24px', height: '400px', overflow: 'hidden', borderRadius: '12px' }}>
                         <img 
                             src={`http://localhost:5000/uploaded_images/${event.image}`} 
                             alt={event.name} 
