@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { createEvent, updateEvent, fetchEventById } from '../../../services/eventService';
 import { useEventRefresh } from '../../../context/EventRefreshContext';
+import './EventForm.css';
 
 export default function EventForm() {
     const navigate = useNavigate();
@@ -288,7 +289,7 @@ export default function EventForm() {
                 await createEvent(finalPayload);
                 triggerRefresh();
             }
-            navigate('/profile/events');
+            navigate('/profile/my-events');
         } catch (err) {
             setApiError(err.message);
         } finally {
@@ -308,10 +309,10 @@ export default function EventForm() {
     }
 
     return (
-        <div className="form-page">
-            <div className="form-page-header">
-                <button className="btn btn-ghost" onClick={() => navigate('/profile/events')}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <div className="event-form-container">
+            <div className="event-form-header">
+                <button type="button" className="back-btn-float" onClick={() => navigate('/profile/my-events')}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <line x1="19" y1="12" x2="5" y2="12" />
                         <polyline points="12 19 5 12 12 5" />
                     </svg>
@@ -319,12 +320,14 @@ export default function EventForm() {
                 </button>
                 <h1 className="form-page-title">{isEdit ? 'Edit Event' : 'Create New Event'}</h1>
                 <p className="form-page-subtitle">
-                    {isEdit ? 'Update the event details below' : 'Fill in the details to create a new event'}
+                    {isEdit 
+                        ? 'Update your event details below to keep your attendees informed.' 
+                        : 'Fill in the details below to publish a new event to the campus community.'}
                 </p>
             </div>
 
             {apiError && (
-                <div className="error-banner" style={{ marginBottom: '20px' }}>
+                <div className="error-banner" style={{ marginBottom: '24px', borderRadius: '12px' }}>
                     <span>{apiError}</span>
                     <button onClick={() => setApiError(null)}>&times;</button>
                 </div>
@@ -332,15 +335,9 @@ export default function EventForm() {
 
             {overlapWarning && (
                 <div className="warning-banner" style={{
-                    marginBottom: '20px',
-                    padding: '12px 16px',
-                    backgroundColor: '#fff3cd',
-                    color: '#856404',
-                    borderRadius: '8px',
-                    border: '1px solid #ffeeba',
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '12px'
+                    marginBottom: '24px', padding: '16px 20px', backgroundColor: '#fffbeb',
+                    color: '#b45309', borderRadius: '12px', border: '1px solid #fde68a',
+                    display: 'flex', alignItems: 'flex-start', gap: '12px', boxShadow: '0 4px 6px -1px rgba(251, 191, 36, 0.1)'
                 }}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: '2px' }}>
                         <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
@@ -348,10 +345,10 @@ export default function EventForm() {
                         <line x1="12" y1="17" x2="12.01" y2="17" />
                     </svg>
                     <div style={{ flexGrow: 1 }}>
-                        <div style={{ fontWeight: '600', marginBottom: '4px' }}>Time Overlap Warning</div>
-                        <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>
+                        <div style={{ fontWeight: '700', marginBottom: '4px', fontSize: '1.05rem' }}>Time Overlap Warning</div>
+                        <div style={{ fontSize: '0.95rem', opacity: 0.9 }}>
                             This event overlaps with existing events on this date:
-                            <ul style={{ marginTop: '4px', paddingLeft: '20px', marginBottom: 0 }}>
+                            <ul style={{ marginTop: '6px', paddingLeft: '20px', marginBottom: 0 }}>
                                 {overlapWarning.map(c => (
                                     <li key={c.id}>
                                         <strong>{c.name}</strong> ({c.startTime} - {c.endTime} at {c.venue})
@@ -361,366 +358,305 @@ export default function EventForm() {
                         </div>
                     </div>
                     <button
+                        type="button"
                         onClick={() => setOverlapWarning(null)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: '#856404', padding: 0 }}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.5rem', color: '#b45309', padding: 0, lineHeight: 1 }}
                     >&times;</button>
                 </div>
             )}
 
-            <form className="event-form" onSubmit={handleSubmit} noValidate>
-                {/* Event Name */}
-                <div className="form-group">
-                    <label className="form-label" htmlFor="name">
-                        Event Name <span className="required">*</span>
-                    </label>
-                    <input
-                        id="name"
-                        type="text"
-                        name="name"
-                        className={`form-input ${errors.name && touched.name ? 'input-error' : ''}`}
-                        placeholder="e.g. Annual Tech Symposium 2026"
-                        value={form.name}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                    />
-                    {errors.name && touched.name && <span className="form-error">{errors.name}</span>}
-                </div>
-
-                {/* Date & Additional Days */}
-                <div className="form-row">
-                    <div className="form-group" style={{ flex: '1 1 100%' }}>
-                        <label className="form-label" htmlFor="date">
-                            Date <span className="required">*</span>
-                        </label>
-                        <input
-                            id="date"
-                            type="date"
-                            name="date"
-                            className={`form-input ${errors.date && touched.date ? 'input-error' : ''}`}
-                            value={form.date}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                        />
-                        {errors.date && touched.date && <span className="form-error">{errors.date}</span>}
-                    </div>
-                </div>
-
-                {/* Additional Days */}
-                <div className="form-group">
-                    <label className="form-label">Additional Days</label>
-                    {form.additionalDates.map((d, index) => (
-                        <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                            <input
-                                type="date"
-                                className="form-input"
-                                value={d}
-                                onChange={(e) => handleAdditionalDateChange(index, e.target.value)}
-                                style={{ flex: 1 }}
-                            />
-                            <button
-                                type="button"
-                                onClick={() => removeAdditionalDate(index)}
-                                style={{ background: 'none', border: 'none', color: '#dc3545', cursor: 'pointer', fontSize: '1.3rem', padding: '4px 8px', lineHeight: 1 }}
-                                title="Remove this day"
-                            >
-                                &times;
-                            </button>
+            <form onSubmit={handleSubmit} noValidate>
+                
+                {/* SECTION 1: Basic Details */}
+                <div className="form-section-card">
+                    <div className="section-header">
+                        <div>
+                            <h2 className="section-title">Basic Details</h2>
+                            <p className="section-subtitle">The fundamental information about your event.</p>
                         </div>
-                    ))}
-                    <button
-                        type="button"
-                        className="btn btn-ghost"
-                        onClick={addAdditionalDate}
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', marginTop: '4px' }}
-                    >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19" />
-                            <line x1="5" y1="12" x2="19" y2="12" />
-                        </svg>
-                        Add Another Day
-                    </button>
-                </div>
-                <div className="form-row">
-                    <div className="form-group">
-                        <label className="form-label" htmlFor="startTime">
-                            Start Time <span className="required">*</span>
-                        </label>
-                        <input
-                            id="startTime"
-                            type="time"
-                            name="startTime"
-                            className={`form-input ${errors.startTime && touched.startTime ? 'input-error' : ''}`}
-                            value={form.startTime}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                        />
-                        {errors.startTime && touched.startTime && <span className="form-error">{errors.startTime}</span>}
+                        <div className="section-icon-wrapper">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        </div>
                     </div>
-                    <div className="form-group">
-                        <label className="form-label" htmlFor="endTime">
-                            End Time
+
+                    <div style={{ marginBottom: '20px' }}>
+                        <label className="field-label" htmlFor="name">
+                            Event Name <span className="required-asterisk">*</span>
                         </label>
                         <input
-                            id="endTime"
-                            type="time"
-                            name="endTime"
-                            className={`form-input ${errors.endTime && touched.endTime ? 'input-error' : ''}`}
-                            value={form.endTime}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
+                            id="name" type="text" name="name"
+                            className={`styled-input ${errors.name && touched.name ? 'error' : ''}`}
+                            placeholder="e.g. Annual Tech Symposium 2026"
+                            value={form.name} onChange={handleChange} onBlur={handleBlur}
                         />
-                        {errors.endTime && touched.endTime && <span className="form-error">{errors.endTime}</span>}
+                        {errors.name && touched.name && <span className="error-text">{errors.name}</span>}
+                    </div>
+
+                    <div>
+                        <label className="field-label" htmlFor="description">
+                            Event Description <span className="required-asterisk">*</span>
+                        </label>
+                        <textarea
+                            id="description" name="description"
+                            className={`styled-input styled-textarea ${errors.description && touched.description ? 'error' : ''}`}
+                            placeholder="Describe the event, agenda, and special instructions..."
+                            value={form.description} onChange={handleChange} onBlur={handleBlur}
+                        />
+                        {errors.description && touched.description && <span className="error-text">{errors.description}</span>}
                     </div>
                 </div>
 
-                {/* Venue */}
-                <div className="form-group">
-                    <label className="form-label" htmlFor="venue">
-                        Venue <span className="required">*</span>
-                    </label>
-                    <input
-                        id="venue"
-                        type="text"
-                        name="venue"
-                        className={`form-input ${errors.venue && touched.venue ? 'input-error' : ''}`}
-                        placeholder="e.g. Main Auditorium, Block A"
-                        value={form.venue}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                    />
-                    {errors.venue && touched.venue && <span className="form-error">{errors.venue}</span>}
-                </div>
+                {/* SECTION 2: Date & Time */}
+                <div className="form-section-card">
+                    <div className="section-header">
+                        <div>
+                            <h2 className="section-title">Date & Time</h2>
+                            <p className="section-subtitle">When is your event taking place?</p>
+                        </div>
+                        <div className="section-icon-wrapper" style={{ background: '#fef3c7', color: '#d97706' }}>
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        </div>
+                    </div>
 
-                {/* Organized By */}
-                <div className="form-group">
-                    <label className="form-label" htmlFor="organizedBy">
-                        Organized By <span className="required">*</span>
-                    </label>
-                    <input
-                        id="organizedBy"
-                        type="text"
-                        name="organizedBy"
-                        className={`form-input ${errors.organizedBy && touched.organizedBy ? 'input-error' : ''}`}
-                        placeholder="e.g. Computer Science Department"
-                        value={form.organizedBy}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        readOnly
-                    />
-                    {errors.organizedBy && touched.organizedBy && (
-                        <span className="form-error">{errors.organizedBy}</span>
-                    )}
-                </div>
-
-                {/* Max Participants */}
-                <div className="form-group">
-                    <label className="form-label" htmlFor="maxParticipants">
-                        Maximum Participation Count
-                    </label>
-                    <input
-                        id="maxParticipants"
-                        type="number"
-                        name="maxParticipants"
-                        className={`form-input ${errors.maxParticipants && touched.maxParticipants ? 'input-error' : ''}`}
-                        placeholder="e.g. 200"
-                        min="1"
-                        value={form.maxParticipants}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                    />
-                    {errors.maxParticipants && touched.maxParticipants && (
-                        <span className="form-error">{errors.maxParticipants}</span>
-                    )}
-                </div>
-
-                {/* Paid / Non-Paid Toggle */}
-                <div className="form-group">
-                    <div className="toggle-row">
-                        <label className="form-label" htmlFor="isPaid" style={{ marginBottom: 0 }}>
-                            Paid Event
-                        </label>
-                        <label className="toggle-switch">
+                    <div className="form-grid-3" style={{ marginBottom: '20px' }}>
+                        <div>
+                            <label className="field-label" htmlFor="date">
+                                Primary Date <span className="required-asterisk">*</span>
+                            </label>
                             <input
-                                id="isPaid"
-                                type="checkbox"
-                                name="isPaid"
-                                checked={form.isPaid}
-                                onChange={handleChange}
+                                id="date" type="date" name="date"
+                                className={`styled-input ${errors.date && touched.date ? 'error' : ''}`}
+                                value={form.date} onChange={handleChange} onBlur={handleBlur}
                             />
+                            {errors.date && touched.date && <span className="error-text">{errors.date}</span>}
+                        </div>
+                        <div>
+                            <label className="field-label" htmlFor="startTime">
+                                Start Time <span className="required-asterisk">*</span>
+                            </label>
+                            <input
+                                id="startTime" type="time" name="startTime"
+                                className={`styled-input ${errors.startTime && touched.startTime ? 'error' : ''}`}
+                                value={form.startTime} onChange={handleChange} onBlur={handleBlur}
+                            />
+                            {errors.startTime && touched.startTime && <span className="error-text">{errors.startTime}</span>}
+                        </div>
+                        <div>
+                            <label className="field-label" htmlFor="endTime">
+                                End Time
+                            </label>
+                            <input
+                                id="endTime" type="time" name="endTime"
+                                className={`styled-input ${errors.endTime && touched.endTime ? 'error' : ''}`}
+                                value={form.endTime} onChange={handleChange} onBlur={handleBlur}
+                            />
+                            {errors.endTime && touched.endTime && <span className="error-text">{errors.endTime}</span>}
+                        </div>
+                    </div>
+
+                    <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px dashed #e2e8f0' }}>
+                        <label className="field-label">Additional Days (Optional)</label>
+                        {form.additionalDates.map((d, index) => (
+                            <div key={index} className="additional-date-item">
+                                <input
+                                    type="date" className="styled-input" value={d}
+                                    onChange={(e) => handleAdditionalDateChange(index, e.target.value)}
+                                />
+                                <button
+                                    type="button" className="btn-remove-date" title="Remove this day"
+                                    onClick={() => removeAdditionalDate(index)}
+                                >
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                </button>
+                            </div>
+                        ))}
+                        <button type="button" className="add-btn" onClick={addAdditionalDate} style={{ marginTop: '8px' }}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                            Add Another Day
+                        </button>
+                    </div>
+                </div>
+
+                {/* SECTION 3: Location & Organizer */}
+                <div className="form-section-card">
+                    <div className="section-header">
+                        <div>
+                            <h2 className="section-title">Location & Logistics</h2>
+                            <p className="section-subtitle">Where is it happening and who is hosting?</p>
+                        </div>
+                        <div className="section-icon-wrapper" style={{ background: '#fce7f3', color: '#db2777' }}>
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        </div>
+                    </div>
+
+                    <div className="form-grid-3">
+                        <div style={{ gridColumn: 'span 2' }}>
+                            <label className="field-label" htmlFor="venue">
+                                Venue / Location <span className="required-asterisk">*</span>
+                            </label>
+                            <input
+                                id="venue" type="text" name="venue"
+                                className={`styled-input ${errors.venue && touched.venue ? 'error' : ''}`}
+                                placeholder="e.g. Main Auditorium, Block A"
+                                value={form.venue} onChange={handleChange} onBlur={handleBlur}
+                            />
+                            {errors.venue && touched.venue && <span className="error-text">{errors.venue}</span>}
+                        </div>
+
+                        <div>
+                            <label className="field-label" htmlFor="maxParticipants">
+                                Max Participants
+                            </label>
+                            <input
+                                id="maxParticipants" type="number" name="maxParticipants"
+                                className={`styled-input ${errors.maxParticipants && touched.maxParticipants ? 'error' : ''}`}
+                                placeholder="e.g. 200" min="1"
+                                value={form.maxParticipants} onChange={handleChange} onBlur={handleBlur}
+                            />
+                            {errors.maxParticipants && touched.maxParticipants && <span className="error-text">{errors.maxParticipants}</span>}
+                        </div>
+
+                        <div style={{ gridColumn: 'span 3' }}>
+                            <label className="field-label" htmlFor="organizedBy">
+                                Organized By <span className="required-asterisk">*</span>
+                            </label>
+                            <input
+                                id="organizedBy" type="text" name="organizedBy"
+                                className={`styled-input ${errors.organizedBy && touched.organizedBy ? 'error' : ''}`}
+                                placeholder="e.g. Computer Science Department"
+                                value={form.organizedBy} onChange={handleChange} onBlur={handleBlur} readOnly
+                            />
+                            {errors.organizedBy && touched.organizedBy && <span className="error-text">{errors.organizedBy}</span>}
+                        </div>
+                    </div>
+                </div>
+
+                {/* SECTION 4: Ticketing */}
+                <div className="form-section-card">
+                    <div className="section-header">
+                        <div>
+                            <h2 className="section-title">Ticketing & Pricing</h2>
+                            <p className="section-subtitle">Setup pricing tiers for event entry.</p>
+                        </div>
+                        <div className="section-icon-wrapper" style={{ background: '#ecfdf5', color: '#10b981' }}>
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path><line x1="12" y1="18" x2="12" y2="22"></line><line x1="12" y1="2" x2="12" y2="6"></line></svg>
+                        </div>
+                    </div>
+
+                    <div className="paid-toggle-wrapper" style={{ marginBottom: form.isPaid ? '24px' : '0' }}>
+                        <div>
+                            <div className="paid-toggle-label">Require tickets / payment for entry?</div>
+                            <div className="paid-toggle-desc">Turn this on to configure different ticket tiers and prices.</div>
+                        </div>
+                        <label className="toggle-switch">
+                            <input id="isPaid" type="checkbox" name="isPaid" checked={form.isPaid} onChange={handleChange} />
                             <span className="toggle-slider"></span>
                         </label>
                     </div>
-                </div>
 
-                {/* Ticket Types — shown only if Paid */}
-                {form.isPaid && (
-                    <div className="form-group slide-down">
-                        <label className="form-label">
-                            Ticket Types <span className="required">*</span>
-                        </label>
-                        {errors.ticketTypes_general && <span className="form-error">{errors.ticketTypes_general}</span>}
+                    {form.isPaid && (
+                        <div className="slide-down">
+                            {errors.ticketTypes_general && <span className="error-text" style={{ marginBottom: '16px', display: 'block' }}>{errors.ticketTypes_general}</span>}
 
-                        {form.ticketTypes.map((ticket, index) => (
-                            <div key={index} style={{ border: '1px solid #ddd', padding: '16px', borderRadius: '8px', marginBottom: '16px', position: 'relative', background: '#fcfcfc' }}>
-                                {form.ticketTypes.length > 1 && (
-                                    <button
-                                        type="button"
-                                        onClick={() => removeTicketType(index)}
-                                        style={{ position: 'absolute', top: '12px', right: '12px', background: 'none', border: 'none', color: '#dc3545', cursor: 'pointer', fontSize: '1.2rem', padding: '4px', lineHeight: 1 }}
-                                        title="Remove Ticket Type"
-                                    >
-                                        &times;
-                                    </button>
-                                )}
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '12px' }}>
-                                    <div>
-                                        <label className="form-label" style={{ fontSize: '0.85rem', marginBottom: '4px' }}>Ticket Name <span className="required">*</span></label>
-                                        <input
-                                            type="text"
-                                            className={`form-input ${errors[`ticket_${index}_name`] ? 'input-error' : ''}`}
-                                            placeholder="e.g. VIP Pass"
-                                            value={ticket.name}
-                                            onChange={(e) => handleTicketChange(index, 'name', e.target.value)}
-                                        />
-                                        {errors[`ticket_${index}_name`] && <span className="form-error" style={{ fontSize: '0.8rem' }}>{errors[`ticket_${index}_name`]}</span>}
+                            {form.ticketTypes.map((ticket, index) => (
+                                <div key={index} className="ticket-type-card">
+                                    {form.ticketTypes.length > 1 && (
+                                        <button type="button" className="ticket-remove-btn" onClick={() => removeTicketType(index)} title="Remove Ticket Type">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                        </button>
+                                    )}
+                                    
+                                    <h3 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '16px', color: '#0f172a' }}>Ticket Tier {index + 1}</h3>
+
+                                    <div className="form-grid-3" style={{ marginBottom: '16px' }}>
+                                        <div>
+                                            <label className="field-label">Ticket Name <span className="required-asterisk">*</span></label>
+                                            <input type="text" className={`styled-input ${errors[`ticket_${index}_name`] ? 'error' : ''}`} placeholder="e.g. VIP Pass" value={ticket.name} onChange={(e) => handleTicketChange(index, 'name', e.target.value)} />
+                                            {errors[`ticket_${index}_name`] && <span className="error-text">{errors[`ticket_${index}_name`]}</span>}
+                                        </div>
+                                        <div>
+                                            <label className="field-label">Price (Rs) <span className="required-asterisk">*</span></label>
+                                            <input type="number" min="0" step="0.01" className={`styled-input ${errors[`ticket_${index}_price`] ? 'error' : ''}`} placeholder="e.g. 500" value={ticket.price} onChange={(e) => handleTicketChange(index, 'price', e.target.value)} />
+                                            {errors[`ticket_${index}_price`] && <span className="error-text">{errors[`ticket_${index}_price`]}</span>}
+                                        </div>
+                                        <div>
+                                            <label className="field-label">Total Count <span className="required-asterisk">*</span></label>
+                                            <input type="number" min="1" className={`styled-input ${errors[`ticket_${index}_totalCount`] ? 'error' : ''}`} placeholder="e.g. 100" value={ticket.totalCount} onChange={(e) => handleTicketChange(index, 'totalCount', e.target.value)} />
+                                            {errors[`ticket_${index}_totalCount`] && <span className="error-text">{errors[`ticket_${index}_totalCount`]}</span>}
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label className="form-label" style={{ fontSize: '0.85rem', marginBottom: '4px' }}>Price (Rs) <span className="required">*</span></label>
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            step="0.01"
-                                            className={`form-input ${errors[`ticket_${index}_price`] ? 'input-error' : ''}`}
-                                            placeholder="e.g. 500"
-                                            value={ticket.price}
-                                            onChange={(e) => handleTicketChange(index, 'price', e.target.value)}
-                                        />
-                                        {errors[`ticket_${index}_price`] && <span className="form-error" style={{ fontSize: '0.8rem' }}>{errors[`ticket_${index}_price`]}</span>}
-                                    </div>
-                                    <div>
-                                        <label className="form-label" style={{ fontSize: '0.85rem', marginBottom: '4px' }}>Total Count <span className="required">*</span></label>
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            className={`form-input ${errors[`ticket_${index}_totalCount`] ? 'input-error' : ''}`}
-                                            placeholder="e.g. 100"
-                                            value={ticket.totalCount}
-                                            onChange={(e) => handleTicketChange(index, 'totalCount', e.target.value)}
-                                        />
-                                        {errors[`ticket_${index}_totalCount`] && <span className="form-error" style={{ fontSize: '0.8rem' }}>{errors[`ticket_${index}_totalCount`]}</span>}
+
+                                    <div className="form-grid-3">
+                                        <div>
+                                            <label className="field-label">Issuing Date <span className="required-asterisk">*</span></label>
+                                            <input type="date" className={`styled-input ${errors[`ticket_${index}_issuingDates`] ? 'error' : ''}`} value={ticket.issuingDates} onChange={(e) => handleTicketChange(index, 'issuingDates', e.target.value)} />
+                                            {errors[`ticket_${index}_issuingDates`] && <span className="error-text">{errors[`ticket_${index}_issuingDates`]}</span>}
+                                        </div>
+                                        <div>
+                                            <label className="field-label">Issuing Time <span className="required-asterisk">*</span></label>
+                                            <input type="time" className={`styled-input ${errors[`ticket_${index}_issuingTimes`] ? 'error' : ''}`} value={ticket.issuingTimes} onChange={(e) => handleTicketChange(index, 'issuingTimes', e.target.value)} />
+                                            {errors[`ticket_${index}_issuingTimes`] && <span className="error-text">{errors[`ticket_${index}_issuingTimes`]}</span>}
+                                        </div>
+                                        <div>
+                                            <label className="field-label">Issuing Venues <span className="required-asterisk">*</span></label>
+                                            <input type="text" className={`styled-input ${errors[`ticket_${index}_issuingVenues`] ? 'error' : ''}`} placeholder="e.g. Main Campus Counter" value={ticket.issuingVenues} onChange={(e) => handleTicketChange(index, 'issuingVenues', e.target.value)} />
+                                            {errors[`ticket_${index}_issuingVenues`] && <span className="error-text">{errors[`ticket_${index}_issuingVenues`]}</span>}
+                                        </div>
                                     </div>
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '12px' }}>
-                                    <div>
-                                        <label className="form-label" style={{ fontSize: '0.85rem', marginBottom: '4px' }}>Issuing Dates <span className="required">*</span></label>
-                                        <input
-                                            type="text"
-                                            className={`form-input ${errors[`ticket_${index}_issuingDates`] ? 'input-error' : ''}`}
-                                            placeholder="e.g. 2026-03-01 to 2026-03-10"
-                                            value={ticket.issuingDates}
-                                            onChange={(e) => handleTicketChange(index, 'issuingDates', e.target.value)}
-                                        />
-                                        {errors[`ticket_${index}_issuingDates`] && <span className="form-error" style={{ fontSize: '0.8rem' }}>{errors[`ticket_${index}_issuingDates`]}</span>}
-                                    </div>
-                                    <div>
-                                        <label className="form-label" style={{ fontSize: '0.85rem', marginBottom: '4px' }}>Issuing Times <span className="required">*</span></label>
-                                        <input
-                                            type="text"
-                                            className={`form-input ${errors[`ticket_${index}_issuingTimes`] ? 'input-error' : ''}`}
-                                            placeholder="e.g. 09:00 to 17:00"
-                                            value={ticket.issuingTimes}
-                                            onChange={(e) => handleTicketChange(index, 'issuingTimes', e.target.value)}
-                                        />
-                                        {errors[`ticket_${index}_issuingTimes`] && <span className="form-error" style={{ fontSize: '0.8rem' }}>{errors[`ticket_${index}_issuingTimes`]}</span>}
-                                    </div>
-                                    <div>
-                                        <label className="form-label" style={{ fontSize: '0.85rem', marginBottom: '4px' }}>Issuing Venues <span className="required">*</span></label>
-                                        <input
-                                            type="text"
-                                            className={`form-input ${errors[`ticket_${index}_issuingVenues`] ? 'input-error' : ''}`}
-                                            placeholder="e.g. Main Campus"
-                                            value={ticket.issuingVenues}
-                                            onChange={(e) => handleTicketChange(index, 'issuingVenues', e.target.value)}
-                                        />
-                                        {errors[`ticket_${index}_issuingVenues`] && <span className="form-error" style={{ fontSize: '0.8rem' }}>{errors[`ticket_${index}_issuingVenues`]}</span>}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+                            ))}
 
-                        <button
-                            type="button"
-                            className="btn btn-ghost"
-                            onClick={addTicketType}
-                            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', marginTop: '4px' }}
-                        >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <line x1="12" y1="5" x2="12" y2="19" />
-                                <line x1="5" y1="12" x2="19" y2="12" />
-                            </svg>
-                            Add Another Ticket Type
-                        </button>
-                    </div>
-                )}
-
-                {/* Image Upload */}
-                <div className="form-group">
-                    <label className="form-label" htmlFor="image">
-                        Event Image (Optional)
-                    </label>
-                    {isEdit && currentImage && (
-                        <div style={{ marginBottom: '10px' }}>
-                            <p style={{ fontSize: '0.85rem', color: '#666', margin: '0 0 5px 0' }}>Current Image:</p>
-                            <img src={`http://localhost:5000/uploaded_images/${currentImage}`} alt="Event" style={{ maxHeight: '150px', borderRadius: '8px' }} />
+                            <button type="button" className="add-btn" onClick={addTicketType}>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                                Add Another Ticket Tier
+                            </button>
                         </div>
                     )}
-                    <input
-                        id="image"
-                        type="file"
-                        name="image"
-                        accept="image/jpeg, image/png, image/webp"
-                        className={`form-input ${errors.image && touched.image ? 'input-error' : ''}`}
-                        onChange={handleFileChange}
-                        onBlur={handleBlur}
-                        style={{ padding: '8px' }}
-                    />
-                    <small style={{ display: 'block', marginTop: '4px', color: '#666', fontSize: '0.8rem' }}>
-                        Supported formats: JPEG, PNG, WEBP. Max size: 5MB.
-                    </small>
-                    {errors.image && touched.image && (
-                        <span className="form-error">{errors.image}</span>
-                    )}
                 </div>
 
-                {/* Description */}
-                <div className="form-group">
-                    <label className="form-label" htmlFor="description">
-                        Event Description <span className="required">*</span>
-                    </label>
-                    <textarea
-                        id="description"
-                        name="description"
-                        className={`form-input form-textarea ${errors.description && touched.description ? 'input-error' : ''}`}
-                        placeholder="Describe the event, agenda, and special instructions..."
-                        rows="5"
-                        value={form.description}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                    />
-                    {errors.description && touched.description && (
-                        <span className="form-error">{errors.description}</span>
+                {/* SECTION 5: Media */}
+                <div className="form-section-card">
+                    <div className="section-header">
+                        <div>
+                            <h2 className="section-title">Cover Image</h2>
+                            <p className="section-subtitle">Upload a beautiful cover image to attract participants.</p>
+                        </div>
+                        <div className="section-icon-wrapper" style={{ background: '#f3e8ff', color: '#9333ea' }}>
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                        </div>
+                    </div>
+
+                    {isEdit && currentImage && (
+                        <div className="current-image-preview">
+                            <div style={{ padding: '8px 12px', background: 'rgba(0,0,0,0.6)', color: 'white', position: 'absolute', top: 0, left: 0, right: 0, fontSize: '0.85rem', fontWeight: '500' }}>
+                                Currently using this image
+                            </div>
+                            <img src={`http://localhost:5000/uploaded_images/${currentImage}`} alt="Event Cover" />
+                        </div>
                     )}
+
+                    <div className="image-dropzone">
+                        <input id="image" type="file" name="image" accept="image/jpeg, image/png, image/webp" onChange={handleFileChange} onBlur={handleBlur} />
+                        <svg className="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        <div className="dropzone-text">Click or drag an image here to upload</div>
+                        <div className="dropzone-subtext">Supported formats: JPEG, PNG, WEBP. Max size: 5MB.</div>
+                        {form.image && (
+                            <div style={{ marginTop: '16px', color: '#16a34a', fontWeight: '600', fontSize: '0.9rem' }}>
+                                Selected: {form.image.name}
+                            </div>
+                        )}
+                    </div>
+                    {errors.image && touched.image && <span className="error-text" style={{ marginTop: '12px' }}>{errors.image}</span>}
                 </div>
 
-                {/* Actions */}
-                <div className="form-actions">
-                    <button type="button" className="btn btn-ghost" onClick={() => navigate('/profile/events')}>
+                <div className="form-footer-actions">
+                    <button type="button" className="cancel-btn" onClick={() => navigate('/profile/my-events')}>
                         Cancel
                     </button>
-                    <button type="submit" className="btn btn-primary" disabled={submitting}>
+                    <button type="submit" className="submit-btn" disabled={submitting}>
                         {submitting
-                            ? (isEdit ? 'Updating...' : 'Creating...')
-                            : (isEdit ? 'Update Event' : 'Create Event')}
+                            ? (isEdit ? 'Updating Event...' : 'Publishing Event...')
+                            : (isEdit ? 'Update Event Details' : 'Publish Event')}
                     </button>
                 </div>
             </form>

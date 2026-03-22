@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { authService, profileService } from '../services/userApi';
 import NotificationBell from './NotificationBell';
 import './UserNavbar.css';
+import logo from '../assets/eventmatrix-logo.png';
 
 const UserNavbar = () => {
   const { user, logout } = useAuth();
@@ -196,8 +197,7 @@ const UserNavbar = () => {
         
         {/* Brand Area */}
         <Link to="/" className="user-navbar-brand">
-          <Calendar size={20} strokeWidth={2.5} />
-          <span>UEMS</span>
+          <span>EventMatrix</span>
         </Link>
 
         {/* Right Section */}

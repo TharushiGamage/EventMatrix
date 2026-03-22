@@ -75,26 +75,23 @@ function App() {
               <Route path="/profile" element={<ProfileOverview />} />
               <Route path="/profile/general" element={<ProfileGeneral />} />
               <Route path="/profile/security" element={<ProfileSecurity />} />
+              <Route path="/profile/browse-events" element={<Feed />} />
+              <Route path="/profile/pending-reviews" element={<PendingReviewPage />} />
+              <Route path="/profile/approved-payments" element={<ApprovedPaymentsPage />} />
+              <Route path="/profile/create-event" element={<EventForm />} />
+              <Route path="/profile/edit-event/:id" element={<EventForm />} />
+              <Route path="/profile/my-events" element={<OrganizerEvents />} />
+              <Route path="/profile/my-registrations" element={<MyRegistrationsPage />} />
             </Route>
-          </Route>
-
-          {/* Organizer Events — view, edit, delete events */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/profile/events" element={<OrganizerEvents />} />
           </Route>
 
           {/* Registration & Payment — Student only */}
           <Route element={<RoleBasedRoute allowedRoles={['Student']} redirectTo="/login" />}>
             <Route path="/register-event/:eventId" element={<EventRegisterPage />} />
             <Route path="/pay/:registrationId" element={<PaymentPage />} />
-            <Route path="/my-registrations" element={<MyRegistrationsPage />} />
           </Route>
 
-          {/* Pending & Approved Review — Organizer only */}
-          <Route element={<RoleBasedRoute allowedRoles={['Organizer']} redirectTo="/" />}>
-            <Route path="/organizer/pending" element={<PendingReviewPage />} />
-            <Route path="/organizer/approved" element={<ApprovedPaymentsPage />} />
-          </Route>
+
 
           {/* Admin-only routes */}
           <Route element={<RoleBasedRoute allowedRoles={['Admin']} />}>

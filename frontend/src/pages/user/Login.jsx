@@ -24,10 +24,10 @@ const Login = () => {
 
       // Redirect based on role
       const userRole = res?.data?.role || res?.role;
-      if (userRole === 'Organizer') {
-        navigate('/profile');
+      if (userRole === 'Admin') {
+        navigate('/admin');
       } else {
-        navigate('/user-dashboard');
+        navigate('/profile');
       }
     } catch (err) {
       console.error('Login error caught:', err);
@@ -47,7 +47,7 @@ const Login = () => {
           <LogIn size={26} />
         </div>
         <h1 className="auth-title">Welcome Back</h1>
-        <p className="auth-subtitle">Sign in to your UEMS account</p>
+        <p className="auth-subtitle">Sign in to your EventMatrix account</p>
 
         {error && <div className="auth-error">{error}</div>}
 

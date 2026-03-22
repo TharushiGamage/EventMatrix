@@ -104,7 +104,7 @@ const ProfileOverview = () => {
         {isOrganizer && (
           <button
             className="create-event-btn"
-            onClick={() => navigate('/create')}
+            onClick={() => navigate('/profile/create-event')}
           >
             <Plus size={20} />
             Create Event
@@ -121,7 +121,7 @@ const ProfileOverview = () => {
           <div className="profile-stats-grid">
             <div
               className="profile-stat-card org-card org-stat-blue"
-              onClick={() => navigate('/profile/events')}
+              onClick={() => navigate('/profile/my-events')}
               style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-4px)';
@@ -141,7 +141,7 @@ const ProfileOverview = () => {
             </div>
             <div
               className="profile-stat-card org-card org-stat-purple"
-              onClick={() => navigate('/organizer/pending')}
+              onClick={() => navigate('/profile/pending-reviews')}
               style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-4px)';
@@ -177,7 +177,7 @@ const ProfileOverview = () => {
             </div>
             <div
               className="profile-stat-card org-card org-stat-pink"
-              onClick={() => navigate('/organizer/approved')}
+              onClick={() => navigate('/profile/approved-payments')}
               style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-4px)';

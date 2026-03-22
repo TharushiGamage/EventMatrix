@@ -56,6 +56,13 @@ const ProfileLayout = () => {
   const getPageTitle = () => {
     if (location.pathname === '/profile/general') return 'General Settings';
     if (location.pathname === '/profile/security') return 'Personal Security';
+    if (location.pathname === '/profile/browse-events') return 'Browse Events';
+    if (location.pathname === '/profile/pending-reviews') return 'Pending Reviews';
+    if (location.pathname === '/profile/approved-payments') return 'Approved Payments';
+    if (location.pathname === '/profile/create-event') return 'Create Event';
+    if (location.pathname.startsWith('/profile/edit-event')) return 'Edit Event';
+    if (location.pathname === '/profile/my-events') return 'My Events';
+    if (location.pathname === '/profile/my-registrations') return 'My Registrations';
 
     return 'My Profile';
   };
@@ -86,13 +93,31 @@ const ProfileLayout = () => {
               </div>
             </NavLink>
 
-            <NavLink to="/" className={({ isActive }) => `profile-sidebar-link ${isActive ? 'active' : ''}`}>
+            <NavLink to="/profile/browse-events" className={({ isActive }) => `profile-sidebar-link ${isActive ? 'active' : ''}`}>
               <div className="p-link-left">
                 <Compass size={20} />
                 <span>Browse Events</span>
               </div>
             </NavLink>
           </div>
+
+          {isOrganizer && (
+            <div className="p-menu-section">
+              <div className="p-menu-section-title">Events</div>
+              <NavLink to="/profile/my-events" className={({ isActive }) => `profile-sidebar-link ${isActive ? 'active' : ''}`}>
+                <div className="p-link-left">
+                  <ClipboardList size={20} />
+                  <span>My Events</span>
+                </div>
+              </NavLink>
+              <NavLink to="/profile/create-event" className={({ isActive }) => `profile-sidebar-link ${isActive ? 'active' : ''}`}>
+                <div className="p-link-left">
+                  <LayoutDashboard size={20} />
+                  <span>Create Event</span>
+                </div>
+              </NavLink>
+            </div>
+          )}
 
           <div className="p-menu-section">
             <div className="p-menu-section-title">Account</div>
@@ -104,7 +129,7 @@ const ProfileLayout = () => {
             </NavLink>
 
             {user?.role === 'Student' && (
-              <NavLink to="/my-registrations" className={({ isActive }) => `profile-sidebar-link ${isActive ? 'active' : ''}`}>
+              <NavLink to="/profile/my-registrations" className={({ isActive }) => `profile-sidebar-link ${isActive ? 'active' : ''}`}>
                 <div className="p-link-left">
                   <ClipboardList size={20} />
                   <span>My Registrations</span>

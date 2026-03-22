@@ -63,7 +63,7 @@ export default function MyRegistrationsPage() {
           <h1 className="form-page-title">My Registrations</h1>
           <p className="form-page-subtitle">Track all your event registrations and payment statuses.</p>
         </div>
-        <button className="btn btn-ghost" onClick={() => navigate('/')}>Browse Events</button>
+        <button className="btn btn-ghost" onClick={() => navigate('/profile/browse-events')}>Browse Events</button>
       </div>
 
       <div style={{ display: 'flex', gap: '10px', marginBottom: '24px' }}>
@@ -98,7 +98,7 @@ export default function MyRegistrationsPage() {
           </svg>
           <h3>No registrations yet</h3>
           <p>Browse and register for events to see them here.</p>
-          <button className="btn btn-primary" onClick={() => navigate('/')}>Browse Events</button>
+          <button className="btn btn-primary" onClick={() => navigate('/profile/browse-events')}>Browse Events</button>
         </div>
       ) : (
         <div className="my-reg-list">

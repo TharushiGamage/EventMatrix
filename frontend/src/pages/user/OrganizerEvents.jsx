@@ -60,7 +60,7 @@ const OrganizerEvents = () => {
   };
 
   const handleEdit = (eventId) => {
-    navigate(`/edit/${eventId}`);
+    navigate(`/profile/edit-event/${eventId}`);
   };
 
   const today = new Date().toISOString().split('T')[0];

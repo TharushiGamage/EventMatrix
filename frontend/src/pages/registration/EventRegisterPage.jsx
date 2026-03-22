@@ -67,6 +67,7 @@ export default function EventRegisterPage() {
 
     // Basic validation
     if (!form.contactNo.trim()) { setError('Contact number is required.'); return; }
+    if (!form.faculty.trim()) { setError('Faculty / Department is required.'); return; }
     if (event?.isPaid && !form.ticketType) { setError('Please select a ticket type.'); return; }
 
     setSubmitting(true);
@@ -83,7 +84,7 @@ export default function EventRegisterPage() {
           // Navigate to payment/receipt upload page
           navigate(`/pay/${res.data._id}`, { state: { event, registration: res.data } });
         } else {
-          navigate('/my-registrations', { state: { successMsg: 'Successfully registered for the event!' } });
+          navigate('/profile/my-registrations', { state: { successMsg: 'Successfully registered for the event!' } });
         }
       }
     } catch (err) {
@@ -149,15 +150,15 @@ export default function EventRegisterPage() {
               {existingReg.status}
             </strong>
           </p>
-          <button className="btn btn-primary" onClick={() => navigate('/my-registrations')}>
+          <button className="btn btn-primary" onClick={() => navigate('/profile/my-registrations')}>
             View My Registrations
           </button>
         </div>
       ) : (
       <div className="reg-form-card">
-        <div className="reg-form-header">
-          <h1 className="form-page-title">Event Registration</h1>
-          <p className="form-page-subtitle">
+        <div className="reg-form-header" style={{ marginBottom: '24px' }}>
+          <h1 className="form-page-title" style={{ marginBottom: '4px' }}>Event Registration</h1>
+          <p className="form-page-subtitle" style={{ margin: 0, maxWidth: 'none' }}>
             {event?.isPaid
               ? "Fill in your details. You'll upload your payment receipt in the next step."
               : 'Fill in your details to confirm your spot.'}
@@ -213,23 +214,28 @@ export default function EventRegisterPage() {
             <div className="form-group">
               <label className="form-label">Contact Number <span className="required">*</span></label>
               <input
+                type="tel"
                 name="contactNo"
                 className="form-input"
                 value={form.contactNo}
-                onChange={handleChange}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^0-9+]/g, '');
+                  setForm(prev => ({ ...prev, contactNo: val }));
+                }}
                 required
-                placeholder="e.g. 0771234567"
+                placeholder="e.g. +94771234567"
               />
             </div>
           </div>
 
           <div className="form-group">
-            <label className="form-label">Faculty / Department</label>
+            <label className="form-label">Faculty / Department <span className="required">*</span></label>
             <input
               name="faculty"
               className="form-input"
               value={form.faculty}
               onChange={handleChange}
+              required
               placeholder="e.g. Faculty of Computing"
             />
           </div>
