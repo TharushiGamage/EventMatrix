@@ -1,5 +1,5 @@
 import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom';
-import { Bell, LogOut, LayoutDashboard, Folder, Users, Star, Calendar, BookOpen, Settings, ChevronRight, Menu, X } from 'lucide-react';
+import { Bell, LogOut, LayoutDashboard, Folder, Users, Calendar, BookOpen, ChevronRight, Menu, X, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import './admin-layout.css';
@@ -76,24 +76,28 @@ const AdminLayout = () => {
               <ChevronRight className="caret-icon" size={16} />
             </a>
 
-            <a href="#" className="admin-sidebar-link">
-              <div className="link-left">
-                <Star size={20} />
-                <span>Categories</span>
-              </div>
-              <ChevronRight className="caret-icon" size={16} />
-            </a>
+            {/* Categories removed per request */}
           </div>
 
+          
+
           <div className="menu-section">
-            <div className="menu-section-title">Settings</div>
-              <NavLink to="/admin/settings" className={({ isActive }) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
-                <div className="link-left">
-                  <Settings size={20} />
-                  <span>System Settings</span>
-                </div>
-                <ChevronRight className="caret-icon" size={16} />
-              </NavLink>
+            <div className="menu-section-title">Account</div>
+            <NavLink to="/admin/account/general" className={({ isActive }) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+              <div className="link-left">
+                <Users size={20} />
+                <span>General Info</span>
+              </div>
+              <ChevronRight className="caret-icon" size={16} />
+            </NavLink>
+
+            <NavLink to="/admin/account/security" className={({ isActive }) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+              <div className="link-left">
+                <ShieldCheck size={20} />
+                <span>Personal Security</span>
+              </div>
+              <ChevronRight className="caret-icon" size={16} />
+            </NavLink>
           </div>
         </nav>
       </aside>

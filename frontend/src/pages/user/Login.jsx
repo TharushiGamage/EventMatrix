@@ -21,9 +21,11 @@ const Login = () => {
       console.log('Attempting login for:', email);
       const res = await login({ email, password });
       console.log('Login successful');
-      const role = res?.data?.role || res?.data?.role || res?.data?.role; // defensive
+      const role = res?.data?.role || res?.data?.role; // role from response
       if (role === 'Student') {
         navigate('/profile');
+      } else if (role === 'Admin') {
+        navigate('/admin');
       } else {
         navigate('/user-dashboard');
       }

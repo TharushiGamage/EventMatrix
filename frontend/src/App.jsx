@@ -30,6 +30,7 @@ import AdminDashboard from './pages/user/AdminDashboard';
 import AdminStudents from './pages/user/AdminStudents';
 import AdminEvents from './pages/user/AdminEvents';
 
+
 // Registration & Payment pages (Dushan's feature)
 import EventRegisterPage from './pages/registration/EventRegisterPage';
 import PaymentPage from './pages/registration/PaymentPage';
@@ -103,6 +104,8 @@ function App() {
               <Route path="/admin/settings" element={<AdminSettings />} />
               <Route path="/admin/events" element={<AdminEvents />} />
               <Route path="/admin/students" element={<AdminStudents />} />
+              <Route path="/admin/account/general" element={<ProfileGeneral />} />
+              <Route path="/admin/account/security" element={<ProfileSecurity />} />
             </Route>
           </Route>
         </Routes>
