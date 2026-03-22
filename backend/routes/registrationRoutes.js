@@ -11,6 +11,7 @@ const {
     reviewRegistration,
     getAttendance,
     getDashboardStats,
+    getApprovedRegistrations,
 } = require('../controllers/registrationController');
 
 // ── Student routes ────────────────────────────────────────────────────────────
@@ -41,6 +42,9 @@ router.get('/dashboard-stats', protect, authorize('Organizer', 'Admin'), getDash
 // View all pending registrations (Organizer only)
 // Optional query: ?eventId=<uuid>
 router.get('/pending', protect, authorize('Organizer'), getPendingRegistrations);
+
+// View all approved registrations (Organizer only)
+router.get('/approved', protect, authorize('Organizer'), getApprovedRegistrations);
 
 // Approve or reject a pending registration (Organizer only)
 // Body: { action: 'approve' | 'reject', notes: '...' }

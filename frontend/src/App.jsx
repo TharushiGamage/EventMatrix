@@ -35,6 +35,7 @@ import EventRegisterPage from './pages/registration/EventRegisterPage';
 import PaymentPage from './pages/registration/PaymentPage';
 import MyRegistrationsPage from './pages/registration/MyRegistrationsPage';
 import PendingReviewPage from './pages/registration/PendingReviewPage';
+import ApprovedPaymentsPage from './pages/registration/ApprovedPaymentsPage';
 
 import './App.css';
 
@@ -89,9 +90,10 @@ function App() {
             <Route path="/my-registrations" element={<MyRegistrationsPage />} />
           </Route>
 
-          {/* Pending Review — Organizer only */}
+          {/* Pending & Approved Review — Organizer only */}
           <Route element={<RoleBasedRoute allowedRoles={['Organizer']} redirectTo="/" />}>
             <Route path="/organizer/pending" element={<PendingReviewPage />} />
+            <Route path="/organizer/approved" element={<ApprovedPaymentsPage />} />
           </Route>
 
           {/* Admin-only routes */}

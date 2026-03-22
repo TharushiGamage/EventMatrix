@@ -45,6 +45,12 @@ export const registrationService = {
     return res.data.data;
   },
 
+  // GET /api/v1/registrations/approved  (Organizer)
+  getApprovedRegistrations: async () => {
+    const res = await api.get('/v1/registrations/approved');
+    return res.data.data;
+  },
+
   // PUT /api/v1/registrations/:id/review  (Organizer)
   reviewRegistration: async (registrationId, action, notes = '') => {
     const res = await api.put(`/v1/registrations/${registrationId}/review`, { action, notes });

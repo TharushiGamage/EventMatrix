@@ -175,7 +175,19 @@ const ProfileOverview = () => {
               <div className="org-stat-name">Total Attendance</div>
               <div className="org-stat-meta positive">Attendees across events</div>
             </div>
-            <div className="profile-stat-card org-card org-stat-pink">
+            <div
+              className="profile-stat-card org-card org-stat-pink"
+              onClick={() => navigate('/organizer/approved')}
+              style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.boxShadow = '0 12px 24px rgba(236, 72, 153, 0.2)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
               <div className="org-stat-icon-wrapper">
                 <CreditCard size={24} />
               </div>

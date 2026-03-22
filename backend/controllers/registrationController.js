@@ -397,6 +397,41 @@ const getPendingRegistrations = async (req, res, next) => {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// GET /api/v1/registrations/approved
+// Organizer views all approved registrations (across their events)
+// ─────────────────────────────────────────────────────────────────────────────
+const getApprovedRegistrations = async (req, res, next) => {
+    try {
+        const filter = { status: 'approved' };
+
+        // By default, strictly enforce organizer ownership if not an Admin
+        if (req.user.role !== 'Admin') {
+            const searchRegex = new RegExp(`^\\s*${req.user.name}\\s*$`, 'i');
+            const searchRegexOrg = new RegExp(`^\\s*${req.user.organizationName}\\s*$`, 'i');
+            const orgFilter = req.user.organizationName 
+                ? { $or: [{ organizedBy: searchRegex }, { organizedBy: searchRegexOrg }] }
+                : { organizedBy: searchRegex };
+
+            const events = await Event.find(orgFilter).select('_id');
+            const eventIds = events.map(e => e._id);
+            filter.event = { $in: eventIds };
+        }
+
+        const registrations = await Registration.find(filter)
+            .populate('event', 'name date venue isPaid ticketTypes')
+            .populate('student', 'name email studentId contactNo')
+            .sort({ createdAt: -1 }); // newest first
+
+        res.status(200).json({
+            success: true,
+            data: registrations,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // PUT /api/v1/registrations/:id/review
 // Organizer approves or rejects a pending registration
 // Body: { action: 'approve' | 'reject', notes: '...' }
@@ -530,4 +565,5 @@ module.exports = {
     reviewRegistration,
     getAttendance,
     getDashboardStats,
+    getApprovedRegistrations,
 };
