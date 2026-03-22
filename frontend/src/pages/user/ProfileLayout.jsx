@@ -1,6 +1,6 @@
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { Bell, LayoutDashboard, User, ShieldCheck, Menu, X, Camera, LogOut, Compass } from 'lucide-react';
-import { useState } from 'react';
+import { Bell, LayoutDashboard, User, ShieldCheck, Menu, X, Camera, LogOut, Compass, ClipboardList } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { profileService } from '../../services/userApi';
 import NotificationBell from '../../components/NotificationBell';
@@ -28,6 +28,15 @@ const ProfileLayout = () => {
       console.error('Image upload failed', err);
     }
   };
+
+  const [localTime, setLocalTime] = useState(new Date());
+  useEffect(() => {
+    const t = setInterval(() => setLocalTime(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const timeString = localTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const dateString = localTime.toLocaleDateString([], { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
 
   const handleLogout = () => {
     setShowLogoutConfirm(true);
@@ -57,26 +66,12 @@ const ProfileLayout = () => {
       <aside className={`profile-sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
         <div className="profile-sidebar-header">
           <div className="profile-sidebar-user">
-            <label className="profile-sidebar-avatar" htmlFor="sidebarAvatarUpload">
-              {user?.profileImage && user.profileImage !== 'default.png' ? (
-                <img src={`http://localhost:5000${user.profileImage}`} alt="Avatar" />
-              ) : (
-                user?.name?.charAt(0).toUpperCase()
-              )}
-              <div className="sidebar-avatar-overlay">
-                <Camera size={16} />
-              </div>
-              <input 
-                type="file" 
-                id="sidebarAvatarUpload" 
-                style={{ display: 'none' }} 
-                accept="image/*"
-                onChange={handleImageUpload}
-              />
-            </label>
+            {/* avatar removed per request */}
             <div className="profile-sidebar-info">
-              <div className="sidebar-user-name">{user?.name}</div>
-              <div className="sidebar-user-role">{user?.role}</div>
+              <div className="sidebar-local-time">
+                <div className="sidebar-local-time-time">{timeString}</div>
+                <div className="sidebar-local-time-date">{dateString}</div>
+              </div>
             </div>
           </div>
         </div>
@@ -107,6 +102,15 @@ const ProfileLayout = () => {
                 <span>General Info</span>
               </div>
             </NavLink>
+
+            {user?.role === 'Student' && (
+              <NavLink to="/my-registrations" className={({ isActive }) => `profile-sidebar-link ${isActive ? 'active' : ''}`}>
+                <div className="p-link-left">
+                  <ClipboardList size={20} />
+                  <span>My Registrations</span>
+                </div>
+              </NavLink>
+            )}
 
             <NavLink to="/profile/security" className={({ isActive }) => `profile-sidebar-link ${isActive ? 'active' : ''}`}>
               <div className="p-link-left">

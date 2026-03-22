@@ -1,13 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { profileService } from '../../services/userApi';
-import { CheckCircle, User } from 'lucide-react';
+import { CheckCircle, User, Camera, Plus } from 'lucide-react';
+import './profile.css';
 
 const ProfileGeneral = () => {
   const { user, updateUser } = useAuth();
   const [profileForm, setProfileForm] = useState({ name: '', email: '', studentId: '', phone: '' });
   const [isEditing, setIsEditing] = useState(false);
   const [toast, setToast] = useState({ show: false, msg: '', ok: true });
+  const [showImageMenu, setShowImageMenu] = useState(false);
+  const [viewImageOpen, setViewImageOpen] = useState(false);
+  const avatarInputRef = useRef(null);
+  const avatarMenuRef = useRef(null);
 
   useEffect(() => {
     if (user) {
@@ -19,6 +24,53 @@ const ProfileGeneral = () => {
       });
     }
   }, [user]);
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('profileImage', file);
+    try {
+      const res = await profileService.uploadProfileImage(formData);
+      updateUser(res.data);
+      showToast('Profile image updated successfully');
+      setShowImageMenu(false);
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Image upload failed', false);
+    }
+  };
+
+  // close menu when clicking outside
+  useEffect(() => {
+    const onDoc = (e) => {
+      if (avatarMenuRef.current && !avatarMenuRef.current.contains(e.target)) {
+        setShowImageMenu(false);
+      }
+    };
+    document.addEventListener('click', onDoc);
+    return () => document.removeEventListener('click', onDoc);
+  }, []);
+
+  const handleViewImage = () => {
+    setShowImageMenu(false);
+    setViewImageOpen(true);
+  };
+
+  const handleUpdateImage = () => {
+    setShowImageMenu(false);
+    avatarInputRef.current?.click();
+  };
+
+  const handleDeleteImage = async () => {
+    try {
+      const res = await profileService.deleteProfileImage();
+      updateUser(res.data);
+      showToast('Profile image removed', true, false, true);
+      setShowImageMenu(false);
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Delete failed', false);
+    }
+  };
 
   const showToast = (msg, ok = true, inline = false, center = false) => {
     setToast({ show: true, msg, ok, inline, center });
@@ -66,6 +118,47 @@ const ProfileGeneral = () => {
         <div>
           <h1>General Settings</h1>
           <p>Manage your personal account details.</p>
+          {/* Round profile avatar under header (no text) */}
+          <div style={{ marginTop: '1rem', position: 'relative' }} ref={avatarMenuRef}>
+            <button type="button" className="profile-avatar-large" onClick={() => setShowImageMenu(s => !s)} aria-haspopup="true" aria-expanded={showImageMenu}>
+              {user?.profileImage && user.profileImage !== 'default.png' ? (
+                <img src={`http://localhost:5000${user.profileImage}`} alt="Profile" />
+              ) : (
+                user?.name?.charAt(0).toUpperCase()
+              )}
+              <div className="avatar-overlay">
+                <Camera size={20} />
+              </div>
+              <span className="avatar-add-btn" aria-hidden>
+                <Plus size={14} />
+              </span>
+            </button>
+            <input
+              id="profileImageUpload"
+              ref={avatarInputRef}
+              type="file"
+              style={{ display: 'none' }}
+              accept="image/*"
+              onChange={handleImageUpload}
+            />
+
+            {showImageMenu && (
+              <div className="avatar-menu" role="menu">
+                <button type="button" className="avatar-menu-item" onClick={handleViewImage}>View image</button>
+                <button type="button" className="avatar-menu-item" onClick={handleUpdateImage}>Update image</button>
+                <button type="button" className="avatar-menu-item" onClick={handleDeleteImage}>Delete image</button>
+              </div>
+            )}
+
+            {viewImageOpen && (
+              <div className="image-modal-overlay" role="dialog" aria-modal="true">
+                <div className="image-modal">
+                  <button className="image-modal-close" onClick={() => setViewImageOpen(false)}>×</button>
+                  <img src={user?.profileImage ? `http://localhost:5000${user.profileImage}` : ''} alt="Profile large" />
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -84,7 +177,7 @@ const ProfileGeneral = () => {
           aria-label="Enable edit profile"
           disabled={isEditing}
         >
-          {isEditing ? 'Editing' : 'Edit'}
+          {isEditing ? 'Editing...' : 'Edit Information'}
         </button>
         <div className="profile-section">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
@@ -93,6 +186,7 @@ const ProfileGeneral = () => {
               <strong style={{ fontSize: '1rem' }}>Personal Information</strong>
             </div>
           </div>
+          
         <form onSubmit={handleProfile} className="profile-form">
           <div className="pf-field">
             <label>Full Name</label>
@@ -138,9 +232,12 @@ const ProfileGeneral = () => {
               placeholder="+1 (555) 000-0000"
             />
           </div>
-          <div className="pf-submit-row">
-            <button type="submit" className="pf-submit-btn" disabled={!isEditing}>Save Changes</button>
-          </div>
+          {isEditing && (
+            <div className="pf-submit-row">
+              <button type="submit" className="pf-submit-btn">Save Changes</button>
+              <button type="button" className="pf-submit-btn" style={{ background: '#f1f5f9', color: '#475569', marginLeft: '0.75rem' }} onClick={() => setIsEditing(false)}>Cancel</button>
+            </div>
+          )}
         </form>
       </div>
     </div>

@@ -78,7 +78,7 @@ const sendPasswordOtp = async (req, res) => {
     // Simulate sending SMS
     console.log(`\n\n[SIMULATED SMS] => Sent to ${user.phone}: Your EventMatrix password verification code is ${otp}. Valid for 5 minutes.\n\n`);
 
-    res.json({ success: true, message: `Verification code sent to ${user.phone}` });
+    res.json({ success: true, message: `Verification code sent to ${user.phone}! [DEMO MODE OTP: ${otp}]` });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -189,6 +189,51 @@ const uploadProfileImage = async (req, res) => {
   }
 };
 
+// DELETE /api/profile/delete-image
+const deleteProfileImage = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    // If already default, nothing to delete
+    if (!user.profileImage || user.profileImage === 'default.png') {
+      return res.json({ success: true, message: 'No profile image to delete', data: { profileImage: 'default.png' } });
+    }
+
+    const path = require('path');
+    const fs = require('fs');
+    const filePath = path.join(__dirname, '..', user.profileImage.replace(/^\//, ''));
+
+    // Delete file if exists
+    try {
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    } catch (err) {
+      // Log but continue
+      console.error('Error removing profile image file:', err.message);
+    }
+
+    user.profileImage = 'default.png';
+    const updated = await user.save();
+
+    res.json({ success: true, message: 'Profile image deleted', data: { 
+      _id: updated._id,
+      name: updated.name,
+      email: updated.email,
+      role: updated.role,
+      studentId: updated.studentId,
+      profileImage: updated.profileImage,
+      organizationName: updated.organizationName,
+      bio: updated.bio,
+      website: updated.website,
+      phone: updated.phone
+    } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   getUserProfile,
   updateUserProfile,
@@ -196,4 +241,5 @@ module.exports = {
   changePassword,
   changePasswordDirect,
   uploadProfileImage,
+  deleteProfileImage,
 };

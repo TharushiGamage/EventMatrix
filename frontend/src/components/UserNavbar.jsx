@@ -214,12 +214,7 @@ const UserNavbar = () => {
                   <UserIcon size={16} /> <span>Profile</span>
                 </Link>
 
-                {/* Student-only nav links */}
-                {user.role === 'Student' && (
-                  <Link to="/my-registrations" className={`user-nav-link ${isActive('/my-registrations') ? 'active' : ''}`}>
-                    <ClipboardList size={16} /> <span>My Registrations</span>
-                  </Link>
-                )}
+                {/* Student-only nav links (moved to profile side-nav) */}
 
                 {/* Organizer-only nav links */}
                 {user.role === 'Organizer' && (
@@ -268,13 +263,10 @@ const UserNavbar = () => {
                 </div>
               </>
             ) : (
-              // Not Logged In
+              // Not Logged In — show only Login (register removed)
               <div className="user-navbar-auth">
-                <Link to="/login" className="user-nav-login">
+                <Link to="/login" className={`user-nav-login ${pathname === '/feed' ? 'prominent-login' : ''}`}>
                   <LogIn size={16} /> Login
-                </Link>
-                <Link to="/register" className="user-nav-signup">
-                  <UserPlus size={16} /> Register
                 </Link>
               </div>
             )}

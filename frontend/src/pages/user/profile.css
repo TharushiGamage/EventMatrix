@@ -105,21 +105,21 @@
 }
 
 .profile-avatar-large {
-  width: 100px;
-  height: 100px;
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
   background: #2563eb;
-  border: 4px solid #ffffff;
+  border: 6px solid #ffffff;
   color: white;
-  font-size: 2.5rem;
+  font-size: 4.5rem;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 14px 40px rgba(37, 99, 235, 0.18);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   cursor: pointer;
 }
 
@@ -127,19 +127,21 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 50%;
+  display: block;
 }
 
 .avatar-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.45);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   color: white;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.18s ease;
 }
 
 .profile-avatar-large:hover .avatar-overlay {
@@ -147,9 +149,99 @@
 }
 
 .avatar-overlay span {
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 700;
   margin-top: 4px;
+}
+
+/* Floating add button on avatar (small gradient + icon) */
+
+.avatar-add-btn {
+  position: absolute;
+  right: -16px;
+  bottom: -16px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ff7a45 0%, #ff4d8a 100%);
+  color: #fff;
+  box-shadow: 0 14px 34px rgba(255,77,138,0.22);
+  border: 4px solid #ffffff;
+  z-index: 30;
+}
+
+.avatar-add-btn svg {
+  stroke: #fff;
+}
+
+/* Avatar dropdown menu */
+.avatar-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 8px 30px rgba(2,6,23,0.08);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+  z-index: 40;
+}
+
+.avatar-menu-item {
+  background: transparent;
+  border: none;
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 700;
+  color: #0f172a;
+  cursor: pointer;
+}
+
+.avatar-menu-item:hover { background: #f1f5f9; }
+
+/* Image modal */
+.image-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 60;
+}
+
+.image-modal {
+  background: #fff;
+  padding: 12px;
+  border-radius: 10px;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.image-modal img {
+  max-width: calc(90vw - 40px);
+  max-height: calc(90vh - 40px);
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.image-modal-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
 }
 
 .profile-identity {
@@ -195,6 +287,80 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+/* Local Time display in header (replaces name/role) */
+.profile-local-time {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.profile-local-time .local-time {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.15rem;
+}
+
+.profile-local-time .local-date {
+  font-size: 0.95rem;
+  color: #64748b;
+}
+
+/* Profile image edit control inside General Settings */
+.profile-image-edit {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.profile-image-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  font-weight: 800;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  border: 3px solid #ffffff;
+  box-shadow: 0 6px 18px rgba(37,99,235,0.15);
+}
+
+.profile-image-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-image-overlay {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  background: rgba(0,0,0,0.5);
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.profile-image-desc .pid-title {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.profile-image-desc .pid-note {
+  font-size: 0.85rem;
+  color: #64748b;
 }
 
 /* Horizontal Layout & Tabs Structure */
