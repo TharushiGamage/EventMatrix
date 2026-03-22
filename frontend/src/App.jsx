@@ -17,7 +17,6 @@ import FeedDetail from './pages/feed/FeedDetail';
 import Login from './pages/user/Login';
 import Register from './pages/user/Register';
 import ProfileLayout from './pages/user/ProfileLayout';
-import ProfileOverview from './pages/user/ProfileOverview';
 import ProfileGeneral from './pages/user/ProfileGeneral';
 import ProfileSecurity from './pages/user/ProfileSecurity';
 import OrganizerEvents from './pages/user/OrganizerEvents';
@@ -72,7 +71,6 @@ function App() {
           {/* Profile — sidebar + topbar layout (mirroring admin dashboard) */}
           <Route element={<ProtectedRoute />}>
             <Route element={<ProfileLayout />}>
-              <Route path="/profile" element={<ProfileOverview />} />
               <Route path="/profile/general" element={<ProfileGeneral />} />
               <Route path="/profile/security" element={<ProfileSecurity />} />
             </Route>

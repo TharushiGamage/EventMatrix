@@ -60,13 +60,13 @@ const AdminLayout = () => {
               <ChevronRight className="caret-icon" size={16} />
             </NavLink>
 
-            <a href="#" className="admin-sidebar-link">
+            <NavLink to="/admin/events" className={({ isActive }) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
               <div className="link-left">
                 <Calendar size={20} />
                 <span>Events</span>
               </div>
               <ChevronRight className="caret-icon" size={16} />
-            </a>
+            </NavLink>
 
             <a href="#" className="admin-sidebar-link">
               <div className="link-left">

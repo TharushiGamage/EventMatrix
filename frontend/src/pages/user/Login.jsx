@@ -7,6 +7,10 @@ import './auth.css';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordTouched, setPasswordTouched] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -16,6 +20,13 @@ const Login = () => {
     e.preventDefault();
     setError('');
     if (!email || !password) { setError('Please fill in all fields'); return; }
+    // validate email and password like registration
+    setEmailTouched(true);
+    const eErr = validateEmailValue(email);
+    if (eErr) { setEmailError(eErr); return; }
+    setPasswordTouched(true);
+    const pErr = validatePasswordValue(password);
+    if (pErr) { setPasswordError(pErr); return; }
     setLoading(true);
     try {
       console.log('Attempting login for:', email);
@@ -23,11 +34,11 @@ const Login = () => {
       console.log('Login successful');
       const role = res?.data?.role || res?.data?.role; // role from response
       if (role === 'Student') {
-        navigate('/profile');
+        navigate('/feed');
       } else if (role === 'Admin') {
         navigate('/admin');
       } else {
-        navigate('/user-dashboard');
+        navigate('/feed');
       }
     } catch (err) {
       console.error('Login error caught:', err);
@@ -36,6 +47,44 @@ const Login = () => {
       setError(errorMsg);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const validateEmailValue = (value) => {
+    const v = (value || '').trim().toLowerCase();
+    const basic = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!basic.test(v) || !v.endsWith('@gmail.com')) return 'Please enter a valid email address';
+    return '';
+  };
+
+  const validatePasswordValue = (value) => {
+    const v = (value || '');
+    if (v.length < 7) return 'Password must be at least 7 characters';
+    return '';
+  };
+
+  const handleEmailBlur = () => {
+    setEmailTouched(true);
+    setEmailError(validateEmailValue(email));
+  };
+
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+    if (emailTouched) setEmailError(validateEmailValue(e.target.value));
+  };
+
+  const handlePasswordBlur = () => {
+    setPasswordTouched(true);
+    setPasswordError(validatePasswordValue(password));
+  };
+
+  const handlePasswordChange = (e) => {
+    const v = e.target.value || '';
+    setPassword(v);
+    if (passwordTouched || v.length >= 6) {
+      setPasswordError(validatePasswordValue(v));
+    } else {
+      setPasswordError('');
     }
   };
 
@@ -51,17 +100,19 @@ const Login = () => {
 
         {error && <div className="auth-error">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="auth-form">
+        <form onSubmit={handleSubmit} className="auth-form" autoComplete="off">
           <div className="auth-field">
-            <label htmlFor="email">Email Address</label>
-            <input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@university.edu" />
+            <label htmlFor="email">Email Address <span className="required-star">*</span></label>
+            {emailError && <div className="field-error">{emailError}</div>}
+            <input id="email" name="login_email" autoComplete="off" type="email" value={email} onChange={handleEmailChange} onBlur={handleEmailBlur} placeholder="you@university.edu" className={emailError ? 'input-error' : ''} />
           </div>
           <div className="auth-field">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <label htmlFor="password" style={{ marginBottom: 0 }}>Password</label>
+              <label htmlFor="password" style={{ marginBottom: 0 }}>Password <span className="required-star">*</span></label>
               <Link to="/forgot-password" style={{ fontSize: '13px', color: '#2563eb', textDecoration: 'none', fontWeight: '500' }}>Forgot password?</Link>
             </div>
-            <input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" />
+            {passwordError && <div className="field-error">{passwordError}</div>}
+            <input id="password" name="login_password" autoComplete="current-password" type="password" value={password} onChange={handlePasswordChange} onBlur={handlePasswordBlur} placeholder="••••••••" className={passwordError ? 'input-error' : ''} />
           </div>
           <button type="submit" className="auth-btn" disabled={loading}>
             {loading ? 'Signing in...' : 'Sign In'}

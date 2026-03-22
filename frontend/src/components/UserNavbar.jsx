@@ -210,7 +210,7 @@ const UserNavbar = () => {
 
             {user ? (
               <>
-                <Link to="/profile" className={`user-nav-link ${isActive('/profile') ? 'active' : ''}`}>
+                <Link to="/profile/general" className={`user-nav-link ${isActive('/profile/general') ? 'active' : ''}`}>
                   <UserIcon size={16} /> <span>Profile</span>
                 </Link>
 

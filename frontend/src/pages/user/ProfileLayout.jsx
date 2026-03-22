@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { Bell, LayoutDashboard, User, ShieldCheck, Menu, X, Camera, LogOut, ClipboardList } from 'lucide-react';
+import { Bell, User, ShieldCheck, Menu, X, Camera, LogOut, ClipboardList } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { profileService } from '../../services/userApi';
@@ -55,7 +55,7 @@ const ProfileLayout = () => {
   const getPageTitle = () => {
     if (location.pathname === '/profile/general') return 'General Settings';
     if (location.pathname === '/profile/security') return 'Personal Security';
-
+    if (location.pathname === '/my-registrations') return 'My Registrations';
     return 'My Profile';
   };
 
@@ -76,16 +76,6 @@ const ProfileLayout = () => {
         </div>
 
         <nav className="profile-sidebar-menu">
-          <div className="p-menu-section">
-            <div className="p-menu-section-title">Dashboard</div>
-            <NavLink to="/profile" end className={({ isActive }) => `profile-sidebar-link ${isActive ? 'active' : ''}`}>
-              <div className="p-link-left">
-                <LayoutDashboard size={20} />
-                <span>Overview</span>
-              </div>
-            </NavLink>
-          </div>
-
           <div className="p-menu-section">
             <div className="p-menu-section-title">Account</div>
             <NavLink to="/profile/general" className={({ isActive }) => `profile-sidebar-link ${isActive ? 'active' : ''}`}>

@@ -9,6 +9,8 @@ const ProfileGeneral = () => {
   const [profileForm, setProfileForm] = useState({ name: '', email: '', studentId: '', phone: '' });
   const [isEditing, setIsEditing] = useState(false);
   const [toast, setToast] = useState({ show: false, msg: '', ok: true });
+  const [emailError, setEmailError] = useState('');
+  const [emailTouched, setEmailTouched] = useState(false);
   const [showImageMenu, setShowImageMenu] = useState(false);
   const [viewImageOpen, setViewImageOpen] = useState(false);
   const avatarInputRef = useRef(null);
@@ -38,6 +40,23 @@ const ProfileGeneral = () => {
     } catch (err) {
       showToast(err.response?.data?.message || 'Image upload failed', false);
     }
+  };
+
+  const validateEmailValue = (value) => {
+    const v = (value || '').trim().toLowerCase();
+    const basic = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!basic.test(v) || !v.endsWith('@gmail.com')) return 'Please enter a valid email address';
+    return '';
+  };
+
+  const handleEmailBlur = () => {
+    setEmailTouched(true);
+    setEmailError(validateEmailValue(profileForm.email));
+  };
+
+  const handleEmailChange = (e) => {
+    setProfileForm({ ...profileForm, email: e.target.value });
+    if (emailTouched) setEmailError(validateEmailValue(e.target.value));
   };
 
   // close menu when clicking outside
@@ -85,6 +104,10 @@ const ProfileGeneral = () => {
 
   const handleProfile = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
+    // ensure email validated
+    setEmailTouched(true);
+    const err = validateEmailValue(profileForm.email);
+    if (err) { setEmailError(err); return; }
     try {
       const res = await profileService.updateProfile(profileForm);
       updateUser(res.data);
@@ -201,12 +224,14 @@ const ProfileGeneral = () => {
           </div>
           <div className="pf-field">
             <label>Email Address</label>
+            {emailError && <div className="field-error">{emailError}</div>}
             <input
-              className="input-with-edit"
+              className={`input-with-edit ${emailError ? 'input-error' : ''}`}
               type="email"
               readOnly={!isEditing}
               value={profileForm.email}
-              onChange={e => setProfileForm({ ...profileForm, email: e.target.value })}
+              onChange={handleEmailChange}
+              onBlur={handleEmailBlur}
               placeholder="you@university.edu"
             />
           </div>
@@ -219,6 +244,7 @@ const ProfileGeneral = () => {
               value={profileForm.studentId}
               onChange={e => setProfileForm({ ...profileForm, studentId: e.target.value })}
               placeholder="e.g. U12345678"
+              disabled={isEditing && emailTouched && !!emailError}
             />
           </div>
           <div className="pf-field">
@@ -230,6 +256,7 @@ const ProfileGeneral = () => {
               value={profileForm.phone}
               onChange={e => setProfileForm({ ...profileForm, phone: e.target.value })}
               placeholder="+1 (555) 000-0000"
+              disabled={isEditing && emailTouched && !!emailError}
             />
           </div>
           {isEditing && (
