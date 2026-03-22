@@ -1,5 +1,9 @@
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
+<<<<<<< HEAD
 import { Bell, LayoutDashboard, User, ShieldCheck, Menu, X, Camera, LogOut, Compass, ClipboardList } from 'lucide-react';
+=======
+import { Bell, User, ShieldCheck, Menu, X, Camera, LogOut, ClipboardList } from 'lucide-react';
+>>>>>>> origin/integrated_copy
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { profileService } from '../../services/userApi';
@@ -56,6 +60,7 @@ const ProfileLayout = () => {
   const getPageTitle = () => {
     if (location.pathname === '/profile/general') return 'General Settings';
     if (location.pathname === '/profile/security') return 'Personal Security';
+<<<<<<< HEAD
     if (location.pathname === '/profile/browse-events') return 'Browse Events';
     if (location.pathname === '/profile/pending-reviews') return 'Pending Reviews';
     if (location.pathname === '/profile/approved-payments') return 'Approved Payments';
@@ -64,6 +69,9 @@ const ProfileLayout = () => {
     if (location.pathname === '/profile/my-events') return 'My Events';
     if (location.pathname === '/profile/my-registrations') return 'My Registrations';
 
+=======
+    if (location.pathname === '/my-registrations') return 'My Registrations';
+>>>>>>> origin/integrated_copy
     return 'My Profile';
   };
 
@@ -85,6 +93,7 @@ const ProfileLayout = () => {
 
         <nav className="profile-sidebar-menu">
           <div className="p-menu-section">
+<<<<<<< HEAD
             <div className="p-menu-section-title">Dashboard</div>
             <NavLink to="/profile" end className={({ isActive }) => `profile-sidebar-link ${isActive ? 'active' : ''}`}>
               <div className="p-link-left">
@@ -120,6 +129,8 @@ const ProfileLayout = () => {
           )}
 
           <div className="p-menu-section">
+=======
+>>>>>>> origin/integrated_copy
             <div className="p-menu-section-title">Account</div>
             <NavLink to="/profile/general" className={({ isActive }) => `profile-sidebar-link ${isActive ? 'active' : ''}`}>
               <div className="p-link-left">

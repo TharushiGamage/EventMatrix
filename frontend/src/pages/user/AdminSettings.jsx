@@ -112,8 +112,8 @@ const AdminSettings = () => {
       showToast('New passwords do not match', false);
       return;
     }
-    if (passwords.newPassword.length < 6) {
-      showToast('New password must be at least 6 characters', false);
+    if (passwords.newPassword.length < 7) {
+      showToast('New password must be at least 7 characters', false);
       return;
     }
     if (!otpState.code) {

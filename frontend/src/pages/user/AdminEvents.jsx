@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { fetchEvents } from '../../services/eventService';
 import { adminService } from '../../services/userApi';
-import { Calendar, Activity, ExternalLink } from 'lucide-react';
+import { Calendar, Activity, ExternalLink, Eye, Edit, Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import './admin.css';
 
 const AdminEvents = () => {
@@ -44,6 +45,14 @@ const AdminEvents = () => {
   };
 
   useEffect(() => { loadData(); }, [search]);
+
+  const navigate = useNavigate();
+
+  const formatDate = (d) => {
+    if (!d) return '-';
+    const dt = new Date(d);
+    return dt.toLocaleDateString() + ' • ' + dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
 
   const filtered = events.filter(ev => {
     if (filterTab === 'All') return true;
@@ -94,22 +103,37 @@ const AdminEvents = () => {
                 <th>Organizer</th>
                 <th>Participants</th>
                 <th>Type</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map(ev => (
-                <tr key={ev.id || ev._id}>
-                  <td>
-                    <div style={{display:'flex',flexDirection:'column'}}>
-                      <strong>{ev.name}</strong>
-                      <small style={{color:'#64748b'}}>{ev.description?.slice(0,80)}{ev.description?.length>80?'...':''}</small>
+                <tr key={ev.id || ev._id} className="admin-event-row">
+                  <td className="ev-col ev-col-main">
+                    <div className="ev-main">
+                      {ev.thumbnail ? (
+                        <div className="ev-thumb"><img src={ev.thumbnail} alt="thumb"/></div>
+                      ) : (
+                        <div className="ev-thumb ev-thumb-fallback">{(ev.name||'E').charAt(0)}</div>
+                      )}
+                      <div className="ev-info">
+                        <div className="event-title">{ev.name}</div>
+                        <div className="event-desc">{ev.description?.slice(0,100)}{ev.description?.length>100?'...':''}</div>
+                      </div>
                     </div>
                   </td>
-                  <td>{ev.date} {ev.startTime} - {ev.endTime}</td>
-                  <td>{ev.venue}</td>
-                  <td>{ev.organizedBy}</td>
-                  <td>{participantsMap[ev.id] || 0}</td>
-                  <td><span className={`aep-type ${ev.isPaid? 'paid':'free'}`}>{ev.isPaid? 'Paid':'Free'}</span></td>
+                  <td className="ev-col ev-col-date">{formatDate(ev.date)}{ev.startTime? ` — ${ev.startTime}` : ''}</td>
+                  <td className="ev-col ev-col-venue">{ev.venue || '-'}</td>
+                  <td className="ev-col ev-col-org">{ev.organizedBy || '-'}</td>
+                  <td className="ev-col ev-col-participants"><span className="participants-badge">{participantsMap[ev.id] || 0}</span></td>
+                  <td className="ev-col ev-col-type"><span className={`aep-type ${ev.isPaid ? 'paid' : 'free'}`}>{ev.isPaid ? 'Paid' : 'Free'}</span></td>
+                  <td className="ev-col ev-col-actions">
+                    <div className="admin-actions">
+                      <button className="admin-action-btn" title="View" onClick={() => navigate(`/admin/events/${ev.id || ev._id}`)}><Eye size={16} /></button>
+                      <button className="admin-action-btn" title="Edit" onClick={() => navigate(`/edit/${ev.id || ev._id}`)}><Edit size={16} /></button>
+                      <button className="admin-action-btn btn-sus" title="Delete" onClick={() => { if(window.confirm('Delete this event?')) showToast('Delete not implemented'); }}><Trash2 size={16} /></button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>

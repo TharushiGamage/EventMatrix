@@ -63,7 +63,7 @@ const Profile = () => {
   const handleSendOtp = async (e) => {
     e.preventDefault();
     if (passForm.newPassword !== passForm.confirmNewPassword) { showToast('Passwords do not match', false); return; }
-    if (passForm.newPassword.length < 6) { showToast('New password must be at least 6 characters', false); return; }
+    if (passForm.newPassword.length < 7) { showToast('New password must be at least 7 characters', false); return; }
     
     try {
       await profileService.sendPasswordOtp({ currentPassword: passForm.currentPassword });

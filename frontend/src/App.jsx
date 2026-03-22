@@ -17,7 +17,6 @@ import FeedDetail from './pages/feed/FeedDetail';
 import Login from './pages/user/Login';
 import Register from './pages/user/Register';
 import ProfileLayout from './pages/user/ProfileLayout';
-import ProfileOverview from './pages/user/ProfileOverview';
 import ProfileGeneral from './pages/user/ProfileGeneral';
 import ProfileSecurity from './pages/user/ProfileSecurity';
 import OrganizerEvents from './pages/user/OrganizerEvents';
@@ -29,6 +28,7 @@ import AdminLayout from './pages/user/AdminLayout';
 import AdminDashboard from './pages/user/AdminDashboard';
 import AdminStudents from './pages/user/AdminStudents';
 import AdminEvents from './pages/user/AdminEvents';
+
 
 // Registration & Payment pages (Dushan's feature)
 import EventRegisterPage from './pages/registration/EventRegisterPage';
@@ -72,7 +72,6 @@ function App() {
           {/* Profile — sidebar + topbar layout (mirroring admin dashboard) */}
           <Route element={<ProtectedRoute />}>
             <Route element={<ProfileLayout />}>
-              <Route path="/profile" element={<ProfileOverview />} />
               <Route path="/profile/general" element={<ProfileGeneral />} />
               <Route path="/profile/security" element={<ProfileSecurity />} />
               <Route path="/profile/browse-events" element={<Feed />} />
@@ -102,6 +101,8 @@ function App() {
               <Route path="/admin/settings" element={<AdminSettings />} />
               <Route path="/admin/events" element={<AdminEvents />} />
               <Route path="/admin/students" element={<AdminStudents />} />
+              <Route path="/admin/account/general" element={<ProfileGeneral />} />
+              <Route path="/admin/account/security" element={<ProfileSecurity />} />
             </Route>
           </Route>
         </Routes>

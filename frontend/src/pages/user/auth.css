@@ -90,6 +90,13 @@
   color: #475569;
 }
 
+.required-star {
+  color: #ef4444;
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-left: 4px;
+}
+
 .auth-field input {
   padding: 0.7rem 1rem;
   background: #f0f9ff; /* 30% Light Blue inputs */
