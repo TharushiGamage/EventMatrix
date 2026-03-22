@@ -1,8 +1,9 @@
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { Bell, LayoutDashboard, User, ShieldCheck, Menu, X, Camera, LogOut } from 'lucide-react';
+import { Bell, LayoutDashboard, User, ShieldCheck, Menu, X, Camera, LogOut, Compass } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { profileService } from '../../services/userApi';
+import NotificationBell from '../../components/NotificationBell';
 import './profile-layout.css';
 
 const ProfileLayout = () => {
@@ -89,6 +90,13 @@ const ProfileLayout = () => {
                 <span>Overview</span>
               </div>
             </NavLink>
+
+            <NavLink to="/" className={({ isActive }) => `profile-sidebar-link ${isActive ? 'active' : ''}`}>
+              <div className="p-link-left">
+                <Compass size={20} />
+                <span>Browse Events</span>
+              </div>
+            </NavLink>
           </div>
 
           <div className="p-menu-section">
@@ -122,10 +130,8 @@ const ProfileLayout = () => {
           </div>
 
           <div className="p-topbar-right">
-            <div className="p-topbar-notifications">
-              <button className="p-notification-bell">
-                <Bell size={20} />
-              </button>
+            <div className="p-topbar-notifications" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '4px' }}>
+              <NotificationBell />
             </div>
             <div className="p-topbar-divider"></div>
             <div className="p-topbar-profile" onClick={() => setProfileDropdownOpen(!profileDropdownOpen)} style={{ cursor: 'pointer', position: 'relative' }}>

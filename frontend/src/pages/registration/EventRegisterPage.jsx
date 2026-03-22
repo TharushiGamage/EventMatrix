@@ -37,9 +37,22 @@ export default function EventRegisterPage() {
     }
   }, [user]);
 
+  const [existingReg, setExistingReg] = useState(null);
+
   useEffect(() => {
-    fetchEventById(eventId)
-      .then(setEvent)
+    Promise.all([
+      fetchEventById(eventId),
+      registrationService.getMyRegistrations().catch(() => [])
+    ])
+      .then(([eventData, myRegs]) => {
+        setEvent(eventData);
+        // Find if user already has an active registration for this event
+        const existing = myRegs.find(r => 
+          r.event?.id === eventData.id && 
+          !['cancelled', 'rejected'].includes(r.status)
+        );
+        if (existing) setExistingReg(existing);
+      })
       .catch(() => setError('Event not found.'))
       .finally(() => setLoading(false));
   }, [eventId]);
@@ -119,6 +132,28 @@ export default function EventRegisterPage() {
         </div>
       )}
 
+      {existingReg ? (
+        <div className="reg-form-card" style={{ textAlign: 'center', padding: '60px 20px' }}>
+          <div style={{ fontSize: '64px', marginBottom: '20px' }}>
+            {existingReg.status === 'confirmed' || existingReg.status === 'approved' ? '✅' : '⏳'}
+          </div>
+          <h2 style={{ marginBottom: '12px' }}>You are already registered!</h2>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '30px', fontSize: '1.1rem' }}>
+            Your registration status for this event is:{' '}
+            <strong style={{ 
+              textTransform: 'uppercase', 
+              color: existingReg.status === 'pending' ? 'var(--warning)' : 'var(--success)',
+              letterSpacing: '0.05em',
+              marginLeft: '4px'
+            }}>
+              {existingReg.status}
+            </strong>
+          </p>
+          <button className="btn btn-primary" onClick={() => navigate('/my-registrations')}>
+            View My Registrations
+          </button>
+        </div>
+      ) : (
       <div className="reg-form-card">
         <div className="reg-form-header">
           <h1 className="form-page-title">Event Registration</h1>
@@ -236,6 +271,7 @@ export default function EventRegisterPage() {
           </div>
         </form>
       </div>
+      )}
 
       {/* Event Full Popup */}
       {showFullModal && (

@@ -18,10 +18,14 @@ const notificationSchema = new mongoose.Schema({
   type: {
     type: String,
     enum: [
-      'registration_approved',   // organizer approved the payment
-      'registration_rejected',   // organizer rejected the payment
-      'waitlist_available',      // a slot opened up; was on waiting list
-      'registration_cancelled'   // confirmation that cancellation went through
+      'registration_approved',
+      'registration_rejected',
+      'waitlist_available',
+      'registration_cancelled',
+      'registration_pending',
+      'registration_request',
+      'registration_confirmed',
+      'new_registration'
     ],
     required: true
   },

@@ -11,6 +11,7 @@ export default function PendingReviewPage() {
   // Per-row state for notes + loading
   const [reviewState, setReviewState] = useState({}); // { [id]: { notes, submitting } }
   const [previewImg, setPreviewImg]   = useState(null);
+  const [eventFilter, setEventFilter] = useState('');
 
   const load = useCallback(async () => {
     try {
@@ -48,6 +49,10 @@ export default function PendingReviewPage() {
     year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
   });
 
+  const filteredRegistrations = registrations.filter(reg => 
+    !eventFilter || (reg.event?.name || '').toLowerCase().includes(eventFilter.toLowerCase())
+  );
+
   return (
     <div className="reg-page">
       <div className="reg-page-header">
@@ -57,7 +62,22 @@ export default function PendingReviewPage() {
             Review payment receipts and approve or reject student registrations.
           </p>
         </div>
-        <span className="pending-count-badge">{registrations.length} pending</span>
+        <span className="pending-count-badge">{filteredRegistrations.length} pending</span>
+      </div>
+
+      <div className="filter-section" style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#666' }}>
+           <circle cx="11" cy="11" r="8"></circle>
+           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+         </svg>
+         <input 
+           type="text" 
+           className="form-input" 
+           placeholder="Filter by event name..." 
+           value={eventFilter} 
+           onChange={e => setEventFilter(e.target.value)} 
+           style={{ maxWidth: '400px' }}
+         />
       </div>
 
       {successMsg && (
@@ -75,17 +95,17 @@ export default function PendingReviewPage() {
 
       {loading ? (
         <div className="empty-state"><div className="spinner" /></div>
-      ) : registrations.length === 0 ? (
+      ) : filteredRegistrations.length === 0 ? (
         <div className="empty-state">
           <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="20 6 9 17 4 12"/>
           </svg>
-          <h3>All caught up!</h3>
-          <p>No pending registrations to review.</p>
+          <h3>No matches found!</h3>
+          <p>No pending registrations match your search criteria.</p>
         </div>
       ) : (
         <div className="pending-list">
-          {registrations.map(reg => {
+          {filteredRegistrations.map(reg => {
             const rowState = reviewState[reg._id] || {};
             return (
               <div key={reg._id} className="pending-card">

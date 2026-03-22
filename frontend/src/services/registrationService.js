@@ -31,6 +31,13 @@ export const registrationService = {
     return res.data;
   },
 
+  // GET /api/v1/registrations/dashboard-stats  (Organizer)
+  getDashboardStats: async (eventIds = []) => {
+    if (!eventIds.length) return { pendingPayments: 0, approvedPayments: 0 };
+    const res = await api.get('/v1/registrations/dashboard-stats', { params: { eventIds: eventIds.join(',') } });
+    return res.data.data;
+  },
+
   // GET /api/v1/registrations/pending  (Organizer)
   getPendingRegistrations: async (eventId = null) => {
     const params = eventId ? { eventId } : {};

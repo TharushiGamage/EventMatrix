@@ -10,6 +10,7 @@ const {
     getPendingRegistrations,
     reviewRegistration,
     getAttendance,
+    getDashboardStats,
 } = require('../controllers/registrationController');
 
 // ── Student routes ────────────────────────────────────────────────────────────
@@ -33,6 +34,9 @@ router.get('/my', protect, authorize('Student'), getMyRegistrations);
 router.delete('/:id', protect, authorize('Student'), cancelRegistration);
 
 // ── Organizer routes ──────────────────────────────────────────────────────────
+
+// Get aggregated stats for specific events
+router.get('/dashboard-stats', protect, authorize('Organizer', 'Admin'), getDashboardStats);
 
 // View all pending registrations (Organizer only)
 // Optional query: ?eventId=<uuid>

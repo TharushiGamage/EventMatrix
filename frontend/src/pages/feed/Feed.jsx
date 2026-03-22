@@ -276,7 +276,7 @@ export default function Feed() {
                                         className="btn btn-register"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            alert(`Registration for "${event.name}" — coming soon!`);
+                                            navigate(`/register-event/${event.id}`);
                                         }}
                                     >
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

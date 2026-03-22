@@ -15,6 +15,7 @@ export default function MyRegistrationsPage() {
   const [successMsg, setSuccessMsg]       = useState(state?.successMsg || '');
   const [cancelTarget, setCancelTarget]   = useState(null);
   const [cancelling, setCancelling]       = useState(false);
+  const [filter, setFilter]               = useState('all'); // 'all', 'free', 'paid'
 
   const load = useCallback(async () => {
     try {
@@ -49,6 +50,12 @@ export default function MyRegistrationsPage() {
     year: 'numeric', month: 'short', day: 'numeric',
   });
 
+  const filteredRegistrations = registrations.filter(reg => {
+    if (filter === 'free') return reg.event?.isPaid === false;
+    if (filter === 'paid') return reg.event?.isPaid === true;
+    return true;
+  });
+
   return (
     <div className="reg-page">
       <div className="reg-page-header">
@@ -57,6 +64,12 @@ export default function MyRegistrationsPage() {
           <p className="form-page-subtitle">Track all your event registrations and payment statuses.</p>
         </div>
         <button className="btn btn-ghost" onClick={() => navigate('/')}>Browse Events</button>
+      </div>
+
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '24px' }}>
+        <button className={`btn ${filter === 'all' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setFilter('all')}>All Events</button>
+        <button className={`btn ${filter === 'free' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setFilter('free')}>Free Events</button>
+        <button className={`btn ${filter === 'paid' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setFilter('paid')}>Paid Events</button>
       </div>
 
       {successMsg && (
@@ -89,11 +102,21 @@ export default function MyRegistrationsPage() {
         </div>
       ) : (
         <div className="my-reg-list">
-          {registrations.map(reg => (
+          {filteredRegistrations.length === 0 ? (
+            <div className="empty-state" style={{ padding: '40px 0' }}>
+              <p>No {filter !== 'all' ? filter : ''} registrations found.</p>
+            </div>
+          ) : (
+          filteredRegistrations.map(reg => (
             <div key={reg._id} className="my-reg-card">
               {/* Left: event info */}
               <div className="my-reg-event-info">
-                <h3 className="my-reg-event-name">{reg.event?.name || 'Unknown Event'}</h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                  <h3 className="my-reg-event-name" style={{ margin: 0 }}>{reg.event?.name || 'Unknown Event'}</h3>
+                  <span className={`badge ${reg.event?.isPaid ? 'badge-paid' : 'badge-free'}`}>
+                    {reg.event?.isPaid ? 'Paid Event' : 'Free Event'}
+                  </span>
+                </div>
                 <div className="my-reg-meta">
                   {reg.event?.date && <span>📅 {reg.event.date}</span>}
                   {reg.event?.venue && <span>📍 {reg.event.venue}</span>}
@@ -148,7 +171,8 @@ export default function MyRegistrationsPage() {
                 )}
               </div>
             </div>
-          ))}
+          ))
+          )}
         </div>
       )}
 

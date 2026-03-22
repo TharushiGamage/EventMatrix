@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useEventRefresh } from '../../context/EventRefreshContext';
 import { Mail, Hash, Award, Calendar, Briefcase, Shield, ArrowRight, KeyRound, DollarSign, Clock, Users, CreditCard, Plus } from 'lucide-react';
 import { fetchEvents } from '../../services/eventService';
+import { registrationService } from '../../services/registrationService';
 
 const ProfileOverview = () => {
   const { user } = useAuth();
@@ -57,18 +58,17 @@ const ProfileOverview = () => {
           return eventDate && eventDate >= today;
         }).length;
 
-        const pendingPayments = organizerEvents.filter((event) => {
-          const eventDate = parseEventDate(event.date);
-          return Boolean(event.isPaid) && (!eventDate || eventDate >= today);
-        }).length;
-
-        const totalAttendance = organizerEvents.reduce((acc, event) => acc + (event.registeredStudents?.length || 0), 0);
+        const eventIds = organizerEvents.map(e => e.id);
         
-        // Count events that are paid but maybe not pending
-        const approvedPayments = organizerEvents.filter((event) => {
-          const eventDate = parseEventDate(event.date);
-          return Boolean(event.isPaid) && eventDate && eventDate < today;
-        }).length;
+        let pendingPayments = 0;
+        let approvedPayments = 0;
+        const totalAttendance = organizerEvents.reduce((acc, event) => acc + (event.registeredStudents?.length || 0), 0);
+
+        if (eventIds.length > 0) {
+            const stats = await registrationService.getDashboardStats(eventIds);
+            pendingPayments = stats.pendingPayments;
+            approvedPayments = stats.approvedPayments;
+        }
 
         if (active) {
           setOrganizerStats({
@@ -139,13 +139,25 @@ const ProfileOverview = () => {
               <div className="org-stat-name">Total Events</div>
               <div className="org-stat-meta">Events created by you</div>
             </div>
-            <div className="profile-stat-card org-card org-stat-purple">
+            <div
+              className="profile-stat-card org-card org-stat-purple"
+              onClick={() => navigate('/organizer/pending')}
+              style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-4px)';
+                e.currentTarget.style.boxShadow = '0 12px 24px rgba(168, 85, 247, 0.2)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
               <div className="org-stat-icon-wrapper">
                 <DollarSign size={24} />
               </div>
               <div className="org-stat-number">{organizerStats.pendingPayments}</div>
               <div className="org-stat-name">Pending Payments</div>
-              <div className="org-stat-meta">Paid events awaiting completion</div>
+              <div className="org-stat-meta">Student receipts awaiting review</div>
             </div>
             <div className="profile-stat-card org-card org-stat-orange">
               <div className="org-stat-icon-wrapper">
@@ -169,7 +181,7 @@ const ProfileOverview = () => {
               </div>
               <div className="org-stat-number">{organizerStats.approvedPayments}</div>
               <div className="org-stat-name">Approved Payments</div>
-              <div className="org-stat-meta">Completed paid events</div>
+              <div className="org-stat-meta">Approved student registrations</div>
             </div>
           </div>
         ) : (

@@ -3,6 +3,7 @@ const Registration = require('../models/Registration');
 const Notification = require('../models/Notification');
 const WaitingList = require('../models/WaitingList');
 const Event = require('../models/Event');
+const User = require('../models/User');
 
 // ─── Helper: create a notification record ────────────────────────────────────
 const createNotification = async ({ recipient, message, type, relatedEvent, relatedRegistration }) => {
@@ -41,17 +42,20 @@ const registerForEvent = async (req, res, next) => {
             return res.status(404).json({ success: false, message: 'Event not found' });
         }
 
-        // 2. Check if student already has an active registration for this event
-        const existing = await Registration.findOne({
+        // 2. Check for an existing registration (active, cancelled, or rejected)
+        let registration = await Registration.findOne({
             student: req.user._id,
-            event: event._id,
-            status: { $nin: ['cancelled', 'rejected'] },
+            event: event._id
         });
-        if (existing) {
-            return res.status(400).json({
-                success: false,
-                message: 'You are already registered for this event',
-            });
+
+        if (registration) {
+            // If they have an active registration, deny
+            if (!['cancelled', 'rejected'].includes(registration.status)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'You are already registered for this event',
+                });
+            }
         }
 
         // 3. Count current confirmed/approved/pending registrations
@@ -89,20 +93,93 @@ const registerForEvent = async (req, res, next) => {
             ticketPrice = chosenTicket.price;
         }
 
-        // 6. Create the registration
-        const registration = await Registration.create({
-            student: req.user._id,
-            event: event._id,
-            studentName,
-            studentEmail,
-            studentId,
-            contactNo,
-            faculty: faculty || '',
-            ticketType: event.isPaid ? ticketType : '',
-            ticketPrice,
-            // Non-paid → confirmed immediately; Paid → needs receipt upload next
-            status: event.isPaid ? 'pending' : 'confirmed',
+        // 6. Update existing or create new registration
+        if (registration) {
+            // Re-registering (after cancel or reject). Reuse the document.
+            registration.studentName = studentName;
+            registration.studentEmail = studentEmail;
+            registration.studentId = studentId;
+            registration.contactNo = contactNo;
+            registration.faculty = faculty || '';
+            registration.ticketType = event.isPaid ? ticketType : '';
+            registration.ticketPrice = ticketPrice;
+            registration.status = event.isPaid ? 'pending' : 'confirmed';
+            
+            // Clear out old receipt/review fields
+            registration.receiptUrl = null;
+            registration.receiptUploadedAt = null;
+            registration.reviewedBy = null;
+            registration.reviewedAt = null;
+            registration.reviewNotes = '';
+
+            await registration.save();
+        } else {
+            // New registration creation
+            registration = await Registration.create({
+                student: req.user._id,
+                event: event._id,
+                studentName,
+                studentEmail,
+                studentId,
+                contactNo,
+                faculty: faculty || '',
+                ticketType: event.isPaid ? ticketType : '',
+                ticketPrice,
+                status: event.isPaid ? 'pending' : 'confirmed',
+            });
+        }
+
+        // 7. Send Notifications
+        const orgSearchRegex = new RegExp(`^\\s*${event.organizedBy.trim()}\\s*$`, 'i');
+        const organizerUser = await User.findOne({
+            role: { $in: ['Organizer', 'Admin'] },
+            $or: [
+                { name: orgSearchRegex },
+                { organizationName: orgSearchRegex }
+            ]
         });
+
+        if (event.isPaid) {
+            // Paid Event - Notify Student
+            await createNotification({
+                recipient: req.user._id,
+                message: `You have successfully requested to register for "${event.name}". Please complete the payment and wait for the organizer's approval.`,
+                type: 'registration_pending',
+                relatedEvent: event._id,
+                relatedRegistration: registration._id,
+            });
+
+            // Paid Event - Notify Organizer
+            if (organizerUser) {
+                await createNotification({
+                    recipient: organizerUser._id,
+                    message: `${studentName || 'A student'} has requested to register for "${event.name}". Awaiting payment receipt and approval.`,
+                    type: 'registration_request',
+                    relatedEvent: event._id,
+                    relatedRegistration: registration._id,
+                });
+            }
+        } else {
+            // Free Event - Notify Student
+            await createNotification({
+                recipient: req.user._id,
+                message: `You have successfully registered for "${event.name}"!`,
+                type: 'registration_confirmed',
+                relatedEvent: event._id,
+                relatedRegistration: registration._id,
+            });
+
+            // Free Event - Notify Organizer
+            if (organizerUser) {
+                await createNotification({
+                    recipient: organizerUser._id,
+                    message: `${studentName || 'A student'} has successfully registered for "${event.name}".`,
+                    type: 'new_registration',
+                    relatedEvent: event._id,
+                    relatedRegistration: registration._id,
+                });
+            }
+        }
 
         return res.status(201).json({
             success: true,
@@ -206,6 +283,36 @@ const cancelRegistration = async (req, res, next) => {
             }
         }
 
+        // --- Send Cancellation Notifications ---
+        const orgSearchRegex = new RegExp(`^\\s*${registration.event.organizedBy.trim()}\\s*$`, 'i');
+        const organizerUser = await User.findOne({
+            role: { $in: ['Organizer', 'Admin'] },
+            $or: [
+                { name: orgSearchRegex },
+                { organizationName: orgSearchRegex }
+            ]
+        });
+
+        // Notify Student
+        await createNotification({
+            recipient: req.user._id,
+            message: `You have successfully cancelled your registration for "${registration.event.name}".`,
+            type: 'registration_cancelled',
+            relatedEvent: registration.event._id,
+            relatedRegistration: registration._id,
+        });
+
+        // Notify Organizer
+        if (organizerUser) {
+            await createNotification({
+                recipient: organizerUser._id,
+                message: `${registration.studentName || req.user.name || 'A student'} has cancelled their registration for "${registration.event.name}".`,
+                type: 'registration_cancelled',
+                relatedEvent: registration.event._id,
+                relatedRegistration: registration._id,
+            });
+        }
+
         res.status(200).json({
             success: true,
             message: 'Registration cancelled successfully',
@@ -222,7 +329,7 @@ const cancelRegistration = async (req, res, next) => {
 const getMyRegistrations = async (req, res, next) => {
     try {
         const registrations = await Registration.find({ student: req.user._id })
-            .populate('event', 'name date startTime endTime venue isPaid image')
+            .populate('event', 'id name date startTime endTime venue isPaid image')
             .sort({ createdAt: -1 });
 
         res.status(200).json({
@@ -246,7 +353,33 @@ const getPendingRegistrations = async (req, res, next) => {
         // If organizer wants to filter by a specific event
         if (req.query.eventId) {
             const event = await Event.findOne({ id: req.query.eventId });
-            if (event) filter.event = event._id;
+            if (event) {
+                // Securing access to only events owned by this user (if not an Admin)
+                if (req.user.role !== 'Admin') {
+                    const searchRegex = new RegExp(`^\\s*${req.user.name}\\s*$`, 'i');
+                    const searchRegexOrg = new RegExp(`^\\s*${req.user.organizationName}\\s*$`, 'i');
+                    const isOwner = searchRegex.test(event.organizedBy) || (req.user.organizationName && searchRegexOrg.test(event.organizedBy));
+                    if (!isOwner) {
+                        return res.status(403).json({ success: false, message: 'Not authorized to view records for this event.' });
+                    }
+                }
+                filter.event = event._id;
+            } else {
+                return res.status(404).json({ success: false, message: 'Event not found.' });
+            }
+        } else {
+            // By default, strictly enforce organizer ownership if not an Admin
+            if (req.user.role !== 'Admin') {
+                const searchRegex = new RegExp(`^\\s*${req.user.name}\\s*$`, 'i');
+                const searchRegexOrg = new RegExp(`^\\s*${req.user.organizationName}\\s*$`, 'i');
+                const orgFilter = req.user.organizationName 
+                    ? { $or: [{ organizedBy: searchRegex }, { organizedBy: searchRegexOrg }] }
+                    : { organizedBy: searchRegex };
+
+                const events = await Event.find(orgFilter).select('_id');
+                const eventIds = events.map(e => e._id);
+                filter.event = { $in: eventIds };
+            }
         }
 
         const registrations = await Registration.find(filter)
@@ -352,6 +485,42 @@ const getAttendance = async (req, res, next) => {
     }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/v1/registrations/dashboard-stats
+// Organizer fetches stats (pending and approved counts) for their events
+// Query: ?eventIds=uuid1,uuid2...
+// ─────────────────────────────────────────────────────────────────────────────
+const getDashboardStats = async (req, res, next) => {
+    try {
+        const { eventIds } = req.query;
+        if (!eventIds) {
+            return res.status(200).json({ 
+                success: true, 
+                data: { pendingPayments: 0, approvedPayments: 0 } 
+            });
+        }
+
+        const idsArray = eventIds.split(',');
+        const events = await Event.find({ id: { $in: idsArray } }).select('_id');
+        const internalIds = events.map(e => e._id);
+
+        const [pendingCount, approvedCount] = await Promise.all([
+            Registration.countDocuments({ event: { $in: internalIds }, status: 'pending' }),
+            Registration.countDocuments({ event: { $in: internalIds }, status: 'approved' })
+        ]);
+
+        res.status(200).json({
+            success: true,
+            data: {
+                pendingPayments: pendingCount,
+                approvedPayments: approvedCount
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     registerForEvent,
     uploadReceipt,
@@ -360,4 +529,5 @@ module.exports = {
     getPendingRegistrations,
     reviewRegistration,
     getAttendance,
+    getDashboardStats,
 };

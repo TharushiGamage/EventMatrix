@@ -19,9 +19,16 @@ const Login = () => {
     setLoading(true);
     try {
       console.log('Attempting login for:', email);
-      await login({ email, password });
+      const res = await login({ email, password });
       console.log('Login successful');
-      navigate('/user-dashboard');
+
+      // Redirect based on role
+      const userRole = res?.data?.role || res?.role;
+      if (userRole === 'Organizer') {
+        navigate('/profile');
+      } else {
+        navigate('/user-dashboard');
+      }
     } catch (err) {
       console.error('Login error caught:', err);
       const errorMsg = err.response?.data?.message || err.message || 'Login failed';
