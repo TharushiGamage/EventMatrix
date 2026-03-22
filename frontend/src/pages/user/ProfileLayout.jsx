@@ -86,12 +86,14 @@ const ProfileLayout = () => {
         <nav className="profile-sidebar-menu">
           <div className="p-menu-section">
             <div className="p-menu-section-title">Dashboard</div>
+            {isOrganizer && (
             <NavLink to="/profile" end className={({ isActive }) => `profile-sidebar-link ${isActive ? 'active' : ''}`}>
               <div className="p-link-left">
                 <LayoutDashboard size={20} />
                 <span>Overview</span>
               </div>
             </NavLink>
+            )}
 
             <NavLink to="/profile/browse-events" className={({ isActive }) => `profile-sidebar-link ${isActive ? 'active' : ''}`}>
               <div className="p-link-left">

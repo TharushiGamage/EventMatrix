@@ -26,7 +26,7 @@ async function createAdmin() {
 
   const adminData = {
     name: 'System Admin',
-    email: 'admin@uems.com',
+    email: 'admin@gmail.com',
     studentId: 'ADMIN001',
     password: await bcrypt.hash('admin123', 10),
     role: 'Admin',
@@ -43,11 +43,11 @@ async function createAdmin() {
 
     const existing = await User.findOne({ email: adminData.email });
     if (existing) {
-      console.log('Admin already exists! Email: admin@uems.com');
+      console.log('Admin already exists! Email: admin@gmail.com');
     } else {
       await User.create(adminData);
       console.log('✅ Admin created successfully!');
-      console.log('   Email:    admin@uems.com');
+      console.log('   Email:    admin@gmail.com');
       console.log('   Password: admin123');
     }
   } catch (err) {

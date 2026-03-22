@@ -38,7 +38,7 @@ const Login = () => {
       if (userRole === 'Admin') {
         navigate('/admin');
       } else {
-        navigate('/profile');
+        navigate('/feed');
       }
     } catch (err) {
       console.error('Login error caught:', err);
