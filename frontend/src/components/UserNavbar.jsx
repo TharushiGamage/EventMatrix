@@ -214,12 +214,7 @@ const UserNavbar = () => {
                   <UserIcon size={16} /> <span>Profile</span>
                 </Link>
 
-                {/* Student-only nav links */}
-                {user.role === 'Student' && (
-                  <Link to="/my-registrations" className={`user-nav-link ${isActive('/my-registrations') ? 'active' : ''}`}>
-                    <ClipboardList size={16} /> <span>My Registrations</span>
-                  </Link>
-                )}
+                {/* Student-only nav links (moved to profile side-nav) */}
 
                 {/* Organizer-only nav links */}
                 {user.role === 'Organizer' && (

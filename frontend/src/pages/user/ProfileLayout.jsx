@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { Bell, LayoutDashboard, User, ShieldCheck, Menu, X, Camera, LogOut } from 'lucide-react';
+import { Bell, LayoutDashboard, User, ShieldCheck, Menu, X, Camera, LogOut, ClipboardList } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { profileService } from '../../services/userApi';
@@ -94,6 +94,15 @@ const ProfileLayout = () => {
                 <span>General Info</span>
               </div>
             </NavLink>
+
+            {user?.role === 'Student' && (
+              <NavLink to="/my-registrations" className={({ isActive }) => `profile-sidebar-link ${isActive ? 'active' : ''}`}>
+                <div className="p-link-left">
+                  <ClipboardList size={20} />
+                  <span>My Registrations</span>
+                </div>
+              </NavLink>
+            )}
 
             <NavLink to="/profile/security" className={({ isActive }) => `profile-sidebar-link ${isActive ? 'active' : ''}`}>
               <div className="p-link-left">
