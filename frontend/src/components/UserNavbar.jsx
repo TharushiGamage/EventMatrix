@@ -268,13 +268,10 @@ const UserNavbar = () => {
                 </div>
               </>
             ) : (
-              // Not Logged In
+              // Not Logged In — show only Login (register removed)
               <div className="user-navbar-auth">
-                <Link to="/login" className="user-nav-login">
+                <Link to="/login" className={`user-nav-login ${pathname === '/feed' ? 'prominent-login' : ''}`}>
                   <LogIn size={16} /> Login
-                </Link>
-                <Link to="/register" className="user-nav-signup">
-                  <UserPlus size={16} /> Register
                 </Link>
               </div>
             )}
