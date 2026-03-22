@@ -32,7 +32,6 @@ const Login = () => {
       console.log('Attempting login for:', email);
       const res = await login({ email, password });
       console.log('Login successful');
-<<<<<<< HEAD
 
       // Redirect based on role
       const userRole = res?.data?.role || res?.role;
@@ -40,15 +39,6 @@ const Login = () => {
         navigate('/admin');
       } else {
         navigate('/profile');
-=======
-      const role = res?.data?.role || res?.data?.role; // role from response
-      if (role === 'Student') {
-        navigate('/feed');
-      } else if (role === 'Admin') {
-        navigate('/admin');
-      } else {
-        navigate('/feed');
->>>>>>> origin/integrated_copy
       }
     } catch (err) {
       console.error('Login error caught:', err);
