@@ -132,4 +132,28 @@ const getStudentRegistrations = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, updateUserRole, updateUserStatus, unlockUser, getOrganizerEvents, getStudentRegistrations };
+// DELETE /api/admin/users/:userId
+const deleteUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Do not allow an admin to delete themselves to prevent lockout
+    if (req.user && req.user._id && req.user._id.toString() === userId) {
+      return res.status(400).json({ success: false, message: 'You cannot delete your own admin account from here' });
+    }
+
+    // trigger the findOneAndDelete middleware we added
+    await User.findByIdAndDelete(userId);
+
+    res.json({ success: true, message: 'User and all associated records deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { getUsers, updateUserRole, updateUserStatus, unlockUser, getOrganizerEvents, getStudentRegistrations, deleteUser };

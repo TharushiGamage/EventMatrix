@@ -282,7 +282,9 @@ const OrganizerEvents = () => {
                 {/* Participants */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Users size={16} style={{ color: '#2563eb', flexShrink: 0 }} />
-                  <span style={{ fontWeight: '500' }}>{event.registeredStudents?.length || 0} Participants</span>
+                  <span style={{ fontWeight: '500' }}>
+                    {(event.participantCount ?? event.registeredStudentsCount ?? (event.registeredStudents?.length ?? 0))} Participants
+                  </span>
                 </div>
               </div>
 

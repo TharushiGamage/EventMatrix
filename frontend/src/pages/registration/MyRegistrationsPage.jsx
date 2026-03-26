@@ -16,6 +16,11 @@ export default function MyRegistrationsPage() {
   const [cancelTarget, setCancelTarget]   = useState(null);
   const [cancelling, setCancelling]       = useState(false);
   const [filter, setFilter]               = useState('all'); // 'all', 'free', 'paid'
+  
+  const [qrTarget, setQrTarget]           = useState(null);
+  const [qrLoading, setQrLoading]         = useState(false);
+  const [qrError, setQrError]             = useState('');
+  const [qrData, setQrData]               = useState(null);
 
   const load = useCallback(async () => {
     try {
@@ -43,6 +48,21 @@ export default function MyRegistrationsPage() {
       setError(err.response?.data?.message || 'Cancellation failed.');
     } finally {
       setCancelling(false);
+    }
+  };
+
+  const handleViewQr = async (reg) => {
+    setQrTarget(reg);
+    setQrLoading(true);
+    setQrError('');
+    setQrData(null);
+    try {
+      const data = await registrationService.getQrCode(reg._id);
+      setQrData(data); // { qrCodeDataUrl, token }
+    } catch (err) {
+      setQrError(err.response?.data?.message || 'Failed to load QR code.');
+    } finally {
+      setQrLoading(false);
     }
   };
 
@@ -123,13 +143,42 @@ export default function MyRegistrationsPage() {
                   <span>🕐 Registered {formatDate(reg.createdAt)}</span>
                 </div>
                 {reg.ticketType && (
-                  <span className="my-reg-ticket">🎟 {reg.ticketType} — LKR {reg.ticketPrice?.toLocaleString()}</span>
+                  <div className="my-reg-ticket-wrapper" style={{ marginTop: '4px' }}>
+                    <span className="my-reg-ticket">🎟 {reg.ticketType} — LKR {reg.ticketPrice?.toLocaleString()}</span>
+                    {(() => {
+                      const ticketInfo = reg.event?.ticketTypes?.find(t => t.name === reg.ticketType);
+                      // Only show ticket issuing details if the registration is approved
+                      if (ticketInfo && reg.status === 'approved') {
+                        return (
+                          <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '6px', background: '#f8fafc', padding: '8px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                            <div style={{ fontWeight: '600', marginBottom: '4px', color: '#334155' }}>Ticket Issuing Details:</div>
+                            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                                <span>📅 {ticketInfo.issuingDates}</span>
+                                <span>🕐 {ticketInfo.issuingTimes}</span>
+                                <span>📍 {ticketInfo.issuingVenues}</span>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
+                  </div>
                 )}
               </div>
 
               {/* Right: status + actions */}
               <div className="my-reg-right">
                 <StatusBadge status={reg.status} />
+
+                {/* View QR Code for approved paid events */}
+                {reg.status === 'approved' && reg.event?.isPaid === true && (
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() => handleViewQr(reg)}
+                  >
+                    View QR Code
+                  </button>
+                )}
 
                 {/* If paid and pending but no receipt yet, allow upload */}
                 {reg.status === 'pending' && !reg.receiptUrl && (
@@ -199,6 +248,45 @@ export default function MyRegistrationsPage() {
               <button className="btn btn-danger" onClick={handleCancel} disabled={cancelling}>
                 {cancelling ? 'Cancelling…' : 'Yes, Cancel'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* QR Code Modal */}
+      {qrTarget && (
+        <div className="modal-overlay" onClick={() => setQrTarget(null)}>
+          <div className="modal-container" onClick={e => e.stopPropagation()} style={{ textAlign: 'center' }}>
+            <h2 className="modal-title">Event Ticket Pass</h2>
+            <p className="modal-message">
+              <strong>{qrTarget.event?.name}</strong><br />
+              {qrTarget.ticketType} Ticket
+            </p>
+            
+            <div style={{ margin: '20px 0', minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {qrLoading ? (
+                <div className="spinner"></div>
+              ) : qrError ? (
+                <p style={{ color: 'var(--danger)' }}>{qrError}</p>
+              ) : qrData ? (
+                <img src={qrData.qrCodeDataUrl} alt="QR Code" style={{ width: '200px', height: '200px', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+              ) : null}
+            </div>
+
+            <div className="modal-actions" style={{ justifyContent: 'center' }}>
+              <button className="btn btn-ghost" onClick={() => setQrTarget(null)}>
+                Close
+              </button>
+              {qrData && (
+                <a 
+                  href={qrData.qrCodeDataUrl} 
+                  download={`Ticket-${(qrTarget.event?.name || 'Event').replace(/\s+/g, '-')}-${(qrTarget.studentName || 'Student').replace(/\s+/g, '-')}.png`}
+                  className="btn btn-primary"
+                  style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  Download QR Code
+                </a>
+              )}
             </div>
           </div>
         </div>

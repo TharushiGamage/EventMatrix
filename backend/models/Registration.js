@@ -45,7 +45,10 @@ const registrationSchema = new mongoose.Schema({
   // ── Organizer review ─────────────────────────────────────
   reviewedBy:  { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   reviewedAt:  { type: Date,   default: null },
-  reviewNotes: { type: String, default: '' }
+  reviewNotes: { type: String, default: '' },
+
+  // ── QR Code Token (set upon approval) ──────────────────
+  qrToken: { type: String, default: null, index: true }
 
 }, { timestamps: true });
 

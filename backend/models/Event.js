@@ -69,6 +69,10 @@ const eventSchema = new mongoose.Schema(
             type: String,
             default: null,
         },
+        registeredStudents: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        }],
     },
     {
         timestamps: true,

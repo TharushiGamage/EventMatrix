@@ -54,30 +54,29 @@ export default function ApprovedPaymentsPage() {
   );
 
   return (
-    <div className="reg-page">
-      <div className="reg-page-header">
+    <div className="approved-page">
+      <div className="approved-header">
         <div>
-          <h1 className="form-page-title">Approved Registrations</h1>
-          <p className="form-page-subtitle">
-            View student payment receipts that have been approved.
-          </p>
+          <p className="approved-kicker">Receipts overview</p>
+          <h1 className="approved-title">Approved Registrations</h1>
+          <p className="approved-subtitle">A curated view of verified payments and student details.</p>
         </div>
-        <span className="pending-count-badge">{filteredRegistrations.length} approved</span>
+        <div className="approved-count-chip">{filteredRegistrations.length} approved</div>
       </div>
 
-      <div className="filter-section" style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#666' }}>
-           <circle cx="11" cy="11" r="8"></circle>
-           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-         </svg>
-         <input 
-           type="text" 
-           className="form-input" 
-           placeholder="Filter by event name..." 
-           value={eventFilter} 
-           onChange={e => setEventFilter(e.target.value)} 
-           style={{ maxWidth: '400px' }}
-         />
+      <div className="approved-controls">
+        <div className="approved-search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input
+            type="text"
+            placeholder="Filter by event name..."
+            value={eventFilter}
+            onChange={e => setEventFilter(e.target.value)}
+          />
+        </div>
       </div>
 
       {successMsg && (
@@ -104,86 +103,71 @@ export default function ApprovedPaymentsPage() {
           <p>No approved registrations match your search criteria.</p>
         </div>
       ) : (
-        <div className="pending-list">
+        <div className="approved-grid">
           {filteredRegistrations.map(reg => {
             const rowState = reviewState[reg._id] || {};
             return (
-              <div key={reg._id} className="pending-card">
-
-                {/* ── Header ── */}
-                <div className="pending-card-header">
+              <div key={reg._id} className="approved-card">
+                <div className="approved-card-top">
                   <div>
-                    <h3 className="pending-event-name">{reg.event?.name}</h3>
-                    <p className="pending-event-meta">
-                      📅 {reg.event?.date} &nbsp;|&nbsp; 📍 {reg.event?.venue}
-                    </p>
+                    <div className="approved-event-name">{reg.event?.name}</div>
+                    <div className="approved-meta-row">
+                      <span className="approved-chip">📅 {reg.event?.date || 'Date TBD'}</span>
+                      <span className="approved-chip">📍 {reg.event?.venue || 'Venue TBD'}</span>
+                      {reg.ticketType && (
+                        <span className="approved-chip">🎟️ {reg.ticketType}{reg.ticketPrice ? ` · LKR ${reg.ticketPrice?.toLocaleString()}` : ''}</span>
+                      )}
+                    </div>
                   </div>
                   <StatusBadge status={reg.status} />
                 </div>
 
-                {/* ── Student Details ── */}
-                <div className="pending-student-grid">
-                  <div className="pending-detail-item">
-                    <span className="pending-detail-label">Student Name</span>
-                    <span className="pending-detail-value">{reg.studentName}</span>
-                  </div>
-                  <div className="pending-detail-item">
-                    <span className="pending-detail-label">Student ID</span>
-                    <span className="pending-detail-value">{reg.studentId}</span>
-                  </div>
-                  <div className="pending-detail-item">
-                    <span className="pending-detail-label">Email</span>
-                    <span className="pending-detail-value">{reg.studentEmail}</span>
-                  </div>
-                  <div className="pending-detail-item">
-                    <span className="pending-detail-label">Contact</span>
-                    <span className="pending-detail-value">{reg.contactNo}</span>
-                  </div>
-                  {reg.ticketType && (
-                    <div className="pending-detail-item">
-                      <span className="pending-detail-label">Ticket Type</span>
-                      <span className="pending-detail-value">
-                        {reg.ticketType} — LKR {reg.ticketPrice?.toLocaleString()}
-                      </span>
+                <div className="approved-body">
+                  <div className="approved-details">
+                    <div className="approved-field">
+                      <span className="approved-label">Student</span>
+                      <span className="approved-value">{reg.studentName}</span>
                     </div>
-                  )}
-                  <div className="pending-detail-item">
-                    <span className="pending-detail-label">Submitted</span>
-                    <span className="pending-detail-value">{formatDate(reg.createdAt)}</span>
+                    <div className="approved-field">
+                      <span className="approved-label">Student ID</span>
+                      <span className="approved-value">{reg.studentId}</span>
+                    </div>
+                    <div className="approved-field">
+                      <span className="approved-label">Email</span>
+                      <span className="approved-value">{reg.studentEmail}</span>
+                    </div>
+                    <div className="approved-field">
+                      <span className="approved-label">Contact</span>
+                      <span className="approved-value">{reg.contactNo}</span>
+                    </div>
+                    <div className="approved-field">
+                      <span className="approved-label">Submitted</span>
+                      <span className="approved-value">{formatDate(reg.createdAt)}</span>
+                    </div>
+                    {reg.reviewNotes && (
+                      <div className="approved-field approved-notes">
+                        <span className="approved-label">Review Notes</span>
+                        <span className="approved-value">{reg.reviewNotes}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="approved-receipt">
+                    <p className="approved-label">Payment Receipt</p>
+                    {reg.receiptUrl ? (
+                      <div
+                        className="approved-receipt-thumb"
+                        style={{ backgroundImage: `url(http://localhost:5000${reg.receiptUrl})` }}
+                        onClick={() => setPreviewImg(`http://localhost:5000${reg.receiptUrl}`)}
+                        title="Click to enlarge"
+                      >
+                        <span className="approved-receipt-overlay">Tap to open</span>
+                      </div>
+                    ) : (
+                      <div className="approved-receipt-empty">No receipt uploaded</div>
+                    )}
                   </div>
                 </div>
-
-                {/* ── Receipt Preview ── */}
-                {reg.receiptUrl ? (
-                  <div className="pending-receipt-section">
-                    <p className="pending-detail-label" style={{ marginBottom: '8px' }}>Payment Receipt</p>
-                    <img
-                      src={`http://localhost:5000${reg.receiptUrl}`}
-                      alt="Payment Receipt"
-                      className="pending-receipt-thumb"
-                      onClick={() => setPreviewImg(`http://localhost:5000${reg.receiptUrl}`)}
-                      title="Click to enlarge"
-                    />
-                    <span className="pending-receipt-hint">Click image to enlarge</span>
-                  </div>
-                ) : (
-                  <div className="pending-no-receipt">
-                    ⚠️ No receipt uploaded yet
-                  </div>
-                )}
-
-                {/* ── Review Notes + Actions ── */}
-                <div className="pending-actions-section">
-                  <div className="form-group" style={{ flex: 1, opacity: 0.7 }}>
-                     {reg.reviewNotes && (
-                       <div>
-                         <span className="pending-detail-label">Review Notes</span>
-                         <p style={{ margin: '4px 0 0 0', fontSize: '14px' }}>{reg.reviewNotes}</p>
-                       </div>
-                     )}
-                  </div>
-                </div>
-
               </div>
             );
           })}

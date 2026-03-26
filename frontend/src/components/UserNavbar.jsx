@@ -13,6 +13,7 @@ const UserNavbar = () => {
   const { pathname } = useLocation();
   const menuRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('current');
   const [actionError, setActionError] = useState('');
@@ -35,8 +36,17 @@ const UserNavbar = () => {
   const isActive = (path) => pathname === path;
 
   const handleLogout = () => {
+    setShowLogoutConfirm(true);
+    setMenuOpen(false);
+  };
+
+  const confirmLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const cancelLogout = () => {
+    setShowLogoutConfirm(false);
   };
 
   useEffect(() => {
@@ -192,8 +202,9 @@ const UserNavbar = () => {
   };
 
   return (
-    <nav className="user-navbar">
-      <div className="user-navbar-inner">
+    <>
+      <nav className="user-navbar">
+        <div className="user-navbar-inner">
         
         {/* Brand Area */}
         <Link to="/" className="user-navbar-brand">
@@ -210,18 +221,13 @@ const UserNavbar = () => {
 
             {user ? (
               <>
-                <Link to="/profile/general" className={`user-nav-link ${isActive('/profile/general') ? 'active' : ''}`}>
+                <Link to="/profile" className={`user-nav-link ${isActive('/profile') ? 'active' : ''}`}>
                   <UserIcon size={16} /> <span>Profile</span>
                 </Link>
 
                 {/* Student-only nav links (moved to profile side-nav) */}
 
                 {/* Organizer-only nav links */}
-                {user.role === 'Organizer' && (
-                  <Link to="/organizer/pending" className={`user-nav-link ${isActive('/organizer/pending') ? 'active' : ''}`}>
-                    <ClipboardList size={16} /> <span>Pending Reviews</span>
-                  </Link>
-                )}
 
                 {user.role === 'Admin' && (
                   <Link to="/admin/users" className={`user-nav-link ${isActive('/admin/users') ? 'active' : ''}`}>
@@ -274,139 +280,161 @@ const UserNavbar = () => {
           
         </div>
 
+        {passwordModalOpen && (
+          <div className="pw-modal-backdrop" onClick={closePasswordModal}>
+            <div className="pw-modal" onClick={(event) => event.stopPropagation()}>
+              <div className="pw-modal-header">
+                <h3>Reset Password</h3>
+                <button type="button" className="pw-close-btn" onClick={closePasswordModal}>
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="pw-tab-row">
+                <button
+                  type="button"
+                  className={`pw-tab ${activeTab === 'current' ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveTab('current');
+                    setActionError('');
+                    setActionSuccess('');
+                  }}
+                >
+                  Use Current Password
+                </button>
+                <button
+                  type="button"
+                  className={`pw-tab ${activeTab === 'forgot' ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveTab('forgot');
+                    setActionError('');
+                    setActionSuccess('');
+                  }}
+                >
+                  Forgot Password
+                </button>
+              </div>
+
+              {actionError && <div className="pw-alert error">{actionError}</div>}
+              {actionSuccess && <div className="pw-alert success">{actionSuccess}</div>}
+
+              {activeTab === 'current' ? (
+                <form className="pw-form" onSubmit={handleCurrentPasswordReset}>
+                  <label htmlFor="currentPassword">Current Password</label>
+                  <input
+                    id="currentPassword"
+                    type="password"
+                    value={currentFlow.currentPassword}
+                    onChange={(event) => setCurrentFlow((prev) => ({ ...prev, currentPassword: event.target.value }))}
+                    placeholder="Enter current password"
+                  />
+
+                  <label htmlFor="newPassword">New Password</label>
+                  <input
+                    id="newPassword"
+                    type="password"
+                    value={currentFlow.newPassword}
+                    onChange={(event) => setCurrentFlow((prev) => ({ ...prev, newPassword: event.target.value }))}
+                    placeholder="Enter new password"
+                  />
+
+                  <label htmlFor="confirmPassword">Confirm Password</label>
+                  <input
+                    id="confirmPassword"
+                    type="password"
+                    value={currentFlow.confirmPassword}
+                    onChange={(event) => setCurrentFlow((prev) => ({ ...prev, confirmPassword: event.target.value }))}
+                    placeholder="Re-enter new password"
+                  />
+
+                  <button type="submit" className="pw-primary-btn" disabled={submitting}>
+                    {submitting ? 'Updating...' : 'Update Password'}
+                  </button>
+                </form>
+              ) : (
+                <form className="pw-form" onSubmit={handleForgotPasswordReset}>
+                  <label htmlFor="identifier">Email or Phone Number</label>
+                  <div className="pw-inline-row">
+                    <input
+                      id="identifier"
+                      type="text"
+                      value={forgotFlow.identifier}
+                      onChange={(event) => setForgotFlow((prev) => ({ ...prev, identifier: event.target.value }))}
+                      placeholder="you@example.com or 0771234567"
+                    />
+                    <button type="button" className="pw-secondary-btn" onClick={handleSendForgotCode} disabled={submitting}>
+                      {submitting ? 'Sending...' : 'Send Code'}
+                    </button>
+                  </div>
+
+                  <label htmlFor="verificationCode">6-digit Verification Code</label>
+                  <div className="pw-inline-row">
+                    <input
+                      id="verificationCode"
+                      type="text"
+                      maxLength={6}
+                      value={forgotFlow.code}
+                      onChange={(event) => setForgotFlow((prev) => ({ ...prev, code: event.target.value }))}
+                      placeholder="Enter code"
+                    />
+                    <button type="button" className="pw-secondary-btn" onClick={handleVerifyForgotCode} disabled={submitting || !forgotFlow.codeSent}>
+                      Verify
+                    </button>
+                  </div>
+
+                  <label htmlFor="forgotNewPassword">New Password</label>
+                  <input
+                    id="forgotNewPassword"
+                    type="password"
+                    value={forgotFlow.newPassword}
+                    onChange={(event) => setForgotFlow((prev) => ({ ...prev, newPassword: event.target.value }))}
+                    placeholder="Enter new password"
+                    disabled={!forgotFlow.verified}
+                  />
+
+                  <label htmlFor="forgotConfirmPassword">Confirm Password</label>
+                  <input
+                    id="forgotConfirmPassword"
+                    type="password"
+                    value={forgotFlow.confirmPassword}
+                    onChange={(event) => setForgotFlow((prev) => ({ ...prev, confirmPassword: event.target.value }))}
+                    placeholder="Re-enter new password"
+                    disabled={!forgotFlow.verified}
+                  />
+
+                  <button type="submit" className="pw-primary-btn" disabled={submitting || !forgotFlow.verified}>
+                    {submitting ? 'Resetting...' : 'Reset Password'}
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+        )}
       </div>
+      </nav>
 
-      {passwordModalOpen && (
-        <div className="pw-modal-backdrop" onClick={closePasswordModal}>
-          <div className="pw-modal" onClick={(event) => event.stopPropagation()}>
-            <div className="pw-modal-header">
-              <h3>Reset Password</h3>
-              <button type="button" className="pw-close-btn" onClick={closePasswordModal}>
-                <X size={18} />
+      {showLogoutConfirm && (
+        <div className="user-logout-overlay">
+          <div className="user-logout-dialog">
+            <div className="user-logout-dialog-content">
+              <div className="user-logout-dialog-icon">
+                <LogOut size={32} />
+              </div>
+              <h3 className="user-logout-dialog-title">Confirm Logout</h3>
+              <p className="user-logout-dialog-message">Are you sure you want to logout from this account?</p>
+            </div>
+            <div className="user-logout-dialog-actions">
+              <button className="user-logout-cancel-btn" onClick={cancelLogout}>
+                Cancel
+              </button>
+              <button className="user-logout-confirm-btn" onClick={confirmLogout}>
+                OK
               </button>
             </div>
-
-            <div className="pw-tab-row">
-              <button
-                type="button"
-                className={`pw-tab ${activeTab === 'current' ? 'active' : ''}`}
-                onClick={() => {
-                  setActiveTab('current');
-                  setActionError('');
-                  setActionSuccess('');
-                }}
-              >
-                Use Current Password
-              </button>
-              <button
-                type="button"
-                className={`pw-tab ${activeTab === 'forgot' ? 'active' : ''}`}
-                onClick={() => {
-                  setActiveTab('forgot');
-                  setActionError('');
-                  setActionSuccess('');
-                }}
-              >
-                Forgot Password
-              </button>
-            </div>
-
-            {actionError && <div className="pw-alert error">{actionError}</div>}
-            {actionSuccess && <div className="pw-alert success">{actionSuccess}</div>}
-
-            {activeTab === 'current' ? (
-              <form className="pw-form" onSubmit={handleCurrentPasswordReset}>
-                <label htmlFor="currentPassword">Current Password</label>
-                <input
-                  id="currentPassword"
-                  type="password"
-                  value={currentFlow.currentPassword}
-                  onChange={(event) => setCurrentFlow((prev) => ({ ...prev, currentPassword: event.target.value }))}
-                  placeholder="Enter current password"
-                />
-
-                <label htmlFor="newPassword">New Password</label>
-                <input
-                  id="newPassword"
-                  type="password"
-                  value={currentFlow.newPassword}
-                  onChange={(event) => setCurrentFlow((prev) => ({ ...prev, newPassword: event.target.value }))}
-                  placeholder="Enter new password"
-                />
-
-                <label htmlFor="confirmPassword">Confirm Password</label>
-                <input
-                  id="confirmPassword"
-                  type="password"
-                  value={currentFlow.confirmPassword}
-                  onChange={(event) => setCurrentFlow((prev) => ({ ...prev, confirmPassword: event.target.value }))}
-                  placeholder="Re-enter new password"
-                />
-
-                <button type="submit" className="pw-primary-btn" disabled={submitting}>
-                  {submitting ? 'Updating...' : 'Update Password'}
-                </button>
-              </form>
-            ) : (
-              <form className="pw-form" onSubmit={handleForgotPasswordReset}>
-                <label htmlFor="identifier">Email or Phone Number</label>
-                <div className="pw-inline-row">
-                  <input
-                    id="identifier"
-                    type="text"
-                    value={forgotFlow.identifier}
-                    onChange={(event) => setForgotFlow((prev) => ({ ...prev, identifier: event.target.value }))}
-                    placeholder="you@example.com or 0771234567"
-                  />
-                  <button type="button" className="pw-secondary-btn" onClick={handleSendForgotCode} disabled={submitting}>
-                    {submitting ? 'Sending...' : 'Send Code'}
-                  </button>
-                </div>
-
-                <label htmlFor="verificationCode">6-digit Verification Code</label>
-                <div className="pw-inline-row">
-                  <input
-                    id="verificationCode"
-                    type="text"
-                    maxLength={6}
-                    value={forgotFlow.code}
-                    onChange={(event) => setForgotFlow((prev) => ({ ...prev, code: event.target.value }))}
-                    placeholder="Enter code"
-                  />
-                  <button type="button" className="pw-secondary-btn" onClick={handleVerifyForgotCode} disabled={submitting || !forgotFlow.codeSent}>
-                    Verify
-                  </button>
-                </div>
-
-                <label htmlFor="forgotNewPassword">New Password</label>
-                <input
-                  id="forgotNewPassword"
-                  type="password"
-                  value={forgotFlow.newPassword}
-                  onChange={(event) => setForgotFlow((prev) => ({ ...prev, newPassword: event.target.value }))}
-                  placeholder="Enter new password"
-                  disabled={!forgotFlow.verified}
-                />
-
-                <label htmlFor="forgotConfirmPassword">Confirm Password</label>
-                <input
-                  id="forgotConfirmPassword"
-                  type="password"
-                  value={forgotFlow.confirmPassword}
-                  onChange={(event) => setForgotFlow((prev) => ({ ...prev, confirmPassword: event.target.value }))}
-                  placeholder="Re-enter new password"
-                  disabled={!forgotFlow.verified}
-                />
-
-                <button type="submit" className="pw-primary-btn" disabled={submitting || !forgotFlow.verified}>
-                  {submitting ? 'Resetting...' : 'Reset Password'}
-                </button>
-              </form>
-            )}
           </div>
         </div>
       )}
-    </nav>
+    </>
   );
 };
 

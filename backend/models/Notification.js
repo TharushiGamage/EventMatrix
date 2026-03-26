@@ -25,7 +25,8 @@ const notificationSchema = new mongoose.Schema({
       'registration_pending',
       'registration_request',
       'registration_confirmed',
-      'new_registration'
+      'new_registration',
+      'new_event'
     ],
     required: true
   },

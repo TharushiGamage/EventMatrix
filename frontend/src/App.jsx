@@ -17,6 +17,7 @@ import FeedDetail from './pages/feed/FeedDetail';
 import Login from './pages/user/Login';
 import Register from './pages/user/Register';
 import ProfileLayout from './pages/user/ProfileLayout';
+import ProfileOverview from './pages/user/ProfileOverview';
 import ProfileGeneral from './pages/user/ProfileGeneral';
 import ProfileSecurity from './pages/user/ProfileSecurity';
 import OrganizerEvents from './pages/user/OrganizerEvents';
@@ -36,6 +37,7 @@ import PaymentPage from './pages/registration/PaymentPage';
 import MyRegistrationsPage from './pages/registration/MyRegistrationsPage';
 import PendingReviewPage from './pages/registration/PendingReviewPage';
 import ApprovedPaymentsPage from './pages/registration/ApprovedPaymentsPage';
+import QrValidationPage from './pages/registration/QrValidationPage';
 
 import './App.css';
 
@@ -72,14 +74,16 @@ function App() {
           {/* Profile — sidebar + topbar layout (mirroring admin dashboard) */}
           <Route element={<ProtectedRoute />}>
             <Route element={<ProfileLayout />}>
+              <Route path="/profile" element={<ProfileOverview />} />
               <Route path="/profile/general" element={<ProfileGeneral />} />
               <Route path="/profile/security" element={<ProfileSecurity />} />
-              <Route path="/profile/browse-events" element={<Feed />} />
+              <Route path="/profile/browse-events" element={<Feed showHero={false} />} />
               <Route path="/profile/pending-reviews" element={<PendingReviewPage />} />
               <Route path="/profile/approved-payments" element={<ApprovedPaymentsPage />} />
               <Route path="/profile/create-event" element={<EventForm />} />
               <Route path="/profile/edit-event/:id" element={<EventForm />} />
               <Route path="/profile/my-events" element={<OrganizerEvents />} />
+              <Route path="/profile/validate-qr" element={<QrValidationPage />} />
               <Route path="/profile/my-registrations" element={<MyRegistrationsPage />} />
             </Route>
           </Route>

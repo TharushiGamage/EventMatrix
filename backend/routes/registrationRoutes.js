@@ -12,6 +12,8 @@ const {
     getAttendance,
     getDashboardStats,
     getApprovedRegistrations,
+    generateQrCode,
+    validateQrCode,
 } = require('../controllers/registrationController');
 
 // ── Student routes ────────────────────────────────────────────────────────────
@@ -30,6 +32,9 @@ router.post(
 
 // View own registrations (Student only)
 router.get('/my', protect, authorize('Student'), getMyRegistrations);
+
+// Get QR code for an approved registration (Student only)
+router.get('/:id/qr-code', protect, authorize('Student'), generateQrCode);
 
 // Cancel own registration (Student only)
 router.delete('/:id', protect, authorize('Student'), cancelRegistration);
@@ -54,5 +59,8 @@ router.put('/:id/review', protect, authorize('Organizer'), reviewRegistration);
 
 // Get attendance (confirmed + approved) for a specific event
 router.get('/attendance/:eventId', protect, authorize('Organizer', 'Admin'), getAttendance);
+
+// Validate QR code token (Organizer / Admin - for scanning)
+router.get('/validate-qr/:token', protect, authorize('Organizer', 'Admin'), validateQrCode);
 
 module.exports = router;

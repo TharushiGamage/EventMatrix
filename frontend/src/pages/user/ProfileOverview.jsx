@@ -62,7 +62,10 @@ const ProfileOverview = () => {
         
         let pendingPayments = 0;
         let approvedPayments = 0;
-        const totalAttendance = organizerEvents.reduce((acc, event) => acc + (event.registeredStudents?.length || 0), 0);
+        const totalAttendance = organizerEvents.reduce((acc, event) => {
+          const count = event.participantCount ?? event.registeredStudentsCount ?? (event.registeredStudents?.length ?? 0);
+          return acc + count;
+        }, 0);
 
         if (eventIds.length > 0) {
             const stats = await registrationService.getDashboardStats(eventIds);

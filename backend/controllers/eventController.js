@@ -1,4 +1,7 @@
 const Event = require('../models/Event');
+const Registration = require('../models/Registration');
+const User = require('../models/User');
+const Notification = require('../models/Notification');
 
 // GET /api/v1/events
 const getAllEvents = async (req, res, next) => {
@@ -50,10 +53,34 @@ const getAllEvents = async (req, res, next) => {
             Event.countDocuments(query),
         ]);
 
+        const participantCounts = await Registration.aggregate([
+            {
+                $match: {
+                    event: { $in: events.map(ev => ev._id) },
+                    status: { $in: ['confirmed', 'pending', 'approved'] },
+                },
+            },
+            { $group: { _id: '$event', count: { $sum: 1 } } },
+        ]);
+
+        const countMap = participantCounts.reduce((acc, curr) => {
+            acc[curr._id.toString()] = curr.count;
+            return acc;
+        }, {});
+
+        const eventsWithCounts = events.map(ev => {
+            const obj = ev.toObject();
+            obj.participantCount = countMap[ev._id.toString()] || 0;
+            obj.registeredStudentsCount = Array.isArray(ev.registeredStudents) ? ev.registeredStudents.length : 0;
+            delete obj._id;
+            delete obj.__v;
+            return obj;
+        });
+
         res.status(200).json({
             success: true,
             data: {
-                events,
+                events: eventsWithCounts,
                 pagination: {
                     page: pageNum,
                     limit: limitNum,
@@ -108,9 +135,20 @@ const getEventById = async (req, res, next) => {
             });
         }
 
+        const participantCount = await Registration.countDocuments({
+            event: event._id,
+            status: { $in: ['confirmed', 'pending', 'approved'] },
+        });
+
+        const payload = event.toObject();
+        payload.participantCount = participantCount;
+        payload.registeredStudentsCount = Array.isArray(event.registeredStudents) ? event.registeredStudents.length : 0;
+        delete payload._id;
+        delete payload.__v;
+
         res.status(200).json({
             success: true,
-            data: event,
+            data: payload,
         });
     } catch (error) {
         next(error);
@@ -142,6 +180,19 @@ const createEvent = async (req, res, next) => {
             description,
             image,
         });
+
+        // Notify all students about the newly published event
+        const students = await User.find({ role: 'Student' }, '_id');
+        const notifications = students.map(student => ({
+            recipient: student._id,
+            message: `A new event "${event.name}" has been published by ${event.organizedBy}! Check it out.`,
+            type: 'new_event',
+            relatedEvent: event._id
+        }));
+
+        if (notifications.length > 0) {
+            await Notification.insertMany(notifications);
+        }
 
         res.status(201).json({
             success: true,

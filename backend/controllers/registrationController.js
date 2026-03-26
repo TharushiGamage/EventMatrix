@@ -4,6 +4,8 @@ const Notification = require('../models/Notification');
 const WaitingList = require('../models/WaitingList');
 const Event = require('../models/Event');
 const User = require('../models/User');
+const crypto = require('crypto');
+const qrcode = require('qrcode');
 
 // ─── Helper: create a notification record ────────────────────────────────────
 const createNotification = async ({ recipient, message, type, relatedEvent, relatedRegistration }) => {
@@ -129,6 +131,16 @@ const registerForEvent = async (req, res, next) => {
             });
         }
 
+        // 6.5 Update Event Participants for Free Events
+        if (!event.isPaid) {
+            event.registeredStudents = event.registeredStudents || [];
+            if (!event.registeredStudents.includes(req.user._id.toString()) && 
+                !event.registeredStudents.some(id => id.toString() === req.user._id.toString())) {
+                event.registeredStudents.push(req.user._id);
+                await event.save();
+            }
+        }
+
         // 7. Send Notifications
         const orgSearchRegex = new RegExp(`^\\s*${event.organizedBy.trim()}\\s*$`, 'i');
         const organizerUser = await User.findOne({
@@ -139,27 +151,7 @@ const registerForEvent = async (req, res, next) => {
             ]
         });
 
-        if (event.isPaid) {
-            // Paid Event - Notify Student
-            await createNotification({
-                recipient: req.user._id,
-                message: `You have successfully requested to register for "${event.name}". Please complete the payment and wait for the organizer's approval.`,
-                type: 'registration_pending',
-                relatedEvent: event._id,
-                relatedRegistration: registration._id,
-            });
-
-            // Paid Event - Notify Organizer
-            if (organizerUser) {
-                await createNotification({
-                    recipient: organizerUser._id,
-                    message: `${studentName || 'A student'} has requested to register for "${event.name}". Awaiting payment receipt and approval.`,
-                    type: 'registration_request',
-                    relatedEvent: event._id,
-                    relatedRegistration: registration._id,
-                });
-            }
-        } else {
+        if (!event.isPaid) {
             // Free Event - Notify Student
             await createNotification({
                 recipient: req.user._id,
@@ -212,7 +204,7 @@ const uploadReceipt = async (req, res, next) => {
         const registration = await Registration.findOne({
             _id: req.params.id,
             student: req.user._id,
-        });
+        }).populate('event');
 
         if (!registration) {
             return res.status(404).json({ success: false, message: 'Registration not found' });
@@ -234,6 +226,36 @@ const uploadReceipt = async (req, res, next) => {
         registration.receiptUploadedAt = new Date();
         registration.status = 'pending';
         await registration.save();
+
+        // Send Notifications for Paid Event AFTER receipt is uploaded
+        const orgSearchRegex = new RegExp(`^\\s*${registration.event.organizedBy.trim()}\\s*$`, 'i');
+        const organizerUser = await User.findOne({
+            role: { $in: ['Organizer', 'Admin'] },
+            $or: [
+                { name: orgSearchRegex },
+                { organizationName: orgSearchRegex }
+            ]
+        });
+
+        // Notify Student
+        await createNotification({
+            recipient: req.user._id,
+            message: `You have successfully uploaded the payment receipt for "${registration.event.name}". Please wait for the organizer's approval.`,
+            type: 'registration_pending',
+            relatedEvent: registration.event._id,
+            relatedRegistration: registration._id,
+        });
+
+        // Notify Organizer
+        if (organizerUser) {
+            await createNotification({
+                recipient: organizerUser._id,
+                message: `${registration.studentName || 'A student'} has submitted their payment receipt for "${registration.event.name}" and is awaiting your approval.`,
+                type: 'registration_request',
+                relatedEvent: registration.event._id,
+                relatedRegistration: registration._id,
+            });
+        }
 
         res.status(200).json({
             success: true,
@@ -266,9 +288,17 @@ const cancelRegistration = async (req, res, next) => {
         }
 
         const wasActive = ['confirmed', 'approved', 'pending'].includes(registration.status);
+        const wasConfirmedOrApproved = ['confirmed', 'approved'].includes(registration.status);
 
         registration.status = 'cancelled';
         await registration.save();
+
+        if (wasConfirmedOrApproved) {
+            const event = registration.event;
+            event.registeredStudents = event.registeredStudents || [];
+            event.registeredStudents = event.registeredStudents.filter(id => id.toString() !== req.user._id.toString());
+            await event.save();
+        }
 
         // If the cancellation frees up a seat, notify waiting-list students
         if (wasActive) {
@@ -329,7 +359,7 @@ const cancelRegistration = async (req, res, next) => {
 const getMyRegistrations = async (req, res, next) => {
     try {
         const registrations = await Registration.find({ student: req.user._id })
-            .populate('event', 'id name date startTime endTime venue isPaid image')
+            .populate('event', 'id name date startTime endTime venue isPaid image ticketTypes')
             .sort({ createdAt: -1 });
 
         res.status(200).json({
@@ -459,17 +489,40 @@ const reviewRegistration = async (req, res, next) => {
 
         const newStatus = action === 'approve' ? 'approved' : 'rejected';
         registration.status = newStatus;
+        if (action === 'approve') {
+            registration.qrToken = crypto.randomUUID();
+        }
         registration.reviewedBy = req.user._id;
         registration.reviewedAt = new Date();
         registration.reviewNotes = notes || '';
         await registration.save();
 
+        if (action === 'approve') {
+            const event = registration.event;
+            event.registeredStudents = event.registeredStudents || [];
+            if (!event.registeredStudents.includes(registration.student.toString()) &&
+                !event.registeredStudents.some(id => id.toString() === registration.student.toString())) {
+                event.registeredStudents.push(registration.student);
+                await event.save();
+            }
+        }
+
         // Send notification to the student
         const eventName = registration.event.name;
         const notifType = action === 'approve' ? 'registration_approved' : 'registration_rejected';
-        const notifMessage = action === 'approve'
-            ? `Your payment for "${eventName}" has been approved! You are now officially registered.`
-            : `Your payment for "${eventName}" was rejected. Reason: ${notes || 'No reason provided'}. Please contact the organizer for more details.`;
+        
+        let notifMessage = '';
+        if (action === 'approve') {
+            notifMessage = `Your payment for "${eventName}" has been approved! You are now officially registered.`;
+            if (registration.event.isPaid && registration.ticketType) {
+                const ticketInfo = registration.event.ticketTypes.find(t => t.name === registration.ticketType);
+                if (ticketInfo) {
+                    notifMessage += ` Ticket Issuing Details: Date: ${ticketInfo.issuingDates}, Time: ${ticketInfo.issuingTimes}, Venue: ${ticketInfo.issuingVenues}.`;
+                }
+            }
+        } else {
+            notifMessage = `Your payment for "${eventName}" was rejected. Reason: ${notes || 'No reason provided'}. Please contact the organizer for more details.`;
+        }
 
         await createNotification({
             recipient: registration.student,
@@ -556,6 +609,104 @@ const getDashboardStats = async (req, res, next) => {
     }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/v1/registrations/:id/qr-code
+// Student gets their QR code for an approved paid registration
+// ─────────────────────────────────────────────────────────────────────────────
+const generateQrCode = async (req, res, next) => {
+    try {
+        const registration = await Registration.findOne({
+            _id: req.params.id,
+            student: req.user._id,
+            status: 'approved'
+        }).populate('event', 'name date venue isPaid ticketTypes');
+
+        if (!registration) {
+            return res.status(404).json({ success: false, message: 'Approved registration not found' });
+        }
+
+        if (!registration.qrToken) {
+            return res.status(400).json({ success: false, message: 'QR token not generated for this registration' });
+        }
+
+        const ticketInfo = registration.event.ticketTypes.find(t => t.name === registration.ticketType);
+
+        const qrData = JSON.stringify({
+            token: registration.qrToken,
+            registrationId: registration._id,
+            studentName: registration.studentName,
+            studentId: registration.studentId,
+            eventName: registration.event.name,
+            ticketType: registration.ticketType
+        });
+
+        const qrCodeDataUrl = await qrcode.toDataURL(qrData);
+
+        res.status(200).json({
+            success: true,
+            data: {
+                qrCodeDataUrl,
+                token: registration.qrToken
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/v1/registrations/validate-qr/:token
+// Organizer validates a scanned QR code token
+// ─────────────────────────────────────────────────────────────────────────────
+const validateQrCode = async (req, res, next) => {
+    try {
+        const { token } = req.params;
+
+        const registration = await Registration.findOne({ qrToken: token })
+            .populate('event', 'name date time organizedBy ticketTypes')
+            .populate('student', 'name email contactNo');
+
+        if (!registration) {
+            return res.status(404).json({ success: false, message: 'Invalid QR Token. Registration not found.' });
+        }
+
+        // Check organizer permission
+        if (req.user.role !== 'Admin') {
+            const orgSearchRegex = new RegExp(`^\\s*${req.user.name.trim()}\\s*$`, 'i');
+            const orgSearchRegexOrg = new RegExp(`^\\s*${req.user.organizationName ? req.user.organizationName.trim() : ''}\\s*$`, 'i');
+            const eventOrg = registration.event.organizedBy.trim();
+            const isOwner = orgSearchRegex.test(eventOrg) || (req.user.organizationName && orgSearchRegexOrg.test(eventOrg));
+            
+            if (!isOwner) {
+                return res.status(403).json({ success: false, message: 'Not authorized to validate this ticket.' });
+            }
+        }
+
+        const ticketInfo = registration.event.ticketTypes.find(t => t.name === registration.ticketType) || {};
+
+        res.status(200).json({
+            success: true,
+            data: {
+                studentName: registration.studentName,
+                studentId: registration.studentId,
+                email: registration.studentEmail,
+                contactNo: registration.contactNo,
+                eventName: registration.event.name,
+                ticketType: registration.ticketType,
+                ticketPrice: registration.ticketPrice,
+                status: registration.status,
+                issuingDetails: {
+                    dates: ticketInfo.issuingDates || 'N/A',
+                    times: ticketInfo.issuingTimes || 'N/A',
+                    venues: ticketInfo.issuingVenues || 'N/A'
+                }
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     registerForEvent,
     uploadReceipt,
@@ -566,4 +717,6 @@ module.exports = {
     getAttendance,
     getDashboardStats,
     getApprovedRegistrations,
+    generateQrCode,
+    validateQrCode,
 };

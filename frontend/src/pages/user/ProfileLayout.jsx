@@ -62,6 +62,7 @@ const ProfileLayout = () => {
     if (location.pathname === '/profile/create-event') return 'Create Event';
     if (location.pathname.startsWith('/profile/edit-event')) return 'Edit Event';
     if (location.pathname === '/profile/my-events') return 'My Events';
+    if (location.pathname === '/profile/validate-qr') return 'Scan Ticket QR';
     if (location.pathname === '/profile/my-registrations') return 'My Registrations';
 
     return 'My Profile';
@@ -116,6 +117,12 @@ const ProfileLayout = () => {
                 <div className="p-link-left">
                   <LayoutDashboard size={20} />
                   <span>Create Event</span>
+                </div>
+              </NavLink>
+              <NavLink to="/profile/validate-qr" className={({ isActive }) => `profile-sidebar-link ${isActive ? 'active' : ''}`}>
+                <div className="p-link-left">
+                  <Camera size={20} />
+                  <span>Scan Ticket QR</span>
                 </div>
               </NavLink>
             </div>

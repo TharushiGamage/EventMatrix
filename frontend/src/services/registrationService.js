@@ -62,6 +62,18 @@ export const registrationService = {
     const res = await api.get(`/v1/registrations/attendance/${eventId}`);
     return res.data.data;
   },
+
+  // GET /api/v1/registrations/:id/qr-code
+  getQrCode: async (registrationId) => {
+    const res = await api.get(`/v1/registrations/${registrationId}/qr-code`);
+    return res.data.data;
+  },
+
+  // GET /api/v1/registrations/validate-qr/:token
+  validateQrCode: async (token) => {
+    const res = await api.get(`/v1/registrations/validate-qr/${token}`);
+    return res.data.data;
+  },
 };
 
 // ── Notifications ─────────────────────────────────────────────────────────────

@@ -60,7 +60,7 @@ export default function PaymentPage() {
             <br />
             Your registration is now <strong>pending organizer review</strong>. You'll receive a notification once it's processed.
           </p>
-          <button className="btn btn-primary" onClick={() => navigate('/my-registrations')}>
+          <button className="btn btn-primary" onClick={() => navigate('/profile/my-registrations')}>
             View My Registrations
           </button>
         </div>
@@ -93,7 +93,7 @@ export default function PaymentPage() {
       <div className="reg-form-card">
         <div className="reg-form-header">
           <h1 className="form-page-title">Upload Payment Receipt</h1>
-          <p className="form-page-subtitle">
+          <p className="form-page-subtitle" style={{ textAlign: 'left', margin: 0 }}>
             Make your payment and upload a photo/screenshot of the receipt to complete registration.
           </p>
         </div>
@@ -152,7 +152,7 @@ export default function PaymentPage() {
           </div>
 
           <div className="form-actions">
-            <button type="button" className="btn btn-ghost" onClick={() => navigate('/my-registrations')}>
+            <button type="button" className="btn btn-ghost" onClick={() => navigate('/profile/my-registrations')}>
               Cancel
             </button>
             <button type="submit" className="btn btn-primary" disabled={submitting || !file}>

@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchFeedEvents } from '../../services/eventService';
 import EventCalendar from '../event/Components/EventCalendar';
 
-export default function Feed() {
+export default function Feed({ showHero = true }) {
     const navigate = useNavigate();
     const [events, setEvents] = useState([]);
     const [pagination, setPagination] = useState({ page: 1, limit: 10, totalItems: 0, totalPages: 1 });
@@ -14,6 +14,18 @@ export default function Feed() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showCalendar, setShowCalendar] = useState(false);
+    const [heroIndex, setHeroIndex] = useState(0);
+
+    const carousel = useMemo(() => ([
+        { url: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=1400&q=80', title: 'Orientation Fair on the Quad' },
+        { url: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1400&q=80', title: 'Engineering Career Expo' },
+        { url: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=1400&q=80', title: 'Student Startup Demo Day' },
+        { url: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1400&q=80', title: 'Coding Night at the Library' },
+        { url: 'https://images.unsplash.com/photo-1472653816316-3ad6f10a6592?auto=format&fit=crop&w=1400&q=80', title: 'Cultural Dance Showcase' },
+        { url: 'https://images.unsplash.com/photo-1517935706615-2717063c2225?auto=format&fit=crop&w=1400&q=80', title: 'Campus Research Symposium' },
+        { url: 'https://images.unsplash.com/photo-1449158743715-0a90ebb6d2d8?auto=format&fit=crop&w=1400&q=80', title: 'Homecoming Pep Rally' },
+        { url: 'https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=1400&q=80', title: 'Open-Air Student Concert' },
+    ]), []);
 
     const loadFeed = useCallback(async () => {
         try {
@@ -37,6 +49,13 @@ export default function Feed() {
     useEffect(() => {
         setPage(1);
     }, [search, filter, category]);
+
+    useEffect(() => {
+        const id = setInterval(() => {
+            setHeroIndex((idx) => (idx + 1) % carousel.length);
+        }, 5000);
+        return () => clearInterval(id);
+    }, [carousel.length]);
 
     const formatDate = (dateStr) => {
         const d = new Date(dateStr + 'T00:00:00');
@@ -95,27 +114,45 @@ export default function Feed() {
 
     return (
         <div className="feed-page">
-            {/* Header */}
-            <header className="feed-header">
-                <div>
+            {showHero && (
+            <header className="feed-hero">
+                <div className="feed-hero-left">
+                    <span className="feed-eyebrow">Campus spotlight</span>
                     <h1 className="feed-title">Campus Events</h1>
-                    <p className="feed-subtitle">Discover what's happening on campus</p>
+                    <p className="feed-subtitle">Discover what's happening on campus, from student meetups to headline performances.</p>
+                    <div className="feed-hero-actions">
+                        <button className="chip ghost" onClick={() => setShowCalendar(true)}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            View calendar
+                        </button>
+                        {!loading && (
+                            <div className="feed-count-card">
+                                <span className="count-label">Total events</span>
+                                <span className="count-value">{pagination.totalItems}</span>
+                                <span className="count-foot">Showing {events.length} on this view</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
-                <div className="feed-header-meta" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <button className="btn btn-outline" onClick={() => setShowCalendar(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', backgroundColor: '#fff', border: '1px solid #e2e8f0', color: '#475569', fontWeight: '500' }}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                            <line x1="16" y1="2" x2="16" y2="6"></line>
-                            <line x1="8" y1="2" x2="8" y2="6"></line>
-                            <line x1="3" y1="10" x2="21" y2="10"></line>
-                        </svg>
-                        View Calendar
-                    </button>
-                    {!loading && (
-                        <span className="feed-count">{pagination.totalItems} event{pagination.totalItems !== 1 ? 's' : ''}</span>
-                    )}
+                <div className="feed-hero-right">
+                    <div className="feed-hero-rotator">
+                        <div className="hero-rotator-img" style={{ backgroundImage: `url(${carousel[heroIndex].url})` }} aria-label={carousel[heroIndex].title} />
+                        <div className="hero-rotator-caption">
+                            <span className="caption-dot" />
+                            <div>
+                                <p className="caption-label">Campus highlight</p>
+                                <p className="caption-title">{carousel[heroIndex].title}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </header>
+            )}
 
             {/* Calendar Modal */}
             {showCalendar && (
@@ -147,7 +184,7 @@ export default function Feed() {
 
             {/* Controls */}
             <section className="feed-controls">
-                <div className="search-box">
+                <div className="search-box elevated">
                     <svg className="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="11" cy="11" r="8" />
                         <line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -169,16 +206,21 @@ export default function Feed() {
                 </div>
 
                 <div className="feed-filters">
-                    <div className="filter-group">
+                    <div className="chip-row" aria-label="Price filters">
                         {['all', 'paid', 'free'].map((f) => (
-                            <button key={f} className={`filter-btn ${filter === f ? 'filter-active' : ''}`} onClick={() => setFilter(f)}>
+                            <button key={f} className={`chip ${filter === f ? 'active' : ''}`} onClick={() => setFilter(f)}>
+                                <span className="dot" aria-hidden="true" />
                                 {f.charAt(0).toUpperCase() + f.slice(1)}
                             </button>
                         ))}
                     </div>
-                    <div className="feed-category-group">
+                    <div className="chip-row" aria-label="Date filters">
                         {['upcoming', 'past', 'all'].map((c) => (
-                            <button key={c} className={`feed-category-btn ${category === c ? 'feed-category-active' : ''}`} onClick={() => setCategory(c)}>
+                            <button key={c} className={`chip soft ${category === c ? 'active' : ''}`} onClick={() => setCategory(c)}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <polyline points="12 6 12 12 16 14" />
+                                </svg>
                                 {c.charAt(0).toUpperCase() + c.slice(1)}
                             </button>
                         ))}
