@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useEventRefresh } from '../../context/EventRefreshContext';
 import { fetchEvents, deleteEvent } from '../../services/eventService';
-import { Edit, Trash2, ArrowLeft, Calendar, MapPin, DollarSign, Users } from 'lucide-react';
+import { Edit, Trash2, Calendar, MapPin, Users, Search } from 'lucide-react';
 import './profile-layout.css';
 
 const OrganizerEvents = () => {
@@ -16,12 +16,18 @@ const OrganizerEvents = () => {
   const [filterTab, setFilterTab] = useState('All');
   const [deleting, setDeleting] = useState(null);
 
+  const today = useMemo(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    return now;
+  }, []);
+
   const loadOrganizerEvents = async () => {
     try {
       setLoading(true);
       const allEvents = await fetchEvents({ search });
-      
-      const identityKeys = [user.name, user.email, user.studentId]
+
+      const identityKeys = [user?.name, user?.email, user?.studentId]
         .filter(Boolean)
         .map((value) => String(value).toLowerCase().trim());
 
@@ -44,14 +50,54 @@ const OrganizerEvents = () => {
     loadOrganizerEvents();
   }, [user, search, refreshTrigger]);
 
-  const handleDelete = async (eventId) => {
-    if (!window.confirm('Are you sure you want to delete this event?')) return;
-    
+  const normalizeDate = (date) => {
+    if (!date) return null;
+    const parsed = new Date(date);
+    if (Number.isNaN(parsed)) return null;
+    parsed.setHours(0, 0, 0, 0);
+    return parsed;
+  };
+
+  const matchesSearch = (event) => {
+    const query = search.trim().toLowerCase();
+    if (!query) return true;
+    return [event.name, event.venue, event.description, event.organizedBy]
+      .filter(Boolean)
+      .some((field) => String(field).toLowerCase().includes(query));
+  };
+
+  const isUpcoming = (event) => {
+    const eventDate = normalizeDate(event.date);
+    if (!eventDate) return false;
+    return eventDate >= today;
+  };
+
+  const isPast = (event) => {
+    const eventDate = normalizeDate(event.date);
+    if (!eventDate) return false;
+    return eventDate < today;
+  };
+
+  const matchesTab = (event, tab) => {
+    if (tab === 'All') return true;
+    if (tab === 'Upcoming') return isUpcoming(event);
+    return isPast(event);
+  };
+
+  const filtered = events.filter((event) => matchesSearch(event) && matchesTab(event, filterTab));
+
+  const countForTab = (tab) =>
+    events.filter((event) => matchesSearch(event) && matchesTab(event, tab)).length;
+
+  const handleEdit = (id) => {
+    navigate(`/profile/edit-event/${id}`);
+  };
+
+  const handleDelete = async (id) => {
     try {
-      setDeleting(eventId);
-      await deleteEvent(eventId);
-      setEvents(events.filter(e => (e.id || e._id) !== eventId));
-      alert('Event deleted successfully');
+      setDeleting(id);
+      await deleteEvent(id);
+      await loadOrganizerEvents();
     } catch (err) {
       alert('Failed to delete event: ' + err.message);
     } finally {
@@ -59,270 +105,91 @@ const OrganizerEvents = () => {
     }
   };
 
-  const handleEdit = (eventId) => {
-    navigate(`/profile/edit-event/${eventId}`);
-  };
-
-  const today = new Date().toISOString().split('T')[0];
-  const filtered = events.filter(ev => {
-    if (filterTab === 'All') return true;
-    if (filterTab === 'Upcoming') return ev.date >= today;
-    if (filterTab === 'Past') return ev.date < today;
-    return true;
-  });
-
   return (
-    <div className="profile-content-wrapper">
-      {/* Back Button */}
-      <button
-        className="back-link"
-        onClick={() => navigate('/profile')}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          background: 'none',
-          border: 'none',
-          color: '#2563eb',
-          fontSize: '0.95rem',
-          fontWeight: '600',
-          cursor: 'pointer',
-          marginBottom: '2rem',
-          padding: 0,
-        }}
-      >
-        <ArrowLeft size={18} />
-        Back to Profile
-      </button>
-
-      {/* Page Header */}
-      <div className="profile-page-header" style={{ marginBottom: '2rem' }}>
+    <div className="profile-content-wrapper organizer-page">
+      <div className="profile-page-header organizer-header">
         <div>
           <h1>My Events</h1>
           <p>Manage all events you've created</p>
         </div>
       </div>
 
-      {/* Controls */}
-      <div className="organizer-controls" style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        gap: '1.5rem',
-        marginBottom: '2rem',
-        flexWrap: 'wrap',
-      }}>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          {['All', 'Upcoming', 'Past'].map(tab => (
+      <div className="organizer-controls">
+        <div className="organizer-tabs">
+          {['All', 'Upcoming', 'Past'].map((tab) => (
             <button
               key={tab}
-              className={`org-filter-tab ${filterTab === tab ? 'active' : ''}`}
+              className={`organizer-tab ${filterTab === tab ? 'active' : ''}`}
               onClick={() => setFilterTab(tab)}
-              style={{
-                padding: '0.75rem 1.25rem',
-                borderRadius: '8px',
-                border: filterTab === tab ? '2px solid #2563eb' : '1px solid #e2e8f0',
-                background: filterTab === tab ? '#eff6ff' : '#ffffff',
-                color: filterTab === tab ? '#2563eb' : '#64748b',
-                fontWeight: filterTab === tab ? '600' : '500',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-              }}
             >
-              {tab} ({filtered.filter(ev => {
-                if (tab === 'All') return true;
-                if (tab === 'Upcoming') return ev.date >= today;
-                return ev.date < today;
-              }).length})
+              {tab} ({countForTab(tab)})
             </button>
           ))}
         </div>
 
-        <div style={{
-          flex: 1,
-          minWidth: '250px',
-          maxWidth: '400px',
-        }}>
+        <div className="organizer-search">
+          <Search size={18} className="search-icon" />
           <input
             type="text"
             placeholder="Search events..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '0.75rem 1rem',
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px',
-              fontSize: '0.95rem',
-              fontFamily: 'inherit',
-            }}
+            className="organizer-search-input"
           />
         </div>
       </div>
 
-      {/* Events Grid - Portrait Cards */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-        gap: '2rem',
-      }}>
+      <div className="organizer-grid">
         {loading ? (
-          <div style={{
-            padding: '3rem',
-            textAlign: 'center',
-            color: '#94a3b8',
-            fontSize: '0.95rem',
-            gridColumn: '1 / -1',
-          }}>
-            Loading your events...
-          </div>
+          <div className="organizer-empty">Loading your events...</div>
         ) : filtered.length === 0 ? (
-          <div style={{
-            padding: '3rem',
-            textAlign: 'center',
-            color: '#94a3b8',
-            fontSize: '0.95rem',
-            gridColumn: '1 / -1',
-          }}>
-            No events found.
-          </div>
+          <div className="organizer-empty">No events found.</div>
         ) : (
-          filtered.map(event => (
-            <div
-              key={event.id || event._id}
-              style={{
-                background: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '12px',
-                padding: '1.5rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1rem',
-                transition: 'all 0.2s ease',
-                cursor: 'pointer',
-                height: '100%',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = '0 12px 24px rgba(37, 99, 235, 0.15)';
-                e.currentTarget.style.borderColor = '#2563eb';
-                e.currentTarget.style.transform = 'translateY(-4px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.borderColor = '#e2e8f0';
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            >
-              {/* Event Header */}
-              <div style={{
-                borderBottom: '1px solid #e2e8f0',
-                paddingBottom: '1rem',
-              }}>
-                <h3 style={{
-                  fontSize: '1.15rem',
-                  fontWeight: '700',
-                  color: '#0f172a',
-                  marginBottom: '0.5rem',
-                  lineHeight: '1.3',
-                }}>
-                  {event.name}
-                </h3>
-                <span style={{
-                  display: 'inline-block',
-                  padding: '0.25rem 0.75rem',
-                  borderRadius: '4px',
-                  background: event.isPaid ? '#fef3c7' : '#d1fae5',
-                  color: event.isPaid ? '#92400e' : '#065f46',
-                  fontWeight: '600',
-                  fontSize: '0.75rem',
-                }}>
+          filtered.map((event) => (
+            <div key={event.id || event._id} className="organizer-card">
+              <div className="organizer-card-header">
+                <div>
+                  <h3 className="organizer-title">{event.name}</h3>
+                  <p className="organizer-date">{event.date}</p>
+                </div>
+                <span className={`organizer-type-badge ${event.isPaid ? 'paid' : 'free'}`}>
                   {event.isPaid ? 'Paid' : 'Free'}
                 </span>
               </div>
 
-              {/* Description */}
-              <p style={{
-                color: '#64748b',
-                fontSize: '0.85rem',
-                lineHeight: '1.4',
-                flex: 1,
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-              }}>
-                {event.description}
-              </p>
+              <p className="organizer-description">{event.description}</p>
 
-              {/* Event Details */}
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.75rem',
-                fontSize: '0.85rem',
-                color: '#64748b',
-              }}>
-                {/* Date & Time */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Calendar size={16} style={{ color: '#2563eb', flexShrink: 0 }} />
+              <div className="organizer-details">
+                <div className="organizer-detail-row">
+                  <Calendar size={16} className="icon" />
                   <div>
-                    <div style={{ fontWeight: '600', color: '#0f172a' }}>{event.date}</div>
+                    <div className="organizer-detail-strong">{event.date}</div>
                     {event.startTime && (
-                      <div style={{ fontSize: '0.8rem' }}>{event.startTime} - {event.endTime || ''}</div>
+                      <div className="organizer-muted">
+                        {event.startTime} {event.endTime ? `- ${event.endTime}` : ''}
+                      </div>
                     )}
                   </div>
                 </div>
 
-                {/* Venue */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <MapPin size={16} style={{ color: '#2563eb', flexShrink: 0 }} />
-                  <span style={{ fontWeight: '500' }}>{event.venue}</span>
+                <div className="organizer-detail-row">
+                  <MapPin size={16} className="icon" />
+                  <span className="organizer-detail-strong">{event.venue}</span>
                 </div>
 
-                {/* Participants */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Users size={16} style={{ color: '#2563eb', flexShrink: 0 }} />
-                  <span style={{ fontWeight: '500' }}>
-                    {(event.participantCount ?? event.registeredStudentsCount ?? (event.registeredStudents?.length ?? 0))} Participants
+                <div className="organizer-detail-row">
+                  <Users size={16} className="icon" />
+                  <span className="organizer-detail-strong">
+                    {(event.participantCount ??
+                      event.registeredStudentsCount ??
+                      (event.registeredStudents?.length ?? 0))}{' '}
+                    Participants
                   </span>
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div style={{
-                display: 'flex',
-                gap: '0.75rem',
-                marginTop: 'auto',
-                paddingTop: '1rem',
-                borderTop: '1px solid #e2e8f0',
-              }}>
-                <button
-                  onClick={() => handleEdit(event.id || event._id)}
-                  style={{
-                    flex: 1,
-                    padding: '0.65rem 1rem',
-                    borderRadius: '8px',
-                    border: 'none',
-                    background: '#3b82f6',
-                    color: '#ffffff',
-                    cursor: 'pointer',
-                    fontWeight: '600',
-                    fontSize: '0.85rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.background = '#2563eb';
-                    e.target.style.transform = 'translateY(-2px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.background = '#3b82f6';
-                    e.target.style.transform = 'translateY(0)';
-                  }}
-                >
+              <div className="organizer-actions">
+                <button onClick={() => handleEdit(event.id || event._id)} className="organizer-edit-button">
                   <Edit size={16} />
                   Edit
                 </button>
@@ -330,31 +197,7 @@ const OrganizerEvents = () => {
                 <button
                   onClick={() => handleDelete(event.id || event._id)}
                   disabled={deleting === (event.id || event._id)}
-                  style={{
-                    flex: 1,
-                    padding: '0.65rem 1rem',
-                    borderRadius: '8px',
-                    border: 'none',
-                    background: '#ef4444',
-                    color: '#ffffff',
-                    cursor: 'pointer',
-                    fontWeight: '600',
-                    fontSize: '0.85rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem',
-                    opacity: deleting === (event.id || event._id) ? 0.6 : 1,
-                    transition: 'all 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.background = '#dc2626';
-                    e.target.style.transform = 'translateY(-2px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.background = '#ef4444';
-                    e.target.style.transform = 'translateY(0)';
-                  }}
+                  className="organizer-delete-button"
                 >
                   <Trash2 size={16} />
                   {deleting === (event.id || event._id) ? 'Deleting...' : 'Delete'}

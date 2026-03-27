@@ -96,7 +96,7 @@ export default function QrValidationPage() {
         </div>
       </div>
 
-      <div style={{ maxWidth: '600px' }}>
+      <div style={{ maxWidth: '720px', margin: '0 auto' }}>
         <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '12px', marginBottom: '32px' }}>
           <input
             ref={inputRef}
@@ -108,7 +108,16 @@ export default function QrValidationPage() {
             onChange={(e) => setToken(e.target.value)}
             disabled={loading}
           />
-          <button type="button" className="btn btn-secondary" onClick={() => setShowScanner(!showScanner)} style={{ whiteSpace: 'nowrap' }}>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => setShowScanner(!showScanner)}
+            style={{ whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M23 19V7a2 2 0 0 0-2-2h-3.17a2 2 0 0 1-1.66-.9l-.34-.5A2 2 0 0 0 14.17 3h-4.34a2 2 0 0 0-1.66.9l-.34.5A2 2 0 0 1 6.17 5H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2Z" />
+              <circle cx="12" cy="13" r="4" />
+            </svg>
             {showScanner ? 'Cancel Camera' : 'Scan with Camera'}
           </button>
           <button type="submit" className="btn btn-primary" disabled={loading || !token.trim()}>

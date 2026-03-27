@@ -86,7 +86,7 @@ export default function MyRegistrationsPage() {
         <button className="btn btn-ghost" onClick={() => navigate('/profile/browse-events')}>Browse Events</button>
       </div>
 
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '24px' }}>
+      <div className="reg-filter-bar">
         <button className={`btn ${filter === 'all' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setFilter('all')}>All Events</button>
         <button className={`btn ${filter === 'free' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setFilter('free')}>Free Events</button>
         <button className={`btn ${filter === 'paid' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setFilter('paid')}>Paid Events</button>

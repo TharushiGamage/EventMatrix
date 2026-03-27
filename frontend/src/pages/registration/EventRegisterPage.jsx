@@ -156,9 +156,9 @@ export default function EventRegisterPage() {
         </div>
       ) : (
       <div className="reg-form-card">
-        <div className="reg-form-header" style={{ marginBottom: '24px' }}>
-          <h1 className="form-page-title" style={{ marginBottom: '4px' }}>Event Registration</h1>
-          <p className="form-page-subtitle" style={{ margin: 0, maxWidth: 'none' }}>
+        <div className="reg-form-header">
+          <h1 className="form-page-title">Event Registration</h1>
+          <p className="form-page-subtitle reg-form-subtitle">
             {event?.isPaid
               ? "Fill in your details. You'll upload your payment receipt in the next step."
               : 'Fill in your details to confirm your spot.'}
@@ -166,7 +166,7 @@ export default function EventRegisterPage() {
         </div>
 
         {error && (
-          <div className="error-banner" style={{ marginBottom: '20px' }}>
+          <div className="error-banner reg-error-banner">
             <span>{error}</span>
             <button onClick={() => setError('')}>×</button>
           </div>

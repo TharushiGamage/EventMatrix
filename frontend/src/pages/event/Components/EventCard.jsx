@@ -140,7 +140,7 @@ export default function EventCard({ event, onDelete }) {
                 {isStudent && isUpcoming && (
                     <button
                         className="btn btn-primary btn-sm event-card-register-btn"
-                        onClick={() => navigate(`/register-event/${event.id}`)}
+                        onClick={() => navigate(`/profile/register-event/${event.id}`)}
                     >
                         Register
                     </button>

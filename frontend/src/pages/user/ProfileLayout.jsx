@@ -62,6 +62,7 @@ const ProfileLayout = () => {
     if (location.pathname === '/profile/create-event') return 'Create Event';
     if (location.pathname.startsWith('/profile/edit-event')) return 'Edit Event';
     if (location.pathname === '/profile/my-events') return 'My Events';
+    if (location.pathname.startsWith('/profile/register-event')) return 'Event Registration';
     if (location.pathname === '/profile/validate-qr') return 'Scan Ticket QR';
     if (location.pathname === '/profile/my-registrations') return 'My Registrations';
 

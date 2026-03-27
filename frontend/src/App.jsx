@@ -85,6 +85,7 @@ function App() {
               <Route path="/profile/my-events" element={<OrganizerEvents />} />
               <Route path="/profile/validate-qr" element={<QrValidationPage />} />
               <Route path="/profile/my-registrations" element={<MyRegistrationsPage />} />
+              <Route path="/profile/register-event/:eventId" element={<EventRegisterPage />} />
             </Route>
           </Route>
 
