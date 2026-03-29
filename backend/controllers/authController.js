@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 const generateToken = require('../utils/generateToken');
 const { sendOtpEmail } = require('../utils/emailService');
 
@@ -24,6 +25,20 @@ const registerUser = async (req, res) => {
 
     const user = await User.create({ name, email, studentId, password, phone });
     console.log('User registered successfully:', user._id);
+
+    // Notify admins
+    if (user.role === 'Student') {
+      const admins = await User.find({ role: 'Admin' });
+      for (const admin of admins) {
+        await Notification.create({
+          recipient: admin._id,
+          message: `New student registered: ${user.name}`,
+          type: 'new_user',
+          relatedUser: user._id
+        });
+      }
+    }
+
     res.status(201).json({
       success: true,
       message: 'Registration successful',

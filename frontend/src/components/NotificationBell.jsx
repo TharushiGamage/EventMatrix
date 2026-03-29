@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { notificationService } from '../services/registrationService';
+import { useNavigate } from 'react-router-dom';
 
 export default function NotificationBell() {
   const [data, setData]       = useState({ notifications: [], unreadCount: 0 });
   const [open, setOpen]       = useState(false);
   const [loading, setLoading] = useState(false);
   const dropdownRef           = useRef(null);
+  const navigate = useNavigate();
 
   const load = useCallback(async () => {
     try {
@@ -48,6 +50,22 @@ export default function NotificationBell() {
     }));
   };
 
+  const handleNotificationClick = (notification) => {
+    // Mark as read first
+    handleMarkRead(notification._id);
+    setOpen(false);
+
+    // Navigate based on type
+    if (notification.type === 'new_user' && notification.relatedUser) {
+      navigate(`/admin/users?userId=${notification.relatedUser}`);
+    } else if (notification.type === 'new_event' && notification.relatedEvent) {
+      navigate(`/feed/${notification.relatedEvent}`);
+    } else if (['registration_approved', 'registration_rejected', 'waitlist_available'].includes(notification.type)) {
+      navigate('/my-registrations');
+    }
+    // Add other navigation logic here if needed
+  };
+
   const handleMarkAllRead = async () => {
     await notificationService.markAllRead();
     setData(prev => ({
@@ -61,6 +79,7 @@ export default function NotificationBell() {
     if (type === 'registration_approved') return '✅';
     if (type === 'registration_rejected') return '❌';
     if (type === 'waitlist_available')    return '🔔';
+    if (type === 'new_user')              return '👤';
     return '📋';
   };
 
@@ -98,27 +117,32 @@ export default function NotificationBell() {
           </div>
 
           <div className="notif-list">
-            {loading && data.notifications.length === 0 ? (
-              <div className="notif-empty">
-                <div className="spinner-sm" />
-              </div>
+            {loading ? (
+              <div className="notif-item notif-loading">Loading...</div>
             ) : data.notifications.length === 0 ? (
-              <div className="notif-empty">
-                <span>No notifications yet</span>
-              </div>
+              <div className="notif-item notif-empty">No new notifications</div>
             ) : (
-              data.notifications.slice(0, 10).map(n => (
+              data.notifications.map(n => (
                 <div
                   key={n._id}
-                  className={`notif-item ${!n.isRead ? 'notif-item-unread' : ''}`}
-                  onClick={() => !n.isRead && handleMarkRead(n._id)}
+                  className={`notif-item ${n.isRead ? 'read' : ''}`}
+                  onClick={() => handleNotificationClick(n)}
                 >
-                  <span className="notif-icon">{typeIcon(n.type)}</span>
-                  <div className="notif-body">
+                  <div className="notif-icon">{typeIcon(n.type)}</div>
+                  <div className="notif-content">
                     <p className="notif-message">{n.message}</p>
                     <span className="notif-time">{formatDate(n.createdAt)}</span>
                   </div>
-                  {!n.isRead && <span className="notif-dot" />}
+                  {!n.isRead && (
+                    <button
+                      className="notif-mark-one-read"
+                      title="Mark as read"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMarkRead(n._id);
+                      }}
+                    />
+                  )}
                 </div>
               ))
             )}

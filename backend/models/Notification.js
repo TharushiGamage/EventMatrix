@@ -26,7 +26,8 @@ const notificationSchema = new mongoose.Schema({
       'registration_request',
       'registration_confirmed',
       'new_registration',
-      'new_event'
+      'new_event',
+      'new_user'
     ],
     required: true
   },
@@ -40,6 +41,11 @@ const notificationSchema = new mongoose.Schema({
   relatedRegistration: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Registration',
+    default: null
+  },
+  relatedUser: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     default: null
   },
 

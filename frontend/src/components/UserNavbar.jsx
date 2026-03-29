@@ -236,7 +236,7 @@ const UserNavbar = () => {
                 )}
 
                 {/* Notification bell (Student + Organizer) */}
-                {(user.role === 'Student' || user.role === 'Organizer') && (
+                {(user.role === 'Student' || user.role === 'Organizer' || user.role === 'Admin') && (
                   <NotificationBell />
                 )}
 
