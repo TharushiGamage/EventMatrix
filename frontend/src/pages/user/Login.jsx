@@ -106,11 +106,11 @@ const Login = () => {
 
         {error && <div className="auth-error">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="auth-form" autoComplete="off">
+        <form onSubmit={handleSubmit} className="auth-form" autoComplete="on">
           <div className="auth-field">
             <label htmlFor="email">Email Address <span className="required-star">*</span></label>
             {emailError && <div className="field-error">{emailError}</div>}
-            <input id="email" name="login_email" autoComplete="off" type="email" value={email} onChange={handleEmailChange} onBlur={handleEmailBlur} placeholder="you@university.edu" className={emailError ? 'input-error' : ''} />
+            <input id="email" name="email" autoComplete="email" type="email" value={email} onChange={handleEmailChange} onBlur={handleEmailBlur} placeholder="you@university.edu" className={emailError ? 'input-error' : ''} />
           </div>
           <div className="auth-field">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
@@ -118,7 +118,7 @@ const Login = () => {
               <Link to="/forgot-password" style={{ fontSize: '13px', color: '#2563eb', textDecoration: 'none', fontWeight: '500' }}>Forgot password?</Link>
             </div>
             {passwordError && <div className="field-error">{passwordError}</div>}
-            <input id="password" name="login_password" autoComplete="current-password" type="password" value={password} onChange={handlePasswordChange} onBlur={handlePasswordBlur} placeholder="••••••••" className={passwordError ? 'input-error' : ''} />
+            <input id="password" name="password" autoComplete="current-password" type="password" value={password} onChange={handlePasswordChange} onBlur={handlePasswordBlur} placeholder="••••••••" className={passwordError ? 'input-error' : ''} />
           </div>
           <button type="submit" className="auth-btn" disabled={loading}>
             {loading ? 'Signing in...' : 'Sign In'}
