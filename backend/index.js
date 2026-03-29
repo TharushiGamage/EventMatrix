@@ -34,9 +34,9 @@ app.use('/uploaded_receipts', express.static(path.join(__dirname, 'uploaded_rece
 // Routes
 app.use('/api/v1/events', eventRoutes);
 app.use('/api/v1/feed', feedRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/profile', profileRoutes);
-app.use('/api/admin', adminRoutes);
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/profile', profileRoutes);
+app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/registrations', registrationRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 
