@@ -107,12 +107,12 @@ const Login = () => {
             <input id="email" name="login_email" autoComplete="off" type="email" value={email} onChange={handleEmailChange} onBlur={handleEmailBlur} placeholder="you@university.edu" className={emailError ? 'input-error' : ''} />
           </div>
           <div className="auth-field">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <label htmlFor="password" style={{ marginBottom: 0 }}>Password <span className="required-star">*</span></label>
-              <Link to="/forgot-password" style={{ fontSize: '13px', color: '#2563eb', textDecoration: 'none', fontWeight: '500' }}>Forgot password?</Link>
-            </div>
+            <label htmlFor="password">Password <span className="required-star">*</span></label>
             {passwordError && <div className="field-error">{passwordError}</div>}
             <input id="password" name="login_password" autoComplete="current-password" type="password" value={password} onChange={handlePasswordChange} onBlur={handlePasswordBlur} placeholder="••••••••" className={passwordError ? 'input-error' : ''} />
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+              <Link to="/forgot-password" style={{ fontSize: '13px', color: '#2563eb', textDecoration: 'none', fontWeight: '500' }}>Forgot password?</Link>
+            </div>
           </div>
           <button type="submit" className="auth-btn" disabled={loading}>
             {loading ? 'Signing in...' : 'Sign In'}
