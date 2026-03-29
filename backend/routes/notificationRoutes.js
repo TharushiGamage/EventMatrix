@@ -5,6 +5,7 @@ const {
     getMyNotifications,
     markAsRead,
     markAllAsRead,
+    clearAllNotifications,
 } = require('../controllers/notificationController');
 
 // All notification routes require authentication (any role)
@@ -14,6 +15,9 @@ router.get('/', protect, getMyNotifications);
 
 // Mark all my notifications as read
 router.put('/read-all', protect, markAllAsRead);
+
+// Clear all my notifications
+router.delete('/clear-all', protect, clearAllNotifications);
 
 // Mark a single notification as read
 router.put('/:id/read', protect, markAsRead);

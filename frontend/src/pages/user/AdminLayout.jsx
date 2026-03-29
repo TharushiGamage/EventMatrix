@@ -116,7 +116,10 @@ const AdminLayout = () => {
 
           <div className="topbar-right">
             <div className="topbar-notifications">
-              <NotificationBell />
+              <button className="notification-bell">
+                <Bell size={20} />
+                <span className="notification-badge">3</span>
+              </button>
             </div>
             <div className="topbar-divider"></div>
             <div className="topbar-profile" onClick={() => setProfileDropdownOpen(!profileDropdownOpen)} style={{ cursor: 'pointer', position: 'relative' }}>

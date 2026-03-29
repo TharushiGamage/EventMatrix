@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { notificationService } from '../services/registrationService';
+import { notificationService } from '../services/notificationService';
 import { useNavigate } from 'react-router-dom';
 
 export default function NotificationBell() {
@@ -40,7 +40,7 @@ export default function NotificationBell() {
   }, []);
 
   const handleMarkRead = async (id) => {
-    await notificationService.markRead(id);
+    await notificationService.markAsRead(id);
     setData(prev => ({
       ...prev,
       unreadCount: Math.max(0, prev.unreadCount - 1),
@@ -52,7 +52,9 @@ export default function NotificationBell() {
 
   const handleNotificationClick = (notification) => {
     // Mark as read first
-    handleMarkRead(notification._id);
+    if (!notification.isRead) {
+      handleMarkRead(notification._id);
+    }
     setOpen(false);
 
     // Navigate based on type
@@ -67,7 +69,7 @@ export default function NotificationBell() {
   };
 
   const handleMarkAllRead = async () => {
-    await notificationService.markAllRead();
+    await notificationService.markAllAsRead();
     setData(prev => ({
       ...prev,
       unreadCount: 0,
@@ -75,11 +77,18 @@ export default function NotificationBell() {
     }));
   };
 
+  const handleClearAll = async () => {
+    await notificationService.clearAll();
+    setData({ notifications: [], unreadCount: 0 });
+    setOpen(false);
+  };
+
   const typeIcon = (type) => {
     if (type === 'registration_approved') return '✅';
     if (type === 'registration_rejected') return '❌';
     if (type === 'waitlist_available')    return '🔔';
     if (type === 'new_user')              return '👤';
+    if (type === 'new_event')             return '🎉';
     return '📋';
   };
 
@@ -87,6 +96,9 @@ export default function NotificationBell() {
     const d = new Date(iso);
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
+
+  const unreadNotifications = data.notifications.filter(n => !n.isRead);
+  const readNotifications = data.notifications.filter(n => n.isRead);
 
   return (
     <div className="notif-bell-wrapper" ref={dropdownRef}>
@@ -109,11 +121,18 @@ export default function NotificationBell() {
         <div className="notif-dropdown">
           <div className="notif-dropdown-header">
             <span className="notif-dropdown-title">Notifications</span>
-            {data.unreadCount > 0 && (
-              <button className="notif-mark-all" onClick={handleMarkAllRead}>
-                Mark all read
-              </button>
-            )}
+            <div>
+              {data.unreadCount > 0 && (
+                <button className="notif-mark-all" onClick={handleMarkAllRead}>
+                  Mark all read
+                </button>
+              )}
+              {data.notifications.length > 0 && (
+                <button className="notif-clear-all" onClick={handleClearAll}>
+                  Clear All
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="notif-list">
@@ -122,29 +141,54 @@ export default function NotificationBell() {
             ) : data.notifications.length === 0 ? (
               <div className="notif-item notif-empty">No new notifications</div>
             ) : (
-              data.notifications.map(n => (
-                <div
-                  key={n._id}
-                  className={`notif-item ${n.isRead ? 'read' : ''}`}
-                  onClick={() => handleNotificationClick(n)}
-                >
-                  <div className="notif-icon">{typeIcon(n.type)}</div>
-                  <div className="notif-content">
-                    <p className="notif-message">{n.message}</p>
-                    <span className="notif-time">{formatDate(n.createdAt)}</span>
+              <>
+                {unreadNotifications.length > 0 && (
+                  <div className="notif-section">
+                    <h4 className="notif-section-title">Unread</h4>
+                    {unreadNotifications.map(n => (
+                      <div
+                        key={n._id}
+                        className={`notif-item ${n.isRead ? 'read' : ''}`}
+                        onClick={() => handleNotificationClick(n)}
+                      >
+                        <div className="notif-icon">{typeIcon(n.type)}</div>
+                        <div className="notif-content">
+                          <p className="notif-message">{n.message}</p>
+                          <span className="notif-time">{formatDate(n.createdAt)}</span>
+                        </div>
+                        {!n.isRead && (
+                          <button
+                            className="notif-mark-one-read"
+                            title="Mark as read"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleMarkRead(n._id);
+                            }}
+                          />
+                        )}
+                      </div>
+                    ))}
                   </div>
-                  {!n.isRead && (
-                    <button
-                      className="notif-mark-one-read"
-                      title="Mark as read"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleMarkRead(n._id);
-                      }}
-                    />
-                  )}
-                </div>
-              ))
+                )}
+                {readNotifications.length > 0 && (
+                  <div className="notif-section">
+                    <h4 className="notif-section-title">Read</h4>
+                    {readNotifications.map(n => (
+                      <div
+                        key={n._id}
+                        className={`notif-item ${n.isRead ? 'read' : ''}`}
+                        onClick={() => handleNotificationClick(n)}
+                      >
+                        <div className="notif-icon">{typeIcon(n.type)}</div>
+                        <div className="notif-content">
+                          <p className="notif-message">{n.message}</p>
+                          <span className="notif-time">{formatDate(n.createdAt)}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -152,3 +196,4 @@ export default function NotificationBell() {
     </div>
   );
 }
+
