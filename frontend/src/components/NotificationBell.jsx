@@ -97,9 +97,6 @@ export default function NotificationBell() {
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
 
-  const unreadNotifications = data.notifications.filter(n => !n.isRead);
-  const readNotifications = data.notifications.filter(n => n.isRead);
-
   return (
     <div className="notif-bell-wrapper" ref={dropdownRef}>
       <button
@@ -141,54 +138,29 @@ export default function NotificationBell() {
             ) : data.notifications.length === 0 ? (
               <div className="notif-item notif-empty">No new notifications</div>
             ) : (
-              <>
-                {unreadNotifications.length > 0 && (
-                  <div className="notif-section">
-                    <h4 className="notif-section-title">Unread</h4>
-                    {unreadNotifications.map(n => (
-                      <div
-                        key={n._id}
-                        className={`notif-item ${n.isRead ? 'read' : ''}`}
-                        onClick={() => handleNotificationClick(n)}
-                      >
-                        <div className="notif-icon">{typeIcon(n.type)}</div>
-                        <div className="notif-content">
-                          <p className="notif-message">{n.message}</p>
-                          <span className="notif-time">{formatDate(n.createdAt)}</span>
-                        </div>
-                        {!n.isRead && (
-                          <button
-                            className="notif-mark-one-read"
-                            title="Mark as read"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleMarkRead(n._id);
-                            }}
-                          />
-                        )}
-                      </div>
-                    ))}
+              data.notifications.map(n => (
+                <div
+                  key={n._id}
+                  className={`notif-item ${n.isRead ? 'read' : ''}`}
+                  onClick={() => handleNotificationClick(n)}
+                >
+                  <div className="notif-icon">{typeIcon(n.type)}</div>
+                  <div className="notif-content">
+                    <p className="notif-message">{n.message}</p>
+                    <span className="notif-time">{formatDate(n.createdAt)}</span>
                   </div>
-                )}
-                {readNotifications.length > 0 && (
-                  <div className="notif-section">
-                    <h4 className="notif-section-title">Read</h4>
-                    {readNotifications.map(n => (
-                      <div
-                        key={n._id}
-                        className={`notif-item ${n.isRead ? 'read' : ''}`}
-                        onClick={() => handleNotificationClick(n)}
-                      >
-                        <div className="notif-icon">{typeIcon(n.type)}</div>
-                        <div className="notif-content">
-                          <p className="notif-message">{n.message}</p>
-                          <span className="notif-time">{formatDate(n.createdAt)}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
+                  {!n.isRead && (
+                    <button
+                      className="notif-mark-one-read"
+                      title="Mark as read"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMarkRead(n._id);
+                      }}
+                    />
+                  )}
+                </div>
+              ))
             )}
           </div>
         </div>
