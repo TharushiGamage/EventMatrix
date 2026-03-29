@@ -13,7 +13,7 @@ const Login = () => {
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, user: contextUser } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -31,14 +31,20 @@ const Login = () => {
     try {
       console.log('Attempting login for:', email);
       const res = await login({ email, password });
-      console.log('Login successful');
+      console.log('Login successful:', res);
 
-      // Redirect based on role
-      const userRole = res?.data?.role || res?.role;
+      // Determine user role from multiple possible locations
+      let userRole = res?.data?.role || res?.role || contextUser?.role;
+      console.log('User role from response:', res?.data?.role || res?.role);
+      console.log('User role from context:', contextUser?.role);
+      console.log('Final user role:', userRole);
+      
       if (userRole === 'Admin') {
-        navigate('/admin');
+        console.log('Redirecting admin to /admin');
+        navigate('/admin', { replace: true });
       } else {
-        navigate('/feed');
+        console.log('Redirecting user to /feed');
+        navigate('/feed', { replace: true });
       }
     } catch (err) {
       console.error('Login error caught:', err);

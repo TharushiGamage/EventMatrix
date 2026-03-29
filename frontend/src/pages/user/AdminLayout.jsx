@@ -1,7 +1,8 @@
 import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom';
-import { Bell, LogOut, LayoutDashboard, Folder, Users, Calendar, BookOpen, ChevronRight, Menu, X, ShieldCheck } from 'lucide-react';
+import { LogOut, LayoutDashboard, Folder, Users, Calendar, BookOpen, ChevronRight, Menu, X, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import NotificationBell from '../../components/NotificationBell';
 import './admin-layout.css';
 
 const AdminLayout = () => {
@@ -108,17 +109,14 @@ const AdminLayout = () => {
         <header className="admin-topbar">
           <div className="topbar-left">
             <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
-              {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+              {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
             <div className="topbar-title">Admin Panel</div>
           </div>
 
           <div className="topbar-right">
             <div className="topbar-notifications">
-              <button className="notification-bell">
-                <Bell size={20} />
-                <span className="notification-badge">3</span>
-              </button>
+              <NotificationBell />
             </div>
             <div className="topbar-divider"></div>
             <div className="topbar-profile" onClick={() => setProfileDropdownOpen(!profileDropdownOpen)} style={{ cursor: 'pointer', position: 'relative' }}>

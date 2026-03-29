@@ -26,19 +26,27 @@ const AdminEvents = () => {
       setEvents(ev || []);
 
       // fetch registrations and build participants count per event id
-      const regRes = await adminService.getStudentRegistrations();
-      const regs = regRes.data || [];
-      const map = {};
-      regs.forEach(item => {
-        (item.events || []).forEach(e => {
-          if (!e) return;
-          const id = e.id || e._id || e.id;
-          map[id] = (map[id] || 0) + 1;
+      // treat registrations as optional — don't fail the entire page if this call fails
+      try {
+        const regRes = await adminService.getStudentRegistrations();
+        const regs = regRes.data || [];
+        const map = {};
+        regs.forEach(item => {
+          (item.events || []).forEach(e => {
+            if (!e) return;
+            const id = e.id || e._id || e.id;
+            map[id] = (map[id] || 0) + 1;
+          });
         });
-      });
-      setParticipantsMap(map);
+        setParticipantsMap(map);
+      } catch (regErr) {
+        // silently fail for registrations — still show events
+        console.warn('Failed to load participant counts:', regErr.message);
+      }
     } catch (err) {
-      showToast('Failed loading events data');
+      console.error('Failed to load events:', err.message);
+      // don't show alert — let page load with empty state
+      setEvents([]);
     } finally {
       setLoading(false);
     }
