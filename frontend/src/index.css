@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+/* User Management module base overrides */
+body {
+  background: #0f1117;
+  color: #f1f5f9;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { text-decoration: none; color: inherit; }
