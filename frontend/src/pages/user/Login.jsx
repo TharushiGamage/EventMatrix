@@ -27,6 +27,7 @@ const Login = () => {
     setPasswordTouched(true);
     const pErr = validatePasswordValue(password);
     if (pErr) { setPasswordError(pErr); return; }
+    
     setLoading(true);
     try {
       console.log('Attempting login for:', email);
@@ -42,6 +43,9 @@ const Login = () => {
       if (userRole === 'Admin') {
         console.log('Redirecting admin to /admin');
         navigate('/admin', { replace: true });
+      } else if (userRole === 'ResourceManager') {
+        console.log('Redirecting resource manager to /resource-manager');
+        navigate('/resource-manager', { replace: true });
       } else {
         console.log('Redirecting user to /feed');
         navigate('/feed', { replace: true });

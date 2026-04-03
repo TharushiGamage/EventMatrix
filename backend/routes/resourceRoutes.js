@@ -12,11 +12,11 @@ const {
 
 router.use(protect);
 
-router.get('/', authorize('Organizer', 'Admin'), getResources);
-router.get('/stats', authorize('Organizer', 'Admin'), getResourceStats);
-router.get('/bookings', authorize('Organizer', 'Admin'), getBookings);
-router.post('/check-availability', authorize('Organizer', 'Admin'), checkResourceAvailability);
-router.post('/bookings', authorize('Organizer', 'Admin'), createResourceBooking);
-router.post('/', authorize('Admin'), createResource);
+router.get('/', authorize('Organizer', 'Admin', 'ResourceManager'), getResources);
+router.get('/stats', authorize('Organizer', 'Admin', 'ResourceManager'), getResourceStats);
+router.get('/bookings', authorize('Organizer', 'Admin', 'ResourceManager'), getBookings);
+router.post('/check-availability', authorize('Organizer', 'Admin', 'ResourceManager'), checkResourceAvailability);
+router.post('/bookings', authorize('Organizer', 'Admin', 'ResourceManager'), createResourceBooking);
+router.post('/', authorize('Admin', 'ResourceManager'), createResource);
 
 module.exports = router;

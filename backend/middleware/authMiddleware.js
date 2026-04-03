@@ -10,6 +10,20 @@ const protect = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Handle hardcoded ResourceManager system user
+    if (decoded.id === 'resource-manager-system') {
+      req.user = {
+        _id: 'resource-manager-system',
+        name: 'Resource Manager',
+        email: 'resourcemanager@eventmatrix.edu',
+        role: 'ResourceManager',
+        studentId: 'RM-SYSTEM',
+        status: 'Active'
+      };
+      return next();
+    }
+    
     req.user = await User.findById(decoded.id);
     if (!req.user) return res.status(401).json({ success: false, message: 'User not found' });
     if (req.user.status === 'Suspended' && req.user.role !== 'Admin') {

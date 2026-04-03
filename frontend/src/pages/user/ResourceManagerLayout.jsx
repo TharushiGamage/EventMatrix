@@ -1,15 +1,15 @@
 import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom';
-import { LogOut, LayoutDashboard, Folder, Users, Calendar, BookOpen, ChevronRight, Menu, X, ShieldCheck, Package } from 'lucide-react';
+import { LogOut, Package, BookOpen, ChevronRight, Menu, X, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import NotificationBell from '../../components/NotificationBell';
 import './admin-layout.css';
 
-const AdminLayout = () => {
+const ResourceManagerLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -32,10 +32,10 @@ const AdminLayout = () => {
       <aside className={`admin-sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
         <div className="admin-sidebar-header">
           <div className="admin-logo">
-            <div className="logo-icon">EM</div>
+            <div className="logo-icon">RM</div>
             <div className="logo-text">
               <div className="logo-title">EventMatrix</div>
-              <div className="logo-subtitle">Admin</div>
+              <div className="logo-subtitle">Resource Mgr</div>
             </div>
           </div>
         </div>
@@ -43,48 +43,36 @@ const AdminLayout = () => {
         <nav className="admin-sidebar-menu">
           <div className="menu-section">
             <div className="menu-section-title">Main</div>
-            <NavLink to="/admin" end className={({ isActive }) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+            <NavLink to="/resource-manager" end className={({ isActive }) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
               <div className="link-left">
-                <LayoutDashboard size={20} />
-                <span>Dashboard</span>
+                <Package size={20} />
+                <span>Resources</span>
               </div>
             </NavLink>
           </div>
 
           <div className="menu-section">
             <div className="menu-section-title">Management</div>
-            <NavLink to="/admin/users" className={({ isActive }) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+            <NavLink to="/resource-manager/bookings" className={({ isActive }) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
               <div className="link-left">
-                <Users size={20} />
-                <span>Users</span>
+                <BookOpen size={20} />
+                <span>Bookings</span>
               </div>
               <ChevronRight className="caret-icon" size={16} />
             </NavLink>
-
-            <NavLink to="/admin/events" className={({ isActive }) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
-              <div className="link-left">
-                <Calendar size={20} />
-                <span>Events</span>
-              </div>
-              <ChevronRight className="caret-icon" size={16} />
-            </NavLink>
-
-            {/* Resources now managed via ResourceManager role */}
           </div>
-
-          
 
           <div className="menu-section">
             <div className="menu-section-title">Account</div>
-            <NavLink to="/admin/account/general" className={({ isActive }) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+            <NavLink to="/resource-manager/account/general" className={({ isActive }) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
               <div className="link-left">
-                <Users size={20} />
+                <ShieldCheck size={20} />
                 <span>General Info</span>
               </div>
               <ChevronRight className="caret-icon" size={16} />
             </NavLink>
 
-            <NavLink to="/admin/account/security" className={({ isActive }) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
+            <NavLink to="/resource-manager/account/security" className={({ isActive }) => `admin-sidebar-link ${isActive ? 'active' : ''}`}>
               <div className="link-left">
                 <ShieldCheck size={20} />
                 <span>Personal Security</span>
@@ -103,7 +91,7 @@ const AdminLayout = () => {
             <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
               {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
-            <div className="topbar-title">Admin Panel</div>
+            <div className="topbar-title">Resource Manager Panel</div>
           </div>
 
           <div className="topbar-right">
@@ -112,10 +100,10 @@ const AdminLayout = () => {
             </div>
             <div className="topbar-divider"></div>
             <div className="topbar-profile" onClick={() => setProfileDropdownOpen(!profileDropdownOpen)} style={{ cursor: 'pointer', position: 'relative' }}>
-              <div className="profile-avatar">A</div>
+              <div className="profile-avatar">{user?.name?.charAt(0).toUpperCase() || 'R'}</div>
               <div className="profile-info">
-                <div className="profile-name">Admin</div>
-                <div className="profile-role">System Administrator</div>
+                <div className="profile-name">{user?.name || 'Resource Manager'}</div>
+                <div className="profile-role">Resource Manager</div>
               </div>
 
               {profileDropdownOpen && (
@@ -162,4 +150,4 @@ const AdminLayout = () => {
   );
 };
 
-export default AdminLayout;
+export default ResourceManagerLayout;

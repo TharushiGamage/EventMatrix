@@ -29,6 +29,7 @@ import AdminLayout from './pages/user/AdminLayout';
 import AdminDashboard from './pages/user/AdminDashboard';
 import AdminStudents from './pages/user/AdminStudents';
 import AdminEvents from './pages/user/AdminEvents';
+import ResourceManagerLayout from './pages/user/ResourceManagerLayout';
 
 
 // Registration & Payment pages (Dushan's feature)
@@ -42,10 +43,10 @@ import ResourceManagement from './pages/resource/ResourceManagement';
 
 import './App.css';
 
-// Conditionally render UserNavbar — hide on profile & admin layout pages
+// Conditionally render UserNavbar — hide on profile & admin & resource-manager layout pages
 const ConditionalNavbar = () => {
   const { pathname } = useLocation();
-  const hideNavbar = pathname.startsWith('/profile') || pathname.startsWith('/admin');
+  const hideNavbar = pathname.startsWith('/profile') || pathname.startsWith('/admin') || pathname.startsWith('/resource-manager');
   return hideNavbar ? null : <UserNavbar />;
 };
 
@@ -110,7 +111,16 @@ function App() {
               <Route path="/admin/students" element={<AdminStudents />} />
               <Route path="/admin/account/general" element={<ProfileGeneral />} />
               <Route path="/admin/account/security" element={<ProfileSecurity />} />
-              <Route path="/admin/resources" element={<ResourceManagement />} />
+            </Route>
+          </Route>
+
+          {/* Resource Manager-only routes */}
+          <Route element={<RoleBasedRoute allowedRoles={['ResourceManager']} />}>
+            <Route element={<ResourceManagerLayout />}>
+              <Route path="/resource-manager" element={<ResourceManagement />} />
+              <Route path="/resource-manager/bookings" element={<ResourceManagement />} />
+              <Route path="/resource-manager/account/general" element={<ProfileGeneral />} />
+              <Route path="/resource-manager/account/security" element={<ProfileSecurity />} />
             </Route>
           </Route>
         </Routes>

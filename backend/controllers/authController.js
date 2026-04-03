@@ -59,6 +59,25 @@ const loginUser = async (req, res) => {
     if (!email || !password)
       return res.status(400).json({ success: false, message: 'Please provide email and password' });
 
+    // Check for hardcoded ResourceManager credentials
+    const rmEmail = 'resourcemanager@gmail.com';
+    const rmPassword = 'ResourceManager123';
+    
+    if (email.toLowerCase() === rmEmail.toLowerCase() && password === rmPassword) {
+      console.log('ResourceManager hardcoded login successful');
+      return res.json({
+        success: true,
+        data: { 
+          _id: 'resource-manager-system', 
+          name: 'Resource Manager', 
+          email: rmEmail, 
+          role: 'ResourceManager', 
+          studentId: 'RM-SYSTEM',
+          token: generateToken('resource-manager-system') 
+        }
+      });
+    }
+
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
       console.log('Login failed: User not found for email:', email);

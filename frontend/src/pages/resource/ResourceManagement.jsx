@@ -17,7 +17,7 @@ function StatusBadge({ status }) {
 
 function ResourceManagement() {
   const { user } = useAuth();
-  const isAdmin = user?.role === 'Admin';
+  const isAdmin = user?.role === 'Admin' || user?.role === 'ResourceManager';
   const organizerName = user?.name || user?.username || '';
 
   const [resources, setResources] = useState([]);
