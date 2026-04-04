@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Event = require('../models/Event');
 const Registration = require('../models/Registration');
+const Notification = require('../models/Notification');
 
 // GET /api/admin/users?search=&role=
 const getUsers = async (req, res) => {
@@ -156,4 +157,86 @@ const deleteUser = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, updateUserRole, updateUserStatus, unlockUser, getOrganizerEvents, getStudentRegistrations, deleteUser };
+// POST /api/admin/events/:eventId/request-edit
+const requestEventEdit = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const { reason = '' } = req.body;
+
+    // Find the event by id (custom id field, not MongoDB _id)
+    const event = await Event.findOne({ id: eventId });
+    if (!event) {
+      return res.status(404).json({ success: false, message: 'Event not found' });
+    }
+
+    // Find the organizer by name (organizedBy stores organization/user name)
+    const organizer = await User.findOne({ 
+      $or: [
+        { organizationName: event.organizedBy },
+        { name: event.organizedBy }
+      ]
+    });
+
+    if (!organizer) {
+      return res.status(404).json({ success: false, message: 'Organizer not found' });
+    }
+
+    // Create notification
+    const message = `Admin has requested to edit event "${event.name}"${reason ? ': ' + reason : ''}`;
+    const notification = await Notification.create({
+      recipient: organizer._id,
+      message,
+      type: 'event_edit_request',
+      relatedEvent: event._id,
+      relatedUser: req.user._id
+    });
+
+    res.json({ success: true, message: 'Edit request sent to organizer', data: notification });
+  } catch (error) {
+    console.error('requestEventEdit error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// POST /api/admin/events/:eventId/request-delete
+const requestEventDelete = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const { reason = '' } = req.body;
+
+    // Find the event by id
+    const event = await Event.findOne({ id: eventId });
+    if (!event) {
+      return res.status(404).json({ success: false, message: 'Event not found' });
+    }
+
+    // Find the organizer
+    const organizer = await User.findOne({ 
+      $or: [
+        { organizationName: event.organizedBy },
+        { name: event.organizedBy }
+      ]
+    });
+
+    if (!organizer) {
+      return res.status(404).json({ success: false, message: 'Organizer not found' });
+    }
+
+    // Create notification
+    const message = `Admin has requested to delete event "${event.name}"${reason ? ': ' + reason : ''}`;
+    const notification = await Notification.create({
+      recipient: organizer._id,
+      message,
+      type: 'event_delete_request',
+      relatedEvent: event._id,
+      relatedUser: req.user._id
+    });
+
+    res.json({ success: true, message: 'Delete request sent to organizer', data: notification });
+  } catch (error) {
+    console.error('requestEventDelete error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { getUsers, updateUserRole, updateUserStatus, unlockUser, getOrganizerEvents, getStudentRegistrations, deleteUser, requestEventEdit, requestEventDelete };

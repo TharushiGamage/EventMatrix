@@ -135,9 +135,10 @@ export const adminService = {
   updateRole: async (userId, role) => (await api.put('/admin/user-role', { userId, role })).data,
   updateStatus: async (userId, status) => (await api.put('/admin/user-status', { userId, status })).data,
   unlockUser: async (userId) => (await api.put('/admin/unlock-user', { userId })).data,
-  getOrganizerEvents: async (userId) => (await api.get(`/admin/organizer-events/${userId}`)).data
-  ,
-  getStudentRegistrations: async () => (await api.get('/admin/student-registrations')).data
+  getOrganizerEvents: async (userId) => (await api.get(`/admin/organizer-events/${userId}`)).data,
+  getStudentRegistrations: async () => (await api.get('/admin/student-registrations')).data,
+  requestEventEdit: async (eventId, reason = '') => (await api.post(`/admin/events/${eventId}/request-edit`, { reason })).data,
+  requestEventDelete: async (eventId, reason = '') => (await api.post(`/admin/events/${eventId}/request-delete`, { reason })).data
 };
 
 export default api;

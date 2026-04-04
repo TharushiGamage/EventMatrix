@@ -27,7 +27,9 @@ const notificationSchema = new mongoose.Schema({
       'registration_confirmed',
       'new_registration',
       'new_event',
-      'new_user'
+      'new_user',
+      'event_edit_request',
+      'event_delete_request'
     ],
     required: true
   },

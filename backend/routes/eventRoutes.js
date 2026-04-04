@@ -23,10 +23,10 @@ router.get('/check-overlap', checkOverlap);
 router.get('/', getAllEvents);
 router.get('/:id', getEventById);
 
-// Protected routes - Organizer and Admin only
-router.post('/', protect, authorize('Organizer', 'Admin'), upload.single('image'), validateEvent, createEvent);
-router.put('/:id', protect, authorize('Organizer', 'Admin'), upload.single('image'), validateEvent, updateEvent);
-router.delete('/:id', protect, authorize('Organizer', 'Admin'), deleteEvent);
+// Protected routes - Organizer only (Organizers can create, edit, delete their own events)
+router.post('/', protect, authorize('Organizer'), upload.single('image'), validateEvent, createEvent);
+router.put('/:id', protect, authorize('Organizer'), upload.single('image'), validateEvent, updateEvent);
+router.delete('/:id', protect, authorize('Organizer'), deleteEvent);
 
 module.exports = router;
 
