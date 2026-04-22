@@ -29,3 +29,7 @@ dist-ssr
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# Ignore temporary images
+1.png
+Screenshot (48).png
