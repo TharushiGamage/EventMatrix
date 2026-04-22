@@ -110,6 +110,16 @@ export default function EventRegisterPage() {
     );
   }
 
+  // Determine if the event date has passed
+  const isPastEvent = (() => {
+    if (!event?.date) return false;
+    const eventDate = new Date(event.date);
+    const today = new Date();
+    eventDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    return eventDate < today;
+  })();
+
   return (
     <div className="reg-page">
       {/* Back */}
@@ -133,7 +143,18 @@ export default function EventRegisterPage() {
         </div>
       )}
 
-      {existingReg ? (
+      {isPastEvent ? (
+        <div className="reg-form-card" style={{ textAlign: 'center', padding: '60px 20px' }}>
+          <div style={{ fontSize: '64px', marginBottom: '20px' }}>⏰</div>
+          <h2 style={{ marginBottom: '12px', color: 'var(--text-primary)' }}>This Event Has Already Taken Place</h2>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '30px', fontSize: '1.1rem', maxWidth: '480px', margin: '0 auto 30px' }}>
+            Registration is no longer available for past events. Please browse our upcoming events to find something new to attend.
+          </p>
+          <button className="btn btn-primary" onClick={() => navigate('/')}>
+            Browse Upcoming Events
+          </button>
+        </div>
+      ) : existingReg ? (
         <div className="reg-form-card" style={{ textAlign: 'center', padding: '60px 20px' }}>
           <div style={{ fontSize: '64px', marginBottom: '20px' }}>
             {existingReg.status === 'confirmed' || existingReg.status === 'approved' ? '✅' : '⏳'}

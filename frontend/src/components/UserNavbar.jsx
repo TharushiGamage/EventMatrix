@@ -41,6 +41,7 @@ const UserNavbar = () => {
   };
 
   const confirmLogout = () => {
+    setShowLogoutConfirm(false);
     logout();
     navigate('/login');
   };
@@ -221,7 +222,7 @@ const UserNavbar = () => {
 
             {user ? (
               <>
-                <Link to="/profile" className={`user-nav-link ${isActive('/profile') ? 'active' : ''}`}>
+                <Link to="/profile/browse-events" className={`user-nav-link ${pathname.startsWith('/profile') ? 'active' : ''}`}>
                   <UserIcon size={16} /> <span>Profile</span>
                 </Link>
 
