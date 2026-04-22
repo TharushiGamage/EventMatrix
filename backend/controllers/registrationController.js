@@ -44,6 +44,18 @@ const registerForEvent = async (req, res, next) => {
             return res.status(404).json({ success: false, message: 'Event not found' });
         }
 
+        // 1.5 Block registration for past events
+        const eventDate = new Date(event.date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        eventDate.setHours(0, 0, 0, 0);
+        if (eventDate < today) {
+            return res.status(400).json({
+                success: false,
+                message: 'This event has already taken place. Registration is no longer available for past events.',
+            });
+        }
+
         // 2. Check for an existing registration (active, cancelled, or rejected)
         let registration = await Registration.findOne({
             student: req.user._id,
