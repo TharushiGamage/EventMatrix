@@ -1,16 +1,59 @@
-const Resource = require("../models/Resource");
 const ResourceIssue = require("../models/ResourceIssue");
+const Resource = require("../models/Resource");
 const ResourceNotification = require("../models/ResourceNotification");
+
+const createNotification = async ({
+  title,
+  message,
+  type,
+  recipientRole,
+  recipientName = "",
+  relatedResource = null,
+}) => {
+  try {
+    await ResourceNotification.create({
+      title,
+      message,
+      type,
+      recipientRole,
+      recipientName,
+      relatedResource,
+      status: "Unread",
+    });
+  } catch (error) {
+    console.log("Notification creation failed:", error.message);
+  }
+};
 
 const createResourceIssue = async (req, res) => {
   try {
     const { resource, reportedBy, issueType, description } = req.body;
 
-    if (!resource || !reportedBy || !issueType || !description) {
+    if (!resource) {
       return res.status(400).json({
         success: false,
-        message:
-          "Resource, reporter name, issue type, and description are required",
+        message: "Resource is required",
+      });
+    }
+
+    if (!reportedBy || !reportedBy.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Reporter name is required",
+      });
+    }
+
+    if (!issueType) {
+      return res.status(400).json({
+        success: false,
+        message: "Issue type is required",
+      });
+    }
+
+    if (!description || !description.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Issue description is required",
       });
     }
 
@@ -19,58 +62,42 @@ const createResourceIssue = async (req, res) => {
     if (!selectedResource) {
       return res.status(404).json({
         success: false,
-        message: "Selected resource not found",
+        message: "Resource not found",
       });
     }
 
     const issue = await ResourceIssue.create({
       resource,
-      reportedBy,
+      reportedBy: reportedBy.trim(),
       issueType,
-      description,
+      description: description.trim(),
       status: "Reported",
+      adminRemark: "",
     });
 
-    selectedResource.maintenanceStatus = "Under Maintenance";
-    selectedResource.status = "Unavailable";
-    await selectedResource.save();
-
-    await ResourceNotification.create({
-      title: "Resource Issue Reported",
-      message: `${reportedBy} reported a ${issueType} for ${selectedResource.resourceName}. The resource is now marked as Unavailable and Under Maintenance.`,
+    await createNotification({
+      title: "New Resource Issue Reported",
+      message: `${reportedBy.trim()} reported a ${issueType} issue for ${selectedResource.resourceName}.`,
       type: "Issue",
-      recipientRole: "Admin",
-      recipientName: "Admin",
-      relatedResource: selectedResource._id,
-      relatedIssue: issue._id,
-    });
-
-    await ResourceNotification.create({
-      title: "Issue Report Confirmation",
-      message: `Your issue report for ${selectedResource.resourceName} has been submitted successfully.`,
-      type: "Issue",
-      recipientRole: "Organizer",
-      recipientName: reportedBy,
-      relatedResource: selectedResource._id,
-      relatedIssue: issue._id,
+      recipientRole: "ResourceManager",
+      relatedResource: resource,
     });
 
     const populatedIssue = await ResourceIssue.findById(issue._id).populate(
-      "resource",
-      "resourceName resourceType location status maintenanceStatus"
+      "resource"
     );
 
     return res.status(201).json({
       success: true,
-      message:
-        "Resource issue reported successfully and resource marked as unavailable and under maintenance",
+      message: "Resource issue reported successfully",
       data: populatedIssue,
     });
   } catch (error) {
+    console.log("Create resource issue error:", error);
+
     return res.status(500).json({
       success: false,
       message: "Failed to report resource issue",
-      error: error.message,
     });
   }
 };
@@ -78,10 +105,7 @@ const createResourceIssue = async (req, res) => {
 const getResourceIssues = async (req, res) => {
   try {
     const issues = await ResourceIssue.find()
-      .populate(
-        "resource",
-        "resourceName resourceType location status maintenanceStatus"
-      )
+      .populate("resource")
       .sort({ createdAt: -1 });
 
     return res.status(200).json({
@@ -90,10 +114,11 @@ const getResourceIssues = async (req, res) => {
       data: issues,
     });
   } catch (error) {
+    console.log("Get resource issues error:", error);
+
     return res.status(500).json({
       success: false,
-      message: "Failed to get resource issues",
-      error: error.message,
+      message: "Failed to load resource issues",
     });
   }
 };
@@ -101,8 +126,7 @@ const getResourceIssues = async (req, res) => {
 const getResourceIssueById = async (req, res) => {
   try {
     const issue = await ResourceIssue.findById(req.params.id).populate(
-      "resource",
-      "resourceName resourceType location status maintenanceStatus"
+      "resource"
     );
 
     if (!issue) {
@@ -117,10 +141,11 @@ const getResourceIssueById = async (req, res) => {
       data: issue,
     });
   } catch (error) {
+    console.log("Get resource issue by id error:", error);
+
     return res.status(500).json({
       success: false,
-      message: "Failed to get resource issue",
-      error: error.message,
+      message: "Failed to load resource issue",
     });
   }
 };
@@ -129,23 +154,17 @@ const updateResourceIssueStatus = async (req, res) => {
   try {
     const { status, adminRemark } = req.body;
 
-    if (!status) {
-      return res.status(400).json({
-        success: false,
-        message: "Status is required",
-      });
-    }
+    const allowedStatuses = ["Reported", "In Review", "Resolved"];
 
-    if (!["Reported", "In Review", "Resolved"].includes(status)) {
+    if (!allowedStatuses.includes(status)) {
       return res.status(400).json({
         success: false,
-        message: "Status must be Reported, In Review, or Resolved",
+        message: "Invalid issue status",
       });
     }
 
     const issue = await ResourceIssue.findById(req.params.id).populate(
-      "resource",
-      "resourceName resourceType location status maintenanceStatus"
+      "resource"
     );
 
     if (!issue) {
@@ -156,59 +175,61 @@ const updateResourceIssueStatus = async (req, res) => {
     }
 
     issue.status = status;
-    issue.adminRemark = adminRemark || "";
-
-    const updatedIssue = await issue.save();
-
-    if (status === "Resolved") {
-      const resource = await Resource.findById(issue.resource._id);
-
-      if (resource) {
-        resource.maintenanceStatus = "Good";
-        resource.status = "Available";
-        await resource.save();
-      }
-
-      await ResourceNotification.create({
-        title: "Resource Issue Resolved",
-        message: `The issue reported for ${issue.resource.resourceName} has been resolved. The resource is now Available and Good.`,
-        type: "Issue",
-        recipientRole: "All",
-        recipientName: "",
-        relatedResource: issue.resource._id,
-        relatedIssue: issue._id,
-      });
-    }
+    issue.adminRemark = adminRemark || issue.adminRemark || "";
+    await issue.save();
 
     if (status === "In Review") {
-      await ResourceNotification.create({
-        title: "Resource Issue In Review",
-        message: `The issue reported for ${issue.resource.resourceName} is now being reviewed by admin.`,
+      await Resource.findByIdAndUpdate(issue.resource._id, {
+        status: "Unavailable",
+        maintenanceStatus: "Under Maintenance",
+      });
+
+      await createNotification({
+        title: "Resource Issue Under Review",
+        message: `The reported issue for ${issue.resource.resourceName} is now under review. The resource is temporarily unavailable.`,
         type: "Issue",
-        recipientRole: "Admin",
-        recipientName: "Admin",
+        recipientRole: "Organizer",
+        recipientName: issue.reportedBy,
         relatedResource: issue.resource._id,
-        relatedIssue: issue._id,
       });
     }
 
-    const populatedIssue = await ResourceIssue.findById(
-      updatedIssue._id
-    ).populate(
-      "resource",
-      "resourceName resourceType location status maintenanceStatus"
+    if (status === "Resolved") {
+      await Resource.findByIdAndUpdate(issue.resource._id, {
+        status: "Available",
+        maintenanceStatus: "Good",
+      });
+
+      await createNotification({
+        title: "Resource Issue Resolved",
+        message: `The reported issue for ${issue.resource.resourceName} has been resolved. The resource is available again.`,
+        type: "Issue",
+        recipientRole: "Organizer",
+        recipientName: issue.reportedBy,
+        relatedResource: issue.resource._id,
+      });
+    }
+
+    const updatedIssue = await ResourceIssue.findById(req.params.id).populate(
+      "resource"
     );
 
     return res.status(200).json({
       success: true,
-      message: "Resource issue status updated successfully",
-      data: populatedIssue,
+      message:
+        status === "In Review"
+          ? "Issue moved to review. Resource is now unavailable and under maintenance."
+          : status === "Resolved"
+          ? "Issue resolved successfully. Resource is available again."
+          : "Issue status updated successfully.",
+      data: updatedIssue,
     });
   } catch (error) {
+    console.log("Update resource issue status error:", error);
+
     return res.status(500).json({
       success: false,
       message: "Failed to update resource issue status",
-      error: error.message,
     });
   }
 };

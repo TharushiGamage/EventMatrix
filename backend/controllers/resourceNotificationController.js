@@ -1,31 +1,42 @@
 const ResourceNotification = require("../models/ResourceNotification");
 
+const buildNotificationQuery = (req) => {
+  const userRole = req.user?.role || req.headers["x-user-role"];
+  const userName = req.user?.name || req.headers["x-user-name"] || "";
+
+  if (!userRole) {
+    return {};
+  }
+
+  if (userRole === "ResourceManager") {
+    return {
+      $or: [{ recipientRole: "ResourceManager" }, { recipientRole: "All" }],
+    };
+  }
+
+  if (userRole === "Organizer") {
+    return {
+      $or: [
+        {
+          recipientRole: "Organizer",
+          recipientName: { $in: [userName, "", null] },
+        },
+        { recipientRole: "All" },
+      ],
+    };
+  }
+
+  return {
+    recipientRole: userRole,
+  };
+};
+
 const getNotifications = async (req, res) => {
   try {
-    const { recipientName, recipientRole, type, status } = req.query;
+    const query = buildNotificationQuery(req);
 
-    const filter = {};
-
-    if (recipientName) {
-      filter.recipientName = recipientName;
-    }
-
-    if (recipientRole) {
-      filter.recipientRole = recipientRole;
-    }
-
-    if (type) {
-      filter.type = type;
-    }
-
-    if (status) {
-      filter.status = status;
-    }
-
-    const notifications = await ResourceNotification.find(filter)
-      .populate("relatedResource", "resourceName resourceType location")
-      .populate("relatedRequest", "eventName status requiredDate startTime endTime")
-      .populate("relatedIssue", "issueType status description")
+    const notifications = await ResourceNotification.find(query)
+      .populate("relatedResource")
       .sort({ createdAt: -1 });
 
     return res.status(200).json({
@@ -34,10 +45,11 @@ const getNotifications = async (req, res) => {
       data: notifications,
     });
   } catch (error) {
+    console.log("Get notifications error:", error);
+
     return res.status(500).json({
       success: false,
-      message: "Failed to get notifications",
-      error: error.message,
+      message: "Failed to load notifications",
     });
   }
 };
@@ -63,30 +75,33 @@ const markNotificationAsRead = async (req, res) => {
       data: notification,
     });
   } catch (error) {
+    console.log("Mark notification as read error:", error);
+
     return res.status(500).json({
       success: false,
-      message: "Failed to update notification",
-      error: error.message,
+      message: "Failed to mark notification as read",
     });
   }
 };
 
 const markAllNotificationsAsRead = async (req, res) => {
   try {
-    await ResourceNotification.updateMany(
-      { status: "Unread" },
-      { status: "Read" }
-    );
+    const query = buildNotificationQuery(req);
+
+    await ResourceNotification.updateMany(query, {
+      status: "Read",
+    });
 
     return res.status(200).json({
       success: true,
       message: "All notifications marked as read",
     });
   } catch (error) {
+    console.log("Mark all notifications as read error:", error);
+
     return res.status(500).json({
       success: false,
-      message: "Failed to update notifications",
-      error: error.message,
+      message: "Failed to mark all notifications as read",
     });
   }
 };
