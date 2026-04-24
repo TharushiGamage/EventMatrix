@@ -24,7 +24,6 @@ function ResourceList() {
       setMessage("");
 
       const response = await axios.get("http://localhost:5000/api/v1/resources");
-
       setResources(response.data.data || []);
     } catch (error) {
       const errorMessage =
@@ -85,6 +84,15 @@ function ResourceList() {
   const handleEditChange = (event) => {
     const { name, value } = event.target;
 
+    if (name === "maintenanceStatus" && value === "Under Maintenance") {
+      setEditFormData({
+        ...editFormData,
+        maintenanceStatus: value,
+        status: "Unavailable",
+      });
+      return;
+    }
+
     setEditFormData({
       ...editFormData,
       [name]: value,
@@ -106,6 +114,13 @@ function ResourceList() {
 
     if (!editFormData.quantity || Number(editFormData.quantity) <= 0) {
       return "Quantity must be greater than 0";
+    }
+
+    if (
+      editFormData.maintenanceStatus === "Under Maintenance" &&
+      editFormData.status === "Available"
+    ) {
+      return "A resource under maintenance cannot be marked as Available";
     }
 
     return "";
@@ -303,6 +318,7 @@ function ResourceList() {
                   <th>Quantity</th>
                   <th>Status</th>
                   <th>Maintenance</th>
+                  <th>Description</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -326,6 +342,7 @@ function ResourceList() {
                       </span>
                     </td>
                     <td>{resource.maintenanceStatus}</td>
+                    <td>{resource.description || "-"}</td>
                     <td>
                       <div className="action-buttons">
                         <button
