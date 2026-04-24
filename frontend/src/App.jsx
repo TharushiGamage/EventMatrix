@@ -7,6 +7,7 @@ import ResourceIssueReport from "./pages/ResourceIssueReport";
 import ResourceIssueManagement from "./pages/ResourceIssueManagement";
 import ResourceUsageLog from "./pages/ResourceUsageLog";
 import AvailabilityCalendar from "./pages/AvailabilityCalendar";
+import NotificationHistory from "./pages/NotificationHistory";
 import "./index.css";
 
 function App() {
@@ -77,6 +78,15 @@ function App() {
           >
             Availability
           </button>
+
+          <button
+            className={
+              activePage === "notifications" ? "nav-btn active" : "nav-btn"
+            }
+            onClick={() => setActivePage("notifications")}
+          >
+            Notifications
+          </button>
         </div>
       </nav>
 
@@ -88,6 +98,7 @@ function App() {
       {activePage === "issueManage" && <ResourceIssueManagement />}
       {activePage === "usage" && <ResourceUsageLog />}
       {activePage === "calendar" && <AvailabilityCalendar />}
+      {activePage === "notifications" && <NotificationHistory />}
     </div>
   );
 }

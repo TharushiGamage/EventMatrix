@@ -1,5 +1,6 @@
 const Resource = require("../models/Resource");
 const ResourceIssue = require("../models/ResourceIssue");
+const ResourceNotification = require("../models/ResourceNotification");
 
 const createResourceIssue = async (req, res) => {
   try {
@@ -33,6 +34,26 @@ const createResourceIssue = async (req, res) => {
     selectedResource.maintenanceStatus = "Under Maintenance";
     selectedResource.status = "Unavailable";
     await selectedResource.save();
+
+    await ResourceNotification.create({
+      title: "Resource Issue Reported",
+      message: `${reportedBy} reported a ${issueType} for ${selectedResource.resourceName}. The resource is now marked as Unavailable and Under Maintenance.`,
+      type: "Issue",
+      recipientRole: "Admin",
+      recipientName: "Admin",
+      relatedResource: selectedResource._id,
+      relatedIssue: issue._id,
+    });
+
+    await ResourceNotification.create({
+      title: "Issue Report Confirmation",
+      message: `Your issue report for ${selectedResource.resourceName} has been submitted successfully.`,
+      type: "Issue",
+      recipientRole: "Organizer",
+      recipientName: reportedBy,
+      relatedResource: selectedResource._id,
+      relatedIssue: issue._id,
+    });
 
     const populatedIssue = await ResourceIssue.findById(issue._id).populate(
       "resource",
@@ -122,7 +143,10 @@ const updateResourceIssueStatus = async (req, res) => {
       });
     }
 
-    const issue = await ResourceIssue.findById(req.params.id);
+    const issue = await ResourceIssue.findById(req.params.id).populate(
+      "resource",
+      "resourceName resourceType location status maintenanceStatus"
+    );
 
     if (!issue) {
       return res.status(404).json({
@@ -137,13 +161,35 @@ const updateResourceIssueStatus = async (req, res) => {
     const updatedIssue = await issue.save();
 
     if (status === "Resolved") {
-      const resource = await Resource.findById(issue.resource);
+      const resource = await Resource.findById(issue.resource._id);
 
       if (resource) {
         resource.maintenanceStatus = "Good";
         resource.status = "Available";
         await resource.save();
       }
+
+      await ResourceNotification.create({
+        title: "Resource Issue Resolved",
+        message: `The issue reported for ${issue.resource.resourceName} has been resolved. The resource is now Available and Good.`,
+        type: "Issue",
+        recipientRole: "All",
+        recipientName: "",
+        relatedResource: issue.resource._id,
+        relatedIssue: issue._id,
+      });
+    }
+
+    if (status === "In Review") {
+      await ResourceNotification.create({
+        title: "Resource Issue In Review",
+        message: `The issue reported for ${issue.resource.resourceName} is now being reviewed by admin.`,
+        type: "Issue",
+        recipientRole: "Admin",
+        recipientName: "Admin",
+        relatedResource: issue.resource._id,
+        relatedIssue: issue._id,
+      });
     }
 
     const populatedIssue = await ResourceIssue.findById(

@@ -1,5 +1,6 @@
 const Resource = require("../models/Resource");
 const ResourceRequest = require("../models/ResourceRequest");
+const ResourceNotification = require("../models/ResourceNotification");
 
 const findAlternativeResources = async ({
   resource,
@@ -221,6 +222,26 @@ const createResourceRequest = async (req, res) => {
       status: "Pending",
     });
 
+    await ResourceNotification.create({
+      title: "Resource Request Submitted",
+      message: `${organizerName} requested ${selectedResource.resourceName} for ${eventName}. The request is waiting for admin approval.`,
+      type: "Request",
+      recipientRole: "Admin",
+      recipientName: "Admin",
+      relatedResource: selectedResource._id,
+      relatedRequest: resourceRequest._id,
+    });
+
+    await ResourceNotification.create({
+      title: "Request Confirmation",
+      message: `Your request for ${selectedResource.resourceName} has been submitted successfully and is currently Pending.`,
+      type: "Request",
+      recipientRole: "Organizer",
+      recipientName: organizerName,
+      relatedResource: selectedResource._id,
+      relatedRequest: resourceRequest._id,
+    });
+
     const populatedRequest = await ResourceRequest.findById(
       resourceRequest._id
     ).populate("resource", "resourceName resourceType location quantity");
@@ -333,7 +354,10 @@ const updateResourceRequestStatus = async (req, res) => {
       });
     }
 
-    const request = await ResourceRequest.findById(req.params.id);
+    const request = await ResourceRequest.findById(req.params.id).populate(
+      "resource",
+      "resourceName resourceType location quantity"
+    );
 
     if (!request) {
       return res.status(404).json({
@@ -358,7 +382,7 @@ const updateResourceRequestStatus = async (req, res) => {
 
       const existingApprovedBooking = await ResourceRequest.findOne({
         _id: { $ne: request._id },
-        resource: request.resource,
+        resource: request.resource._id,
         requiredDate: {
           $gte: dayStart,
           $lte: dayEnd,
@@ -385,6 +409,24 @@ const updateResourceRequestStatus = async (req, res) => {
     request.adminRemark = adminRemark || "";
 
     const updatedRequest = await request.save();
+
+    await ResourceNotification.create({
+      title:
+        status === "Approved"
+          ? "Resource Request Approved"
+          : "Resource Request Rejected",
+      message:
+        status === "Approved"
+          ? `Your request for ${request.resource.resourceName} for ${request.eventName} has been approved.`
+          : `Your request for ${request.resource.resourceName} for ${request.eventName} has been rejected. Remark: ${
+              adminRemark || "No remark provided"
+            }`,
+      type: "Approval",
+      recipientRole: "Organizer",
+      recipientName: request.organizerName,
+      relatedResource: request.resource._id,
+      relatedRequest: request._id,
+    });
 
     const populatedRequest = await ResourceRequest.findById(
       updatedRequest._id
