@@ -31,17 +31,18 @@ const createResourceIssue = async (req, res) => {
     });
 
     selectedResource.maintenanceStatus = "Under Maintenance";
+    selectedResource.status = "Unavailable";
     await selectedResource.save();
 
     const populatedIssue = await ResourceIssue.findById(issue._id).populate(
       "resource",
-      "resourceName resourceType location maintenanceStatus"
+      "resourceName resourceType location status maintenanceStatus"
     );
 
     return res.status(201).json({
       success: true,
       message:
-        "Resource issue reported successfully and resource marked as under maintenance",
+        "Resource issue reported successfully and resource marked as unavailable and under maintenance",
       data: populatedIssue,
     });
   } catch (error) {
@@ -56,7 +57,10 @@ const createResourceIssue = async (req, res) => {
 const getResourceIssues = async (req, res) => {
   try {
     const issues = await ResourceIssue.find()
-      .populate("resource", "resourceName resourceType location maintenanceStatus")
+      .populate(
+        "resource",
+        "resourceName resourceType location status maintenanceStatus"
+      )
       .sort({ createdAt: -1 });
 
     return res.status(200).json({
@@ -77,7 +81,7 @@ const getResourceIssueById = async (req, res) => {
   try {
     const issue = await ResourceIssue.findById(req.params.id).populate(
       "resource",
-      "resourceName resourceType location maintenanceStatus"
+      "resourceName resourceType location status maintenanceStatus"
     );
 
     if (!issue) {
@@ -137,13 +141,17 @@ const updateResourceIssueStatus = async (req, res) => {
 
       if (resource) {
         resource.maintenanceStatus = "Good";
+        resource.status = "Available";
         await resource.save();
       }
     }
 
     const populatedIssue = await ResourceIssue.findById(
       updatedIssue._id
-    ).populate("resource", "resourceName resourceType location maintenanceStatus");
+    ).populate(
+      "resource",
+      "resourceName resourceType location status maintenanceStatus"
+    );
 
     return res.status(200).json({
       success: true,
