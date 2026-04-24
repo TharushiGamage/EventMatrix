@@ -4,6 +4,7 @@ import ResourceList from "./pages/ResourceList";
 import ReserveResource from "./pages/ReserveResource";
 import AdminApproval from "./pages/AdminApproval";
 import ResourceIssueReport from "./pages/ResourceIssueReport";
+import ResourceIssueManagement from "./pages/ResourceIssueManagement";
 import ResourceUsageLog from "./pages/ResourceUsageLog";
 import AvailabilityCalendar from "./pages/AvailabilityCalendar";
 import "./index.css";
@@ -53,6 +54,15 @@ function App() {
           </button>
 
           <button
+            className={
+              activePage === "issueManage" ? "nav-btn active" : "nav-btn"
+            }
+            onClick={() => setActivePage("issueManage")}
+          >
+            Issue Management
+          </button>
+
+          <button
             className={activePage === "usage" ? "nav-btn active" : "nav-btn"}
             onClick={() => setActivePage("usage")}
           >
@@ -75,6 +85,7 @@ function App() {
       {activePage === "reserve" && <ReserveResource />}
       {activePage === "approval" && <AdminApproval />}
       {activePage === "issue" && <ResourceIssueReport />}
+      {activePage === "issueManage" && <ResourceIssueManagement />}
       {activePage === "usage" && <ResourceUsageLog />}
       {activePage === "calendar" && <AvailabilityCalendar />}
     </div>
