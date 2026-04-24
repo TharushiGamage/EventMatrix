@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../utils/api";
 
 function ResourceList() {
   const [resources, setResources] = useState([]);
@@ -23,7 +23,7 @@ function ResourceList() {
       setLoading(true);
       setMessage("");
 
-      const response = await axios.get("http://localhost:5000/api/v1/resources");
+      const response = await api.get("/resources");
       setResources(response.data.data || []);
     } catch (error) {
       const errorMessage =
@@ -50,7 +50,7 @@ function ResourceList() {
     }
 
     try {
-      await axios.delete(`http://localhost:5000/api/v1/resources/${id}`);
+      await api.delete(`/resources/${id}`);
 
       setMessage("Resource deleted successfully");
       setMessageType("success");
@@ -144,13 +144,10 @@ function ResourceList() {
     }
 
     try {
-      const response = await axios.put(
-        `http://localhost:5000/api/v1/resources/${editingResource._id}`,
-        {
-          ...editFormData,
-          quantity: Number(editFormData.quantity),
-        }
-      );
+      const response = await api.put(`/resources/${editingResource._id}`, {
+        ...editFormData,
+        quantity: Number(editFormData.quantity),
+      });
 
       setMessage(response.data.message || "Resource updated successfully");
       setMessageType("success");

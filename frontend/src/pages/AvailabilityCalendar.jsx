@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../utils/api";
 
 function AvailabilityCalendar() {
   const [resources, setResources] = useState([]);
@@ -15,13 +15,8 @@ function AvailabilityCalendar() {
       setLoading(true);
       setMessage("");
 
-      const resourcesResponse = await axios.get(
-        "http://localhost:5000/api/v1/resources"
-      );
-
-      const requestsResponse = await axios.get(
-        "http://localhost:5000/api/v1/resource-requests"
-      );
+      const resourcesResponse = await api.get("/resources");
+      const requestsResponse = await api.get("/resource-requests");
 
       const resourceData = resourcesResponse.data.data || [];
       const requestData = requestsResponse.data.data || [];

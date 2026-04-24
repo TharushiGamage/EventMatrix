@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../utils/api";
 
 function AddResource() {
   const [formData, setFormData] = useState({
@@ -41,6 +41,13 @@ function AddResource() {
       return "Quantity must be greater than 0";
     }
 
+    if (
+      formData.maintenanceStatus === "Under Maintenance" &&
+      formData.status === "Available"
+    ) {
+      return "A resource under maintenance cannot be marked as Available";
+    }
+
     return "";
   };
 
@@ -59,7 +66,7 @@ function AddResource() {
     }
 
     try {
-      const response = await axios.post("http://localhost:5000/api/v1/resources", {
+      const response = await api.post("/resources", {
         ...formData,
         quantity: Number(formData.quantity),
       });

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../utils/api";
 
 function ResourceIssueManagement() {
   const [issues, setIssues] = useState([]);
@@ -12,10 +12,7 @@ function ResourceIssueManagement() {
     try {
       setLoading(true);
 
-      const response = await axios.get(
-        "http://localhost:5000/api/v1/resource-issues"
-      );
-
+      const response = await api.get("/resource-issues");
       setIssues(response.data.data || []);
     } catch (error) {
       const errorMessage =
@@ -43,17 +40,14 @@ function ResourceIssueManagement() {
     const adminRemark = remarks[issueId] || "";
 
     try {
-      const response = await axios.put(
-        `http://localhost:5000/api/v1/resource-issues/${issueId}/status`,
-        {
-          status,
-          adminRemark:
-            adminRemark ||
-            (status === "Resolved"
-              ? "Issue resolved and resource is ready to use"
-              : "Issue is currently being reviewed"),
-        }
-      );
+      const response = await api.put(`/resource-issues/${issueId}/status`, {
+        status,
+        adminRemark:
+          adminRemark ||
+          (status === "Resolved"
+            ? "Issue resolved and resource is ready to use"
+            : "Issue is currently being reviewed"),
+      });
 
       setMessage(response.data.message);
       setMessageType("success");
@@ -131,8 +125,7 @@ function ResourceIssueManagement() {
                     </td>
                     <td>
                       <div>
-                        <strong>Status:</strong>{" "}
-                        {issue.resource?.status || "N/A"}
+                        <strong>Status:</strong> {issue.resource?.status || "N/A"}
                       </div>
                       <div>
                         <strong>Maintenance:</strong>{" "}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../utils/api";
 
 function ResourceIssueReport() {
   const [resources, setResources] = useState([]);
@@ -15,7 +15,7 @@ function ResourceIssueReport() {
 
   const fetchResources = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/v1/resources");
+      const response = await api.get("/resources");
       setResources(response.data.data || []);
     } catch (error) {
       setMessage("Failed to load resources");
@@ -25,6 +25,14 @@ function ResourceIssueReport() {
 
   useEffect(() => {
     fetchResources();
+
+    const loggedUser = JSON.parse(localStorage.getItem("resourceUser"));
+    if (loggedUser?.name) {
+      setFormData((previousData) => ({
+        ...previousData,
+        reportedBy: loggedUser.name,
+      }));
+    }
   }, []);
 
   const handleChange = (event) => {
@@ -71,17 +79,16 @@ function ResourceIssueReport() {
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/v1/resource-issues",
-        formData
-      );
+      const response = await api.post("/resource-issues", formData);
 
       setMessage(response.data.message);
       setMessageType("success");
 
+      const loggedUser = JSON.parse(localStorage.getItem("resourceUser"));
+
       setFormData({
         resource: "",
-        reportedBy: "",
+        reportedBy: loggedUser?.name || "",
         issueType: "",
         description: "",
       });

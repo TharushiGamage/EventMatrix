@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../utils/api";
 
 function ResourceUsageLog() {
   const [requests, setRequests] = useState([]);
@@ -13,9 +13,7 @@ function ResourceUsageLog() {
       setLoading(true);
       setMessage("");
 
-      const response = await axios.get(
-        "http://localhost:5000/api/v1/resource-requests"
-      );
+      const response = await api.get("/resource-requests");
 
       const data = response.data.data || [];
       setRequests(data);
@@ -129,13 +127,9 @@ function ResourceUsageLog() {
                 {filteredRequests.map((request) => (
                   <tr key={request._id}>
                     <td>{request.eventName}</td>
-                    <td>
-                      {request.resource?.resourceName || "Resource not found"}
-                    </td>
+                    <td>{request.resource?.resourceName || "Resource not found"}</td>
                     <td>{request.organizerName}</td>
-                    <td>
-                      {new Date(request.requiredDate).toLocaleDateString()}
-                    </td>
+                    <td>{new Date(request.requiredDate).toLocaleDateString()}</td>
                     <td>
                       {request.startTime} - {request.endTime}
                     </td>

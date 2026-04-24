@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../utils/api";
 
 function ReserveResource() {
   const [resources, setResources] = useState([]);
@@ -20,7 +20,7 @@ function ReserveResource() {
 
   const fetchResources = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/v1/resources");
+      const response = await api.get("/resources");
       setResources(response.data.data || []);
     } catch (error) {
       setMessage("Failed to load resources");
@@ -30,6 +30,14 @@ function ReserveResource() {
 
   useEffect(() => {
     fetchResources();
+
+    const loggedUser = JSON.parse(localStorage.getItem("resourceUser"));
+    if (loggedUser?.name) {
+      setFormData((previousData) => ({
+        ...previousData,
+        organizerName: loggedUser.name,
+      }));
+    }
   }, []);
 
   const handleChange = (event) => {
@@ -118,23 +126,22 @@ function ReserveResource() {
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/v1/resource-requests",
-        {
-          ...formData,
-          quantity: Number(formData.quantity),
-        }
-      );
+      const response = await api.post("/resource-requests", {
+        ...formData,
+        quantity: Number(formData.quantity),
+      });
 
       setMessage(
         `${response.data.message}. Current status: ${response.data.data.status}`
       );
       setMessageType("success");
 
+      const loggedUser = JSON.parse(localStorage.getItem("resourceUser"));
+
       setFormData({
         eventName: "",
         resource: "",
-        organizerName: "",
+        organizerName: loggedUser?.name || "",
         requiredDate: "",
         startTime: "",
         endTime: "",

@@ -14,7 +14,7 @@ const router = express.Router();
 
 router.post("/", requireRole("Organizer"), createResourceRequest);
 
-router.get("/", requireRole("Admin"), getResourceRequests);
+router.get("/", requireRole("Admin", "Organizer"), getResourceRequests);
 router.get("/my-requests", requireRole("Organizer", "Admin"), getMyResourceRequests);
 router.get("/:id", requireRole("Organizer", "Admin"), getResourceRequestById);
 

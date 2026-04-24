@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../utils/api";
 
 function AdminApproval() {
   const [requests, setRequests] = useState([]);
@@ -12,10 +12,7 @@ function AdminApproval() {
     try {
       setLoading(true);
 
-      const response = await axios.get(
-        "http://localhost:5000/api/v1/resource-requests"
-      );
-
+      const response = await api.get("/resource-requests");
       setRequests(response.data.data || []);
     } catch (error) {
       const errorMessage =
@@ -49,17 +46,14 @@ function AdminApproval() {
     }
 
     try {
-      const response = await axios.put(
-        `http://localhost:5000/api/v1/resource-requests/${requestId}/status`,
-        {
-          status,
-          adminRemark:
-            adminRemark ||
-            (status === "Approved"
-              ? "Approved by admin"
-              : "Rejected by admin"),
-        }
-      );
+      const response = await api.put(`/resource-requests/${requestId}/status`, {
+        status,
+        adminRemark:
+          adminRemark ||
+          (status === "Approved"
+            ? "Approved by admin"
+            : "Rejected by admin"),
+      });
 
       setMessage(response.data.message);
       setMessageType("success");
@@ -126,9 +120,7 @@ function AdminApproval() {
                 {requests.map((request) => (
                   <tr key={request._id}>
                     <td>{request.eventName}</td>
-                    <td>
-                      {request.resource?.resourceName || "Resource not found"}
-                    </td>
+                    <td>{request.resource?.resourceName || "Resource not found"}</td>
                     <td>{request.organizerName}</td>
                     <td>{new Date(request.requiredDate).toLocaleDateString()}</td>
                     <td>

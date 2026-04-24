@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../utils/api";
 
 function NotificationHistory() {
   const [notifications, setNotifications] = useState([]);
@@ -15,10 +15,7 @@ function NotificationHistory() {
       setLoading(true);
       setMessage("");
 
-      const response = await axios.get(
-        "http://localhost:5000/api/v1/notifications"
-      );
-
+      const response = await api.get("/notifications");
       const data = response.data.data || [];
 
       setNotifications(data);
@@ -70,9 +67,7 @@ function NotificationHistory() {
 
   const markAsRead = async (notificationId) => {
     try {
-      const response = await axios.put(
-        `http://localhost:5000/api/v1/notifications/${notificationId}/read`
-      );
+      const response = await api.put(`/notifications/${notificationId}/read`);
 
       setMessage(response.data.message || "Notification marked as read");
       setMessageType("success");
@@ -89,9 +84,7 @@ function NotificationHistory() {
 
   const markAllAsRead = async () => {
     try {
-      const response = await axios.put(
-        "http://localhost:5000/api/v1/notifications/mark-all-read"
-      );
+      const response = await api.put("/notifications/mark-all-read");
 
       setMessage(response.data.message || "All notifications marked as read");
       setMessageType("success");
