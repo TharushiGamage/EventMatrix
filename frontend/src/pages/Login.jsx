@@ -74,11 +74,10 @@ function Login({ onLogin }) {
         <div className="login-logo">EM</div>
 
         <h1>EventMatrix</h1>
-        <h2>Resource Management Login</h2>
+        <h2>Welcome Back</h2>
 
         <p className="login-subtitle">
-          Login using your username and password to access the correct resource
-          management features.
+          Please enter your credentials to access your dashboard.
         </p>
 
         {message && <div className="error-box">{message}</div>}
@@ -91,7 +90,7 @@ function Login({ onLogin }) {
               name="username"
               value={formData.username}
               onChange={handleChange}
-              placeholder="Example: Resource Manager"
+              placeholder="Enter your username"
             />
           </div>
 
@@ -102,34 +101,14 @@ function Login({ onLogin }) {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Enter password"
+              placeholder="Enter your password"
             />
           </div>
 
           <button type="submit" className="primary-button">
-            Login
+            Sign In
           </button>
         </form>
-
-        <div className="login-role-box">
-          <div>
-            <strong>Resource Manager</strong>
-            <p>
-              Username: Resource Manager
-              <br />
-              Password: resource123
-            </p>
-          </div>
-
-          <div>
-            <strong>Organizer</strong>
-            <p>
-              Username: Organizer
-              <br />
-              Password: organizer123
-            </p>
-          </div>
-        </div>
       </div>
     </div>
   );
