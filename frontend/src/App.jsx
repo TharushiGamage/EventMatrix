@@ -4,6 +4,7 @@ import ResourceList from "./pages/ResourceList";
 import ReserveResource from "./pages/ReserveResource";
 import AdminApproval from "./pages/AdminApproval";
 import ResourceIssueReport from "./pages/ResourceIssueReport";
+import ResourceUsageLog from "./pages/ResourceUsageLog";
 import "./index.css";
 
 function App() {
@@ -49,6 +50,13 @@ function App() {
           >
             Issue Report
           </button>
+
+          <button
+            className={activePage === "usage" ? "nav-btn active" : "nav-btn"}
+            onClick={() => setActivePage("usage")}
+          >
+            Usage Log
+          </button>
         </div>
       </nav>
 
@@ -57,6 +65,7 @@ function App() {
       {activePage === "reserve" && <ReserveResource />}
       {activePage === "approval" && <AdminApproval />}
       {activePage === "issue" && <ResourceIssueReport />}
+      {activePage === "usage" && <ResourceUsageLog />}
     </div>
   );
 }
