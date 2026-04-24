@@ -223,9 +223,99 @@ const getMyResourceRequests = async (req, res) => {
   }
 };
 
+const updateResourceRequestStatus = async (req, res) => {
+  try {
+    const { status, adminRemark } = req.body;
+
+    if (!status) {
+      return res.status(400).json({
+        success: false,
+        message: "Status is required",
+      });
+    }
+
+    if (!["Approved", "Rejected"].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Status must be either Approved or Rejected",
+      });
+    }
+
+    const request = await ResourceRequest.findById(req.params.id);
+
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        message: "Resource request not found",
+      });
+    }
+
+    if (request.status !== "Pending") {
+      return res.status(400).json({
+        success: false,
+        message: "Only pending requests can be approved or rejected",
+      });
+    }
+
+    if (status === "Approved") {
+      const dayStart = new Date(request.requiredDate);
+      dayStart.setHours(0, 0, 0, 0);
+
+      const dayEnd = new Date(request.requiredDate);
+      dayEnd.setHours(23, 59, 59, 999);
+
+      const existingApprovedBooking = await ResourceRequest.findOne({
+        _id: { $ne: request._id },
+        resource: request.resource,
+        requiredDate: {
+          $gte: dayStart,
+          $lte: dayEnd,
+        },
+        status: "Approved",
+        startTime: {
+          $lt: request.endTime,
+        },
+        endTime: {
+          $gt: request.startTime,
+        },
+      });
+
+      if (existingApprovedBooking) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Cannot approve because this resource is already approved for an overlapping time slot",
+        });
+      }
+    }
+
+    request.status = status;
+    request.adminRemark = adminRemark || "";
+
+    const updatedRequest = await request.save();
+
+    const populatedRequest = await ResourceRequest.findById(
+      updatedRequest._id
+    ).populate("resource", "resourceName resourceType location quantity");
+
+    return res.status(200).json({
+      success: true,
+      message: `Resource request ${status.toLowerCase()} successfully`,
+      data: populatedRequest,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update resource request status",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   createResourceRequest,
   getResourceRequests,
   getResourceRequestById,
   getMyResourceRequests,
+  updateResourceRequestStatus,
 };
