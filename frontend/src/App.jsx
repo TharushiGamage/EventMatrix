@@ -226,10 +226,6 @@ function App() {
             )}
           </button>
         </nav>
-
-        <button className="logout-button" onClick={handleLogout}>
-          Logout
-        </button>
       </aside>
 
       <main className="main-content">
@@ -242,7 +238,13 @@ function App() {
             </p>
           </div>
 
-          <span className="role-pill">{roleLabel}</span>
+          <div className="header-actions">
+            <span className="role-pill">{roleLabel}</span>
+
+            <button className="top-logout-button" onClick={handleLogout}>
+              Logout
+            </button>
+          </div>
         </header>
 
         {activePage === "dashboard" && (

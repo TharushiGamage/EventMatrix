@@ -176,21 +176,6 @@ textarea {
   margin-left: auto;
 }
 
-.logout-button {
-  margin-top: auto;
-  border: none;
-  background: #dc2626;
-  color: white;
-  padding: 12px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 800;
-}
-
-.logout-button:hover {
-  background: #b91c1c;
-}
-
 .main-content {
   min-width: 0;
   padding: 28px;
@@ -219,12 +204,33 @@ textarea {
   line-height: 1.5;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
 .role-pill {
   background: #dbeafe;
   color: #1e40af;
   padding: 8px 14px;
   border-radius: 999px;
   font-weight: 800;
+}
+
+.top-logout-button {
+  border: none;
+  background: #dc2626;
+  color: white;
+  padding: 9px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.top-logout-button:hover {
+  background: #b91c1c;
 }
 
 /* DASHBOARD + MODULE COMMON */
@@ -319,7 +325,6 @@ textarea {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
-/* Dashboard එකේ 01/02/03/04 පේනවා */
 .dashboard-stat-card .stat-icon {
   width: 36px;
   height: 36px;
@@ -332,7 +337,6 @@ textarea {
   margin-bottom: 14px;
 }
 
-/* Other pages වල 01/02/03/04 hide වෙනවා */
 .module-stat-card .stat-icon {
   display: none;
 }
@@ -954,6 +958,11 @@ th {
     flex-direction: column;
   }
 
+  .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
   .module-filter-row {
     grid-template-columns: 1fr;
   }
@@ -1014,5 +1023,9 @@ th {
   .module-hero h2,
   .add-resource-hero h2 {
     font-size: 28px;
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
   }
 }
