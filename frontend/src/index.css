@@ -148,6 +148,10 @@ textarea:focus {
   color: white;
 }
 
+.secondary-button:hover {
+  background: #374151;
+}
+
 .clear-button {
   margin-top: 29px;
   height: 43px;
@@ -159,10 +163,18 @@ textarea:focus {
   color: white;
 }
 
+.approve-button:hover {
+  background: #15803d;
+}
+
 .danger-button {
   padding: 8px 12px;
   background: #dc2626;
   color: white;
+}
+
+.danger-button:hover {
+  background: #b91c1c;
 }
 
 .success-box {
@@ -250,10 +262,14 @@ th {
   color: #92400e;
 }
 
-.status.cancelled,
-.status.in.review {
+.status.cancelled {
   background: #e5e7eb;
   color: #374151;
+}
+
+.status.in.review {
+  background: #e0f2fe;
+  color: #075985;
 }
 
 .action-buttons {
@@ -341,6 +357,27 @@ th {
   margin-top: 10px;
 }
 
+/* Edit Resource Section */
+.edit-section {
+  margin-bottom: 28px;
+  padding: 22px;
+  border: 1px solid #dbeafe;
+  background: #eff6ff;
+  border-radius: 12px;
+}
+
+.edit-section h2 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  color: #1e3a8a;
+}
+
+.button-row {
+  display: grid;
+  grid-template-columns: 1fr 160px;
+  gap: 12px;
+}
+
 @media (max-width: 700px) {
   .navbar {
     padding: 16px 20px;
@@ -384,6 +421,10 @@ th {
   }
 
   .calendar-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .button-row {
     grid-template-columns: 1fr;
   }
 }
