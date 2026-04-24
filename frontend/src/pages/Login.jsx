@@ -1,9 +1,24 @@
 import { useState } from "react";
 
+const USERS = [
+  {
+    username: "Resource Manager",
+    password: "resource123",
+    role: "ResourceManager",
+    displayRole: "Resource Manager",
+  },
+  {
+    username: "Organizer",
+    password: "organizer123",
+    role: "Organizer",
+    displayRole: "Organizer",
+  },
+];
+
 function Login({ onLogin }) {
   const [formData, setFormData] = useState({
-    name: "",
-    role: "",
+    username: "",
+    password: "",
   });
 
   const [message, setMessage] = useState("");
@@ -22,23 +37,35 @@ function Login({ onLogin }) {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    if (!formData.name.trim()) {
-      setMessage("User name is required");
+    if (!formData.username.trim()) {
+      setMessage("Username is required");
       return;
     }
 
-    if (!formData.role) {
-      setMessage("User role is required");
+    if (!formData.password.trim()) {
+      setMessage("Password is required");
       return;
     }
 
-    const user = {
-      name: formData.name.trim(),
-      role: formData.role,
+    const matchedUser = USERS.find(
+      (user) =>
+        user.username === formData.username.trim() &&
+        user.password === formData.password.trim()
+    );
+
+    if (!matchedUser) {
+      setMessage("Invalid username or password");
+      return;
+    }
+
+    const loggedUser = {
+      name: matchedUser.username,
+      role: matchedUser.role,
+      displayRole: matchedUser.displayRole,
     };
 
-    localStorage.setItem("resourceUser", JSON.stringify(user));
-    onLogin(user);
+    localStorage.setItem("resourceUser", JSON.stringify(loggedUser));
+    onLogin(loggedUser);
   };
 
   return (
@@ -50,7 +77,7 @@ function Login({ onLogin }) {
         <h2>Resource Management Login</h2>
 
         <p className="login-subtitle">
-          Login as Resource Manager or Organizer to access the correct resource
+          Login using your username and password to access the correct resource
           management features.
         </p>
 
@@ -58,23 +85,25 @@ function Login({ onLogin }) {
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>User Name</label>
+            <label>Username</label>
             <input
               type="text"
-              name="name"
-              value={formData.name}
+              name="username"
+              value={formData.username}
               onChange={handleChange}
-              placeholder="Example: Thilini Abeykoon"
+              placeholder="Example: Resource Manager"
             />
           </div>
 
           <div className="form-group">
-            <label>User Role</label>
-            <select name="role" value={formData.role} onChange={handleChange}>
-              <option value="">Select role</option>
-              <option value="ResourceManager">Resource Manager</option>
-              <option value="Organizer">Organizer</option>
-            </select>
+            <label>Password</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Enter password"
+            />
           </div>
 
           <button type="submit" className="primary-button">
@@ -86,13 +115,19 @@ function Login({ onLogin }) {
           <div>
             <strong>Resource Manager</strong>
             <p>
-              Add, edit, delete resources, approve requests, and resolve issues.
+              Username: Resource Manager
+              <br />
+              Password: resource123
             </p>
           </div>
 
           <div>
             <strong>Organizer</strong>
-            <p>Reserve resources, report issues, and view availability.</p>
+            <p>
+              Username: Organizer
+              <br />
+              Password: organizer123
+            </p>
           </div>
         </div>
       </div>
