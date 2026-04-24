@@ -1,6 +1,59 @@
 const Resource = require("../models/Resource");
 const ResourceRequest = require("../models/ResourceRequest");
 
+const findAlternativeResources = async ({
+  resource,
+  requiredDate,
+  startTime,
+  endTime,
+  quantity,
+}) => {
+  const dayStart = new Date(requiredDate);
+  dayStart.setHours(0, 0, 0, 0);
+
+  const dayEnd = new Date(requiredDate);
+  dayEnd.setHours(23, 59, 59, 999);
+
+  const conflictingBookings = await ResourceRequest.find({
+    requiredDate: {
+      $gte: dayStart,
+      $lte: dayEnd,
+    },
+    status: {
+      $in: ["Pending", "Approved"],
+    },
+    startTime: {
+      $lt: endTime,
+    },
+    endTime: {
+      $gt: startTime,
+    },
+  }).select("resource");
+
+  const blockedResourceIds = conflictingBookings.map((booking) =>
+    booking.resource.toString()
+  );
+
+  if (resource) {
+    blockedResourceIds.push(resource.toString());
+  }
+
+  const alternativeResources = await Resource.find({
+    _id: {
+      $nin: blockedResourceIds,
+    },
+    status: "Available",
+    maintenanceStatus: "Good",
+    quantity: {
+      $gte: Number(quantity),
+    },
+  })
+    .select("resourceName resourceType location quantity status maintenanceStatus")
+    .limit(5);
+
+  return alternativeResources;
+};
+
 const createResourceRequest = async (req, res) => {
   try {
     const {
@@ -66,23 +119,53 @@ const createResourceRequest = async (req, res) => {
     }
 
     if (selectedResource.status !== "Available") {
+      const alternativeResources = await findAlternativeResources({
+        resource,
+        requiredDate,
+        startTime,
+        endTime,
+        quantity,
+      });
+
       return res.status(400).json({
         success: false,
-        message: "Selected resource is currently unavailable",
+        message:
+          "Selected resource is currently unavailable. Please choose an alternative resource.",
+        alternativeResources,
       });
     }
 
     if (selectedResource.maintenanceStatus === "Under Maintenance") {
+      const alternativeResources = await findAlternativeResources({
+        resource,
+        requiredDate,
+        startTime,
+        endTime,
+        quantity,
+      });
+
       return res.status(400).json({
         success: false,
-        message: "Selected resource is under maintenance",
+        message:
+          "Selected resource is under maintenance. Please choose an alternative resource.",
+        alternativeResources,
       });
     }
 
     if (Number(quantity) > selectedResource.quantity) {
+      const alternativeResources = await findAlternativeResources({
+        resource,
+        requiredDate,
+        startTime,
+        endTime,
+        quantity,
+      });
+
       return res.status(400).json({
         success: false,
-        message: "Requested quantity is greater than available quantity",
+        message:
+          "Requested quantity is greater than available quantity. Please choose an alternative resource.",
+        alternativeResources,
       });
     }
 
@@ -110,10 +193,19 @@ const createResourceRequest = async (req, res) => {
     });
 
     if (existingBooking) {
+      const alternativeResources = await findAlternativeResources({
+        resource,
+        requiredDate,
+        startTime,
+        endTime,
+        quantity,
+      });
+
       return res.status(400).json({
         success: false,
         message:
-          "This resource is already requested or booked for the selected date and time",
+          "This resource is already requested or booked for the selected date and time. Alternative resources are suggested below.",
+        alternativeResources,
       });
     }
 

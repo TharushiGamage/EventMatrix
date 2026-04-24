@@ -3,6 +3,7 @@ import axios from "axios";
 
 function ReserveResource() {
   const [resources, setResources] = useState([]);
+  const [alternativeResources, setAlternativeResources] = useState([]);
   const [formData, setFormData] = useState({
     eventName: "",
     resource: "",
@@ -38,6 +39,8 @@ function ReserveResource() {
       ...formData,
       [name]: value,
     });
+
+    setAlternativeResources([]);
   };
 
   const validateForm = () => {
@@ -88,11 +91,23 @@ function ReserveResource() {
     return "";
   };
 
+  const handleAlternativeSelect = (resourceId) => {
+    setFormData({
+      ...formData,
+      resource: resourceId,
+    });
+
+    setMessage("Alternative resource selected. You can submit the request again.");
+    setMessageType("success");
+    setAlternativeResources([]);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     setMessage("");
     setMessageType("");
+    setAlternativeResources([]);
 
     const validationError = validateForm();
 
@@ -132,6 +147,10 @@ function ReserveResource() {
 
       setMessage(errorMessage);
       setMessageType("error");
+
+      if (error.response?.data?.alternativeResources) {
+        setAlternativeResources(error.response.data.alternativeResources);
+      }
     }
   };
 
@@ -147,6 +166,36 @@ function ReserveResource() {
         {message && (
           <div className={messageType === "success" ? "success-box" : "error-box"}>
             {message}
+          </div>
+        )}
+
+        {alternativeResources.length > 0 && (
+          <div className="info-box">
+            <h3>Suggested Alternative Resources</h3>
+            <p>
+              The selected resource is not available for this date and time.
+              You can choose one of the available resources below.
+            </p>
+
+            {alternativeResources.map((resource) => (
+              <div key={resource._id} className="alternative-item">
+                <div>
+                  <strong>{resource.resourceName}</strong>
+                  <p>
+                    {resource.resourceType} | {resource.location} | Quantity:{" "}
+                    {resource.quantity}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={() => handleAlternativeSelect(resource._id)}
+                >
+                  Select
+                </button>
+              </div>
+            ))}
           </div>
         )}
 
@@ -173,7 +222,8 @@ function ReserveResource() {
               {resources.map((resource) => (
                 <option key={resource._id} value={resource._id}>
                   {resource.resourceName} - {resource.resourceType} -{" "}
-                  {resource.location}
+                  {resource.location} - {resource.status} -{" "}
+                  {resource.maintenanceStatus}
                 </option>
               ))}
             </select>

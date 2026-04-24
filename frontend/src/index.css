@@ -377,6 +377,23 @@ th {
   gap: 12px;
 }
 
+.alternative-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  margin-top: 10px;
+  background: white;
+  border: 1px solid #bae6fd;
+  border-radius: 10px;
+}
+
+.alternative-item p {
+  margin: 5px 0 0;
+  color: #374151;
+}
+
 @media (max-width: 700px) {
   .navbar {
     padding: 16px 20px;
@@ -425,5 +442,10 @@ th {
 
   .button-row {
     grid-template-columns: 1fr;
+  }
+
+  .alternative-item {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
