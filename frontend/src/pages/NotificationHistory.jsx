@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import api from "../utils/api";
 
-function NotificationHistory() {
+function NotificationHistory({ onNotificationUpdate }) {
   const [notifications, setNotifications] = useState([]);
   const [typeFilter, setTypeFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -58,9 +58,12 @@ function NotificationHistory() {
   const markAsRead = async (notificationId) => {
     try {
       const response = await api.put(`/notifications/${notificationId}/read`);
+
       setMessage(response.data.message || "Notification marked as read");
       setMessageType("success");
-      fetchNotifications();
+
+      await fetchNotifications();
+      onNotificationUpdate?.();
     } catch (error) {
       setMessage(
         error.response?.data?.message || "Failed to mark notification as read"
@@ -72,9 +75,12 @@ function NotificationHistory() {
   const markAllAsRead = async () => {
     try {
       const response = await api.put("/notifications/mark-all-read");
+
       setMessage(response.data.message || "All notifications marked as read");
       setMessageType("success");
-      fetchNotifications();
+
+      await fetchNotifications();
+      onNotificationUpdate?.();
     } catch (error) {
       setMessage(
         error.response?.data?.message || "Failed to mark notifications as read"

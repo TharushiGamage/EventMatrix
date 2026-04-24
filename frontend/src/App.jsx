@@ -10,11 +10,45 @@ import ResourceIssueManagement from "./pages/ResourceIssueManagement";
 import ResourceUsageLog from "./pages/ResourceUsageLog";
 import AvailabilityCalendar from "./pages/AvailabilityCalendar";
 import NotificationHistory from "./pages/NotificationHistory";
+import api from "./utils/api";
 import "./index.css";
 
 function App() {
   const [loggedUser, setLoggedUser] = useState(null);
   const [activePage, setActivePage] = useState("dashboard");
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
+
+  const calculateUnreadCount = (notifications) => {
+    return notifications.filter((notification) => {
+      const status = String(notification.status || "").toLowerCase();
+
+      if (status === "unread") {
+        return true;
+      }
+
+      if (notification.isRead === false) {
+        return true;
+      }
+
+      if (notification.read === false) {
+        return true;
+      }
+
+      return false;
+    }).length;
+  };
+
+  const fetchUnreadNotificationCount = async () => {
+    try {
+      const response = await api.get("/notifications");
+      const notifications = response.data.data || [];
+
+      const unreadCount = calculateUnreadCount(notifications);
+      setUnreadNotificationCount(unreadCount);
+    } catch (error) {
+      setUnreadNotificationCount(0);
+    }
+  };
 
   useEffect(() => {
     const savedUser = JSON.parse(localStorage.getItem("resourceUser"));
@@ -25,15 +59,42 @@ function App() {
     }
   }, []);
 
+  useEffect(() => {
+    if (!loggedUser) {
+      return;
+    }
+
+    fetchUnreadNotificationCount();
+
+    const notificationInterval = setInterval(() => {
+      fetchUnreadNotificationCount();
+    }, 1000);
+
+    return () => {
+      clearInterval(notificationInterval);
+    };
+  }, [loggedUser]);
+
+  useEffect(() => {
+    if (loggedUser) {
+      fetchUnreadNotificationCount();
+    }
+  }, [activePage]);
+
   const handleLogin = (user) => {
     setLoggedUser(user);
     setActivePage("dashboard");
+
+    setTimeout(() => {
+      fetchUnreadNotificationCount();
+    }, 500);
   };
 
   const handleLogout = () => {
     localStorage.removeItem("resourceUser");
     setLoggedUser(null);
     setActivePage("dashboard");
+    setUnreadNotificationCount(0);
   };
 
   if (!loggedUser) {
@@ -64,7 +125,9 @@ function App() {
 
         <nav className="side-nav">
           <button
-            className={activePage === "dashboard" ? "side-link active" : "side-link"}
+            className={
+              activePage === "dashboard" ? "side-link active" : "side-link"
+            }
             onClick={() => setActivePage("dashboard")}
           >
             Dashboard
@@ -112,7 +175,9 @@ function App() {
 
           {isOrganizer && (
             <button
-              className={activePage === "issue" ? "side-link active" : "side-link"}
+              className={
+                activePage === "issue" ? "side-link active" : "side-link"
+              }
               onClick={() => setActivePage("issue")}
             >
               Issue Report
@@ -152,7 +217,13 @@ function App() {
             }
             onClick={() => setActivePage("notifications")}
           >
-            Notifications
+            <span>Notifications</span>
+
+            {unreadNotificationCount > 0 && (
+              <span className="notification-count-badge">
+                {unreadNotificationCount}
+              </span>
+            )}
           </button>
         </nav>
 
@@ -188,7 +259,11 @@ function App() {
         )}
         {activePage === "usage" && <ResourceUsageLog />}
         {activePage === "availability" && <AvailabilityCalendar />}
-        {activePage === "notifications" && <NotificationHistory />}
+        {activePage === "notifications" && (
+          <NotificationHistory
+            onNotificationUpdate={fetchUnreadNotificationCount}
+          />
+        )}
       </main>
     </div>
   );

@@ -146,6 +146,9 @@ textarea {
   border-radius: 10px;
   cursor: pointer;
   font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .side-link:hover {
@@ -156,6 +159,21 @@ textarea {
 .side-link.active {
   background: #2563eb;
   color: white;
+}
+
+.notification-count-badge {
+  background: #ef4444;
+  color: white;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 900;
+  margin-left: auto;
 }
 
 .logout-button {
@@ -301,7 +319,7 @@ textarea {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
-/* Dashboard එකේ 01/02/03/04 පේන්න */
+/* Dashboard එකේ 01/02/03/04 පේනවා */
 .dashboard-stat-card .stat-icon {
   width: 36px;
   height: 36px;
@@ -314,7 +332,7 @@ textarea {
   margin-bottom: 14px;
 }
 
-/* Other module pages වල numbers hide කරන්න */
+/* Other pages වල 01/02/03/04 hide වෙනවා */
 .module-stat-card .stat-icon {
   display: none;
 }
