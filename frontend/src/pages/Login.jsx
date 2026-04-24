@@ -15,18 +15,20 @@ function Login({ onLogin }) {
       ...formData,
       [name]: value,
     });
+
+    setMessage("");
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
 
     if (!formData.name.trim()) {
-      setMessage("Name is required");
+      setMessage("User name is required");
       return;
     }
 
     if (!formData.role) {
-      setMessage("Role is required");
+      setMessage("User role is required");
       return;
     }
 
@@ -42,9 +44,14 @@ function Login({ onLogin }) {
   return (
     <div className="login-page">
       <div className="login-card">
-        <h1>EventMatrix Login</h1>
-        <p className="subtitle">
-          Select your role to access the Resource Management Module.
+        <div className="login-logo">EM</div>
+
+        <h1>EventMatrix</h1>
+        <h2>Resource Management Login</h2>
+
+        <p className="login-subtitle">
+          Login as Resource Manager or Organizer to access the correct resource
+          management features.
         </p>
 
         {message && <div className="error-box">{message}</div>}
@@ -65,7 +72,7 @@ function Login({ onLogin }) {
             <label>User Role</label>
             <select name="role" value={formData.role} onChange={handleChange}>
               <option value="">Select role</option>
-              <option value="Admin">Admin</option>
+              <option value="ResourceManager">Resource Manager</option>
               <option value="Organizer">Organizer</option>
             </select>
           </div>
@@ -75,14 +82,18 @@ function Login({ onLogin }) {
           </button>
         </form>
 
-        <div className="login-help">
-          <p>
-            <strong>Admin:</strong> Add/manage resources, approve requests, and
-            resolve issues.
-          </p>
-          <p>
-            <strong>Organizer:</strong> Reserve resources and report issues.
-          </p>
+        <div className="login-role-box">
+          <div>
+            <strong>Resource Manager</strong>
+            <p>
+              Add, edit, delete resources, approve requests, and resolve issues.
+            </p>
+          </div>
+
+          <div>
+            <strong>Organizer</strong>
+            <p>Reserve resources, report issues, and view availability.</p>
+          </div>
         </div>
       </div>
     </div>

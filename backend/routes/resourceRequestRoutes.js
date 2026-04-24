@@ -14,10 +14,18 @@ const router = express.Router();
 
 router.post("/", requireRole("Organizer"), createResourceRequest);
 
-router.get("/", requireRole("Admin", "Organizer"), getResourceRequests);
-router.get("/my-requests", requireRole("Organizer", "Admin"), getMyResourceRequests);
-router.get("/:id", requireRole("Organizer", "Admin"), getResourceRequestById);
+router.get("/", requireRole("ResourceManager", "Organizer"), getResourceRequests);
+router.get(
+  "/my-requests",
+  requireRole("Organizer", "ResourceManager"),
+  getMyResourceRequests
+);
+router.get("/:id", requireRole("Organizer", "ResourceManager"), getResourceRequestById);
 
-router.put("/:id/status", requireRole("Admin"), updateResourceRequestStatus);
+router.put(
+  "/:id/status",
+  requireRole("ResourceManager"),
+  updateResourceRequestStatus
+);
 
 module.exports = router;

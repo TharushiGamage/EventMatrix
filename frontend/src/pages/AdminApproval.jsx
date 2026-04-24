@@ -37,10 +37,10 @@ function AdminApproval() {
   };
 
   const updateRequestStatus = async (requestId, status) => {
-    const adminRemark = remarks[requestId] || "";
+    const managerRemark = remarks[requestId] || "";
 
-    if (status === "Rejected" && !adminRemark.trim()) {
-      setMessage("Admin remark is required when rejecting a request");
+    if (status === "Rejected" && !managerRemark.trim()) {
+      setMessage("Manager remark is required when rejecting a request");
       setMessageType("error");
       return;
     }
@@ -49,10 +49,10 @@ function AdminApproval() {
       const response = await api.put(`/resource-requests/${requestId}/status`, {
         status,
         adminRemark:
-          adminRemark ||
+          managerRemark ||
           (status === "Approved"
-            ? "Approved by admin"
-            : "Rejected by admin"),
+            ? "Approved by resource manager"
+            : "Rejected by resource manager"),
       });
 
       setMessage(response.data.message);
@@ -78,10 +78,10 @@ function AdminApproval() {
       <div className="table-card">
         <div className="table-header">
           <div>
-            <h1>Admin Approval</h1>
+            <h1>Resource Request Approval</h1>
             <p className="subtitle">
-              Review resource reservation requests and approve or reject pending
-              requests.
+              Resource Manager can review reservation requests and approve or
+              reject pending requests.
             </p>
           </div>
 
@@ -111,7 +111,7 @@ function AdminApproval() {
                   <th>Date</th>
                   <th>Time</th>
                   <th>Status</th>
-                  <th>Admin Remark</th>
+                  <th>Manager Remark</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -140,7 +140,7 @@ function AdminApproval() {
                           onChange={(event) =>
                             handleRemarkChange(request._id, event.target.value)
                           }
-                          placeholder="Admin remark"
+                          placeholder="Manager remark"
                         />
                       ) : (
                         request.adminRemark || "-"

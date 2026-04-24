@@ -12,11 +12,11 @@ const { requireRole } = require("../middleware/roleMiddleware");
 
 const router = express.Router();
 
-router.get("/", getResources);
-router.get("/:id", getResourceById);
+router.get("/", requireRole("ResourceManager", "Organizer"), getResources);
+router.get("/:id", requireRole("ResourceManager", "Organizer"), getResourceById);
 
-router.post("/", requireRole("Admin"), createResource);
-router.put("/:id", requireRole("Admin"), updateResource);
-router.delete("/:id", requireRole("Admin"), deleteResource);
+router.post("/", requireRole("ResourceManager"), createResource);
+router.put("/:id", requireRole("ResourceManager"), updateResource);
+router.delete("/:id", requireRole("ResourceManager"), deleteResource);
 
 module.exports = router;
