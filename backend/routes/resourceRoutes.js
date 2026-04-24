@@ -8,12 +8,15 @@ const {
   deleteResource,
 } = require("../controllers/resourceController");
 
+const { requireRole } = require("../middleware/roleMiddleware");
+
 const router = express.Router();
 
-router.post("/", createResource);
 router.get("/", getResources);
 router.get("/:id", getResourceById);
-router.put("/:id", updateResource);
-router.delete("/:id", deleteResource);
+
+router.post("/", requireRole("Admin"), createResource);
+router.put("/:id", requireRole("Admin"), updateResource);
+router.delete("/:id", requireRole("Admin"), deleteResource);
 
 module.exports = router;

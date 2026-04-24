@@ -7,11 +7,14 @@ const {
   updateResourceIssueStatus,
 } = require("../controllers/resourceIssueController");
 
+const { requireRole } = require("../middleware/roleMiddleware");
+
 const router = express.Router();
 
-router.post("/", createResourceIssue);
-router.get("/", getResourceIssues);
-router.get("/:id", getResourceIssueById);
-router.put("/:id/status", updateResourceIssueStatus);
+router.post("/", requireRole("Organizer", "Admin"), createResourceIssue);
+
+router.get("/", requireRole("Admin"), getResourceIssues);
+router.get("/:id", requireRole("Admin"), getResourceIssueById);
+router.put("/:id/status", requireRole("Admin"), updateResourceIssueStatus);
 
 module.exports = router;
