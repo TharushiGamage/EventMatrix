@@ -4,6 +4,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 
 const resourceRoutes = require("./routes/resourceRoutes");
+const resourceRequestRoutes = require("./routes/resourceRequestRoutes");
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1/resources", resourceRoutes);
+app.use("/api/v1/resource-requests", resourceRequestRoutes);
 
 mongoose
   .connect(MONGO_URI)
