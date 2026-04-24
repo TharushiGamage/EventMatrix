@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
 import AddResource from "./pages/AddResource";
 import ResourceList from "./pages/ResourceList";
 import ReserveResource from "./pages/ReserveResource";
@@ -20,13 +21,13 @@ function App() {
 
     if (savedUser) {
       setLoggedUser(savedUser);
-      setActivePage(savedUser.role === "ResourceManager" ? "dashboard" : "reserve");
+      setActivePage("dashboard");
     }
   }, []);
 
   const handleLogin = (user) => {
     setLoggedUser(user);
-    setActivePage(user.role === "ResourceManager" ? "dashboard" : "reserve");
+    setActivePage("dashboard");
   };
 
   const handleLogout = () => {
@@ -42,6 +43,9 @@ function App() {
   const isResourceManager = loggedUser.role === "ResourceManager";
   const isOrganizer = loggedUser.role === "Organizer";
 
+  const roleLabel =
+    loggedUser.role === "ResourceManager" ? "Resource Manager" : loggedUser.role;
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -55,11 +59,7 @@ function App() {
 
         <div className="user-box">
           <span className="user-name">{loggedUser.name}</span>
-          <span className="user-role">
-            {loggedUser.role === "ResourceManager"
-              ? "Resource Manager"
-              : loggedUser.role}
-          </span>
+          <span className="user-role">{roleLabel}</span>
         </div>
 
         <nav className="side-nav">
@@ -171,47 +171,11 @@ function App() {
             </p>
           </div>
 
-          <span className="role-pill">
-            {loggedUser.role === "ResourceManager"
-              ? "Resource Manager"
-              : loggedUser.role}
-          </span>
+          <span className="role-pill">{roleLabel}</span>
         </header>
 
         {activePage === "dashboard" && (
-          <div className="dashboard-grid">
-            <div className="dashboard-card">
-              <h3>Resource Inventory</h3>
-              <p>
-                Resource Manager can add, update, delete and manage university
-                resources.
-              </p>
-            </div>
-
-            <div className="dashboard-card">
-              <h3>Booking Workflow</h3>
-              <p>
-                Organizers can request resources and Resource Manager can approve
-                or reject requests.
-              </p>
-            </div>
-
-            <div className="dashboard-card">
-              <h3>Availability Control</h3>
-              <p>
-                The system prevents double booking and shows availability
-                records.
-              </p>
-            </div>
-
-            <div className="dashboard-card">
-              <h3>Issue Management</h3>
-              <p>
-                Organizers can report issues and Resource Manager can resolve
-                resources after maintenance.
-              </p>
-            </div>
-          </div>
+          <Dashboard user={loggedUser} onNavigate={setActivePage} />
         )}
 
         {activePage === "add" && isResourceManager && <AddResource />}
