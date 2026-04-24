@@ -1,6 +1,7 @@
 import { useState } from "react";
 import AddResource from "./pages/AddResource";
 import ResourceList from "./pages/ResourceList";
+import ReserveResource from "./pages/ReserveResource";
 import "./index.css";
 
 function App() {
@@ -25,11 +26,19 @@ function App() {
           >
             Resource List
           </button>
+
+          <button
+            className={activePage === "reserve" ? "nav-btn active" : "nav-btn"}
+            onClick={() => setActivePage("reserve")}
+          >
+            Reserve Resource
+          </button>
         </div>
       </nav>
 
       {activePage === "add" && <AddResource />}
       {activePage === "list" && <ResourceList />}
+      {activePage === "reserve" && <ReserveResource />}
     </div>
   );
 }
