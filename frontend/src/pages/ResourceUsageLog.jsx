@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import api from "../utils/api";
 
 function ResourceUsageLog() {
   const [requests, setRequests] = useState([]);
-  const [filteredRequests, setFilteredRequests] = useState([]);
   const [statusFilter, setStatusFilter] = useState("All");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -14,14 +13,11 @@ function ResourceUsageLog() {
       setMessage("");
 
       const response = await api.get("/resource-requests");
-
-      const data = response.data.data || [];
-      setRequests(data);
-      setFilteredRequests(data);
+      setRequests(response.data.data || []);
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to load resource usage logs";
-      setMessage(errorMessage);
+      setMessage(
+        error.response?.data?.message || "Failed to load resource usage logs"
+      );
     } finally {
       setLoading(false);
     }
@@ -31,35 +27,65 @@ function ResourceUsageLog() {
     fetchUsageLogs();
   }, []);
 
-  const handleStatusFilter = (event) => {
-    const selectedStatus = event.target.value;
-    setStatusFilter(selectedStatus);
+  const filteredRequests = useMemo(() => {
+    if (statusFilter === "All") return requests;
+    return requests.filter((request) => request.status === statusFilter);
+  }, [requests, statusFilter]);
 
-    if (selectedStatus === "All") {
-      setFilteredRequests(requests);
-      return;
-    }
-
-    const filtered = requests.filter(
-      (request) => request.status === selectedStatus
-    );
-
-    setFilteredRequests(filtered);
-  };
-
-  const getTotalByStatus = (status) => {
+  const countByStatus = (status) => {
     return requests.filter((request) => request.status === status).length;
   };
 
   return (
-    <div className="page-container">
-      <div className="table-card">
+    <div className="module-page">
+      <section className="module-hero">
+        <div>
+          <span className="dashboard-kicker">Booking Records</span>
+          <h2>Resource Usage Log</h2>
+          <p>
+            Track all resource reservation records, organizer details, booking
+            dates, request status and usage history.
+          </p>
+        </div>
+
+        <div className="module-role-card">
+          <span>Total Logs</span>
+          <strong>{requests.length}</strong>
+        </div>
+      </section>
+
+      <section className="module-stats-grid">
+        <div className="module-stat-card">
+          <span className="stat-icon">01</span>
+          <h3>{requests.length}</h3>
+          <p>Total Requests</p>
+        </div>
+
+        <div className="module-stat-card">
+          <span className="stat-icon">02</span>
+          <h3>{countByStatus("Pending")}</h3>
+          <p>Pending</p>
+        </div>
+
+        <div className="module-stat-card">
+          <span className="stat-icon">03</span>
+          <h3>{countByStatus("Approved")}</h3>
+          <p>Approved</p>
+        </div>
+
+        <div className="module-stat-card">
+          <span className="stat-icon">04</span>
+          <h3>{countByStatus("Rejected")}</h3>
+          <p>Rejected</p>
+        </div>
+      </section>
+
+      <section className="module-card">
         <div className="table-header">
           <div>
-            <h1>Resource Usage Log</h1>
+            <h2>Reservation History</h2>
             <p className="subtitle">
-              View resource reservation history, event usage details, request
-              status, and organizer information.
+              Filter resource usage logs by request status.
             </p>
           </div>
 
@@ -68,45 +94,24 @@ function ResourceUsageLog() {
           </button>
         </div>
 
-        {message && <div className="error-box">{message}</div>}
-
-        <div className="summary-row">
-          <div className="summary-box">
-            <h3>{requests.length}</h3>
-            <p>Total Requests</p>
-          </div>
-
-          <div className="summary-box">
-            <h3>{getTotalByStatus("Pending")}</h3>
-            <p>Pending</p>
-          </div>
-
-          <div className="summary-box">
-            <h3>{getTotalByStatus("Approved")}</h3>
-            <p>Approved</p>
-          </div>
-
-          <div className="summary-box">
-            <h3>{getTotalByStatus("Rejected")}</h3>
-            <p>Rejected</p>
-          </div>
-        </div>
-
-        <div className="filter-row">
-          <label>Filter by Status</label>
-          <select value={statusFilter} onChange={handleStatusFilter}>
-            <option value="All">All</option>
+        <div className="module-filter-row single-filter">
+          <select
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value)}
+          >
+            <option value="All">All Status</option>
             <option value="Pending">Pending</option>
             <option value="Approved">Approved</option>
             <option value="Rejected">Rejected</option>
-            <option value="Cancelled">Cancelled</option>
           </select>
         </div>
+
+        {message && <div className="error-box">{message}</div>}
 
         {loading ? (
           <p>Loading usage logs...</p>
         ) : filteredRequests.length === 0 ? (
-          <p>No usage logs found.</p>
+          <div className="empty-card">No usage logs found.</div>
         ) : (
           <div className="table-wrapper">
             <table>
@@ -146,7 +151,7 @@ function ResourceUsageLog() {
             </table>
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }

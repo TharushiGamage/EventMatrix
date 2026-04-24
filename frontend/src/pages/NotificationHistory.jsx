@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import api from "../utils/api";
 
 function NotificationHistory() {
   const [notifications, setNotifications] = useState([]);
-  const [filteredNotifications, setFilteredNotifications] = useState([]);
   const [typeFilter, setTypeFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
   const [loading, setLoading] = useState(true);
@@ -16,15 +15,9 @@ function NotificationHistory() {
       setMessage("");
 
       const response = await api.get("/notifications");
-      const data = response.data.data || [];
-
-      setNotifications(data);
-      applyFilters(data, typeFilter, statusFilter);
+      setNotifications(response.data.data || []);
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to load notifications";
-
-      setMessage(errorMessage);
+      setMessage(error.response?.data?.message || "Failed to load notifications");
       setMessageType("error");
     } finally {
       setLoading(false);
@@ -35,49 +28,43 @@ function NotificationHistory() {
     fetchNotifications();
   }, []);
 
-  const applyFilters = (data, selectedType, selectedStatus) => {
-    let filtered = [...data];
+  const filteredNotifications = useMemo(() => {
+    let filtered = [...notifications];
 
-    if (selectedType !== "All") {
+    if (typeFilter !== "All") {
       filtered = filtered.filter(
-        (notification) => notification.type === selectedType
+        (notification) => notification.type === typeFilter
       );
     }
 
-    if (selectedStatus !== "All") {
+    if (statusFilter !== "All") {
       filtered = filtered.filter(
-        (notification) => notification.status === selectedStatus
+        (notification) => notification.status === statusFilter
       );
     }
 
-    setFilteredNotifications(filtered);
-  };
+    return filtered;
+  }, [notifications, typeFilter, statusFilter]);
 
-  const handleTypeFilter = (event) => {
-    const selectedType = event.target.value;
-    setTypeFilter(selectedType);
-    applyFilters(notifications, selectedType, statusFilter);
-  };
+  const unreadCount = notifications.filter(
+    (notification) => notification.status === "Unread"
+  ).length;
 
-  const handleStatusFilter = (event) => {
-    const selectedStatus = event.target.value;
-    setStatusFilter(selectedStatus);
-    applyFilters(notifications, typeFilter, selectedStatus);
+  const countByType = (type) => {
+    return notifications.filter((notification) => notification.type === type)
+      .length;
   };
 
   const markAsRead = async (notificationId) => {
     try {
       const response = await api.put(`/notifications/${notificationId}/read`);
-
       setMessage(response.data.message || "Notification marked as read");
       setMessageType("success");
-
-      await fetchNotifications();
+      fetchNotifications();
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to mark notification as read";
-
-      setMessage(errorMessage);
+      setMessage(
+        error.response?.data?.message || "Failed to mark notification as read"
+      );
       setMessageType("error");
     }
   };
@@ -85,46 +72,67 @@ function NotificationHistory() {
   const markAllAsRead = async () => {
     try {
       const response = await api.put("/notifications/mark-all-read");
-
       setMessage(response.data.message || "All notifications marked as read");
       setMessageType("success");
-
-      await fetchNotifications();
+      fetchNotifications();
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.message ||
-        "Failed to mark all notifications as read";
-
-      setMessage(errorMessage);
+      setMessage(
+        error.response?.data?.message || "Failed to mark notifications as read"
+      );
       setMessageType("error");
     }
   };
 
-  const getUnreadCount = () => {
-    return notifications.filter(
-      (notification) => notification.status === "Unread"
-    ).length;
-  };
-
-  const getTotalByType = (type) => {
-    return notifications.filter((notification) => notification.type === type)
-      .length;
-  };
-
-  const formatDateTime = (dateValue) => {
-    return new Date(dateValue).toLocaleString();
-  };
-
   return (
-    <div className="page-container">
-      <div className="table-card">
+    <div className="module-page">
+      <section className="module-hero">
+        <div>
+          <span className="dashboard-kicker">Message Center</span>
+          <h2>Notifications</h2>
+          <p>
+            View confirmation messages, approval updates, issue reports and
+            system notifications related to resource workflows.
+          </p>
+        </div>
+
+        <div className="module-role-card">
+          <span>Unread Messages</span>
+          <strong>{unreadCount}</strong>
+        </div>
+      </section>
+
+      <section className="module-stats-grid">
+        <div className="module-stat-card">
+          <span className="stat-icon">01</span>
+          <h3>{notifications.length}</h3>
+          <p>Total Messages</p>
+        </div>
+
+        <div className="module-stat-card">
+          <span className="stat-icon">02</span>
+          <h3>{unreadCount}</h3>
+          <p>Unread</p>
+        </div>
+
+        <div className="module-stat-card">
+          <span className="stat-icon">03</span>
+          <h3>{countByType("Request")}</h3>
+          <p>Requests</p>
+        </div>
+
+        <div className="module-stat-card">
+          <span className="stat-icon">04</span>
+          <h3>{countByType("Issue")}</h3>
+          <p>Issues</p>
+        </div>
+      </section>
+
+      <section className="module-card">
         <div className="table-header">
           <div>
-            <h1>Notification History</h1>
+            <h2>Message History</h2>
             <p className="subtitle">
-              View confirmation messages and system notifications related to
-              resource requests, approvals, rejections, issue reports, and
-              resolved issues.
+              Filter notifications by type or read/unread status.
             </p>
           </div>
 
@@ -139,60 +147,38 @@ function NotificationHistory() {
           </div>
         </div>
 
+        <div className="module-filter-row">
+          <select
+            value={typeFilter}
+            onChange={(event) => setTypeFilter(event.target.value)}
+          >
+            <option value="All">All Types</option>
+            <option value="Request">Request</option>
+            <option value="Approval">Approval</option>
+            <option value="Issue">Issue</option>
+            <option value="System">System</option>
+          </select>
+
+          <select
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value)}
+          >
+            <option value="All">All Status</option>
+            <option value="Unread">Unread</option>
+            <option value="Read">Read</option>
+          </select>
+        </div>
+
         {message && (
           <div className={messageType === "success" ? "success-box" : "error-box"}>
             {message}
           </div>
         )}
 
-        <div className="summary-row">
-          <div className="summary-box">
-            <h3>{notifications.length}</h3>
-            <p>Total Messages</p>
-          </div>
-
-          <div className="summary-box">
-            <h3>{getUnreadCount()}</h3>
-            <p>Unread</p>
-          </div>
-
-          <div className="summary-box">
-            <h3>{getTotalByType("Request")}</h3>
-            <p>Requests</p>
-          </div>
-
-          <div className="summary-box">
-            <h3>{getTotalByType("Issue")}</h3>
-            <p>Issues</p>
-          </div>
-        </div>
-
-        <div className="calendar-controls">
-          <div className="filter-row">
-            <label>Filter by Type</label>
-            <select value={typeFilter} onChange={handleTypeFilter}>
-              <option value="All">All Types</option>
-              <option value="Request">Request</option>
-              <option value="Approval">Approval</option>
-              <option value="Issue">Issue</option>
-              <option value="System">System</option>
-            </select>
-          </div>
-
-          <div className="filter-row">
-            <label>Filter by Status</label>
-            <select value={statusFilter} onChange={handleStatusFilter}>
-              <option value="All">All Status</option>
-              <option value="Unread">Unread</option>
-              <option value="Read">Read</option>
-            </select>
-          </div>
-        </div>
-
         {loading ? (
           <p>Loading notifications...</p>
         ) : filteredNotifications.length === 0 ? (
-          <p>No notifications found.</p>
+          <div className="empty-card">No notifications found.</div>
         ) : (
           <div className="notification-list">
             {filteredNotifications.map((notification) => (
@@ -208,7 +194,7 @@ function NotificationHistory() {
                   <div>
                     <h3>{notification.title}</h3>
                     <p className="notification-date">
-                      {formatDateTime(notification.createdAt)}
+                      {new Date(notification.createdAt).toLocaleString()}
                     </p>
                   </div>
 
@@ -262,7 +248,7 @@ function NotificationHistory() {
             ))}
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }

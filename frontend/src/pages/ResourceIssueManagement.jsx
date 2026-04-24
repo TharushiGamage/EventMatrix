@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import api from "../utils/api";
 
 function ResourceIssueManagement() {
   const [issues, setIssues] = useState([]);
   const [remarks, setRemarks] = useState({});
+  const [statusFilter, setStatusFilter] = useState("All");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
@@ -11,14 +12,10 @@ function ResourceIssueManagement() {
   const fetchIssues = async () => {
     try {
       setLoading(true);
-
       const response = await api.get("/resource-issues");
       setIssues(response.data.data || []);
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to load resource issues";
-
-      setMessage(errorMessage);
+      setMessage(error.response?.data?.message || "Failed to load issues");
       setMessageType("error");
     } finally {
       setLoading(false);
@@ -28,6 +25,15 @@ function ResourceIssueManagement() {
   useEffect(() => {
     fetchIssues();
   }, []);
+
+  const filteredIssues = useMemo(() => {
+    if (statusFilter === "All") return issues;
+    return issues.filter((issue) => issue.status === statusFilter);
+  }, [issues, statusFilter]);
+
+  const countByStatus = (status) => {
+    return issues.filter((issue) => issue.status === status).length;
+  };
 
   const handleRemarkChange = (issueId, value) => {
     setRemarks({
@@ -59,30 +65,79 @@ function ResourceIssueManagement() {
 
       await fetchIssues();
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to update issue status";
-
-      setMessage(errorMessage);
+      setMessage(error.response?.data?.message || "Failed to update issue");
       setMessageType("error");
     }
   };
 
   return (
-    <div className="page-container">
-      <div className="table-card">
+    <div className="module-page">
+      <section className="module-hero">
+        <div>
+          <span className="dashboard-kicker">Maintenance Workflow</span>
+          <h2>Issue Management</h2>
+          <p>
+            Review reported damages, technical issues and maintenance requests.
+            Resolve issues after checking the resource condition.
+          </p>
+        </div>
+
+        <div className="module-role-card">
+          <span>Open Issues</span>
+          <strong>{countByStatus("Reported") + countByStatus("In Review")}</strong>
+        </div>
+      </section>
+
+      <section className="module-stats-grid">
+        <div className="module-stat-card">
+          <span className="stat-icon">01</span>
+          <h3>{issues.length}</h3>
+          <p>Total Issues</p>
+        </div>
+
+        <div className="module-stat-card">
+          <span className="stat-icon">02</span>
+          <h3>{countByStatus("Reported")}</h3>
+          <p>Reported</p>
+        </div>
+
+        <div className="module-stat-card">
+          <span className="stat-icon">03</span>
+          <h3>{countByStatus("In Review")}</h3>
+          <p>In Review</p>
+        </div>
+
+        <div className="module-stat-card">
+          <span className="stat-icon">04</span>
+          <h3>{countByStatus("Resolved")}</h3>
+          <p>Resolved</p>
+        </div>
+      </section>
+
+      <section className="module-card">
         <div className="table-header">
           <div>
-            <h1>Issue Management</h1>
+            <h2>Reported Resource Issues</h2>
             <p className="subtitle">
-              View reported resource issues and mark them as In Review or
-              Resolved. When an issue is resolved, the resource becomes
-              Available again.
+              Resource Manager can review issue reports and update their status.
             </p>
           </div>
 
           <button className="secondary-button" onClick={fetchIssues}>
             Refresh
           </button>
+        </div>
+
+        <div className="module-filter-row single-filter">
+          <select
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value)}
+          >
+            <option value="All">All Status</option>
+            <option value="Reported">Reported</option>
+            <option value="In Review">In Review</option>
+            <option value="Resolved">Resolved</option>
+          </select>
         </div>
 
         {message && (
@@ -93,8 +148,8 @@ function ResourceIssueManagement() {
 
         {loading ? (
           <p>Loading resource issues...</p>
-        ) : issues.length === 0 ? (
-          <p>No resource issues found.</p>
+        ) : filteredIssues.length === 0 ? (
+          <div className="empty-card">No issues found.</div>
         ) : (
           <div className="table-wrapper">
             <table>
@@ -106,13 +161,13 @@ function ResourceIssueManagement() {
                   <th>Reported By</th>
                   <th>Status</th>
                   <th>Resource Status</th>
-                  <th>Admin Remark</th>
+                  <th>Manager Remark</th>
                   <th>Action</th>
                 </tr>
               </thead>
 
               <tbody>
-                {issues.map((issue) => (
+                {filteredIssues.map((issue) => (
                   <tr key={issue._id}>
                     <td>{issue.resource?.resourceName || "Resource not found"}</td>
                     <td>{issue.issueType}</td>
@@ -143,7 +198,7 @@ function ResourceIssueManagement() {
                           onChange={(event) =>
                             handleRemarkChange(issue._id, event.target.value)
                           }
-                          placeholder="Admin remark"
+                          placeholder="Manager remark"
                         />
                       )}
                     </td>
@@ -178,7 +233,7 @@ function ResourceIssueManagement() {
             </table>
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }

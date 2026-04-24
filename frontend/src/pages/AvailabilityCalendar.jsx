@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import api from "../utils/api";
 
 function AvailabilityCalendar() {
   const [resources, setResources] = useState([]);
   const [requests, setRequests] = useState([]);
-  const [filteredBookings, setFilteredBookings] = useState([]);
   const [selectedResource, setSelectedResource] = useState("All");
   const [selectedDate, setSelectedDate] = useState("");
   const [loading, setLoading] = useState(true);
@@ -18,23 +17,13 @@ function AvailabilityCalendar() {
       const resourcesResponse = await api.get("/resources");
       const requestsResponse = await api.get("/resource-requests");
 
-      const resourceData = resourcesResponse.data.data || [];
-      const requestData = requestsResponse.data.data || [];
-
-      setResources(resourceData);
-      setRequests(requestData);
-
-      const blockingBookings = requestData.filter(
-        (request) =>
-          request.status === "Pending" || request.status === "Approved"
-      );
-
-      setFilteredBookings(blockingBookings);
+      setResources(resourcesResponse.data.data || []);
+      setRequests(requestsResponse.data.data || []);
     } catch (error) {
-      const errorMessage =
+      setMessage(
         error.response?.data?.message ||
-        "Failed to load availability calendar data";
-      setMessage(errorMessage);
+          "Failed to load availability calendar data"
+      );
     } finally {
       setLoading(false);
     }
@@ -44,78 +33,102 @@ function AvailabilityCalendar() {
     fetchData();
   }, []);
 
-  const applyFilters = (resourceValue, dateValue) => {
+  const blockingBookings = useMemo(() => {
     let filtered = requests.filter(
       (request) => request.status === "Pending" || request.status === "Approved"
     );
 
-    if (resourceValue !== "All") {
+    if (selectedResource !== "All") {
       filtered = filtered.filter(
-        (request) => request.resource?._id === resourceValue
+        (request) => request.resource?._id === selectedResource
       );
     }
 
-    if (dateValue) {
+    if (selectedDate) {
       filtered = filtered.filter((request) => {
         const requestDate = new Date(request.requiredDate)
           .toISOString()
           .split("T")[0];
 
-        return requestDate === dateValue;
+        return requestDate === selectedDate;
       });
     }
 
-    setFilteredBookings(filtered);
-  };
+    return filtered;
+  }, [requests, selectedResource, selectedDate]);
 
-  const handleResourceChange = (event) => {
-    const value = event.target.value;
-    setSelectedResource(value);
-    applyFilters(value, selectedDate);
-  };
+  const approvedCount = blockingBookings.filter(
+    (request) => request.status === "Approved"
+  ).length;
 
-  const handleDateChange = (event) => {
-    const value = event.target.value;
-    setSelectedDate(value);
-    applyFilters(selectedResource, value);
-  };
+  const pendingCount = blockingBookings.filter(
+    (request) => request.status === "Pending"
+  ).length;
+
+  const uniqueDates = [
+    ...new Set(
+      blockingBookings.map((request) =>
+        new Date(request.requiredDate).toISOString().split("T")[0]
+      )
+    ),
+  ];
 
   const clearFilters = () => {
     setSelectedResource("All");
     setSelectedDate("");
-
-    const blockingBookings = requests.filter(
-      (request) => request.status === "Pending" || request.status === "Approved"
-    );
-
-    setFilteredBookings(blockingBookings);
-  };
-
-  const formatDate = (dateValue) => {
-    return new Date(dateValue).toLocaleDateString();
-  };
-
-  const getResourceName = (request) => {
-    return request.resource?.resourceName || "Resource not found";
-  };
-
-  const getUniqueBookedDates = () => {
-    const dates = filteredBookings.map((request) =>
-      new Date(request.requiredDate).toISOString().split("T")[0]
-    );
-
-    return [...new Set(dates)];
   };
 
   return (
-    <div className="page-container">
-      <div className="table-card">
+    <div className="module-page">
+      <section className="module-hero">
+        <div>
+          <span className="dashboard-kicker">Availability Control</span>
+          <h2>Availability Calendar</h2>
+          <p>
+            Check pending and approved bookings by resource and date before
+            creating a new reservation.
+          </p>
+        </div>
+
+        <div className="module-role-card">
+          <span>Blocking Bookings</span>
+          <strong>{blockingBookings.length}</strong>
+        </div>
+      </section>
+
+      <section className="module-stats-grid">
+        <div className="module-stat-card">
+          <span className="stat-icon">01</span>
+          <h3>{blockingBookings.length}</h3>
+          <p>Blocking Bookings</p>
+        </div>
+
+        <div className="module-stat-card">
+          <span className="stat-icon">02</span>
+          <h3>{uniqueDates.length}</h3>
+          <p>Booked Dates</p>
+        </div>
+
+        <div className="module-stat-card">
+          <span className="stat-icon">03</span>
+          <h3>{approvedCount}</h3>
+          <p>Approved</p>
+        </div>
+
+        <div className="module-stat-card">
+          <span className="stat-icon">04</span>
+          <h3>{pendingCount}</h3>
+          <p>Pending</p>
+        </div>
+      </section>
+
+      <section className="module-card">
         <div className="table-header">
           <div>
-            <h1>Availability Calendar</h1>
+            <h2>Booked Dates View</h2>
             <p className="subtitle">
-              View booked and pending resource time slots to check availability
-              before creating a new reservation.
+              Use resource and date filters to identify available or occupied
+              time slots.
             </p>
           </div>
 
@@ -124,89 +137,56 @@ function AvailabilityCalendar() {
           </button>
         </div>
 
-        {message && <div className="error-box">{message}</div>}
+        <div className="module-filter-row">
+          <select
+            value={selectedResource}
+            onChange={(event) => setSelectedResource(event.target.value)}
+          >
+            <option value="All">All Resources</option>
+            {resources.map((resource) => (
+              <option key={resource._id} value={resource._id}>
+                {resource.resourceName} - {resource.resourceType}
+              </option>
+            ))}
+          </select>
 
-        <div className="calendar-controls">
-          <div className="filter-row">
-            <label>Filter by Resource</label>
-            <select value={selectedResource} onChange={handleResourceChange}>
-              <option value="All">All Resources</option>
-              {resources.map((resource) => (
-                <option key={resource._id} value={resource._id}>
-                  {resource.resourceName} - {resource.resourceType}
-                </option>
-              ))}
-            </select>
-          </div>
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(event) => setSelectedDate(event.target.value)}
+          />
 
-          <div className="filter-row">
-            <label>Filter by Date</label>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={handleDateChange}
-            />
-          </div>
-
-          <button className="secondary-button clear-button" onClick={clearFilters}>
+          <button className="secondary-button" onClick={clearFilters}>
             Clear Filters
           </button>
         </div>
 
-        <div className="summary-row">
-          <div className="summary-box">
-            <h3>{filteredBookings.length}</h3>
-            <p>Blocking Bookings</p>
-          </div>
-
-          <div className="summary-box">
-            <h3>{getUniqueBookedDates().length}</h3>
-            <p>Booked Dates</p>
-          </div>
-
-          <div className="summary-box">
-            <h3>
-              {
-                filteredBookings.filter(
-                  (request) => request.status === "Approved"
-                ).length
-              }
-            </h3>
-            <p>Approved</p>
-          </div>
-
-          <div className="summary-box">
-            <h3>
-              {
-                filteredBookings.filter((request) => request.status === "Pending")
-                  .length
-              }
-            </h3>
-            <p>Pending</p>
-          </div>
-        </div>
+        {message && <div className="error-box">{message}</div>}
 
         {loading ? (
           <p>Loading availability calendar...</p>
-        ) : filteredBookings.length === 0 ? (
+        ) : blockingBookings.length === 0 ? (
           <div className="success-box">
             No pending or approved bookings found for the selected filter. This
-            time/date may be available.
+            date/time may be available.
           </div>
         ) : (
           <>
             <div className="calendar-grid">
-              {filteredBookings.map((request) => (
+              {blockingBookings.map((request) => (
                 <div className="booking-card" key={request._id}>
                   <div className="booking-card-header">
-                    <h3>{formatDate(request.requiredDate)}</h3>
+                    <h3>
+                      {new Date(request.requiredDate).toLocaleDateString()}
+                    </h3>
                     <span className={`status ${request.status.toLowerCase()}`}>
                       {request.status}
                     </span>
                   </div>
 
                   <p>
-                    <strong>Resource:</strong> {getResourceName(request)}
+                    <strong>Resource:</strong>{" "}
+                    {request.resource?.resourceName || "Resource not found"}
                   </p>
                   <p>
                     <strong>Event:</strong> {request.eventName}
@@ -236,10 +216,10 @@ function AvailabilityCalendar() {
                 </thead>
 
                 <tbody>
-                  {filteredBookings.map((request) => (
+                  {blockingBookings.map((request) => (
                     <tr key={request._id}>
-                      <td>{formatDate(request.requiredDate)}</td>
-                      <td>{getResourceName(request)}</td>
+                      <td>{new Date(request.requiredDate).toLocaleDateString()}</td>
+                      <td>{request.resource?.resourceName || "Resource not found"}</td>
                       <td>{request.eventName}</td>
                       <td>
                         {request.startTime} - {request.endTime}
@@ -259,7 +239,7 @@ function AvailabilityCalendar() {
             </div>
           </>
         )}
-      </div>
+      </section>
     </div>
   );
 }

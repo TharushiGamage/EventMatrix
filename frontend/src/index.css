@@ -16,10 +16,7 @@ textarea {
   font-family: inherit;
 }
 
-/* =========================
-   LOGIN PAGE
-========================= */
-
+/* LOGIN */
 .login-page {
   min-height: 100vh;
   background: linear-gradient(135deg, #111827, #1d4ed8);
@@ -69,29 +66,7 @@ textarea {
   margin-bottom: 22px;
 }
 
-.login-role-box {
-  margin-top: 20px;
-  display: grid;
-  gap: 12px;
-}
-
-.login-role-box div {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 12px;
-}
-
-.login-role-box p {
-  margin: 5px 0 0;
-  color: #6b7280;
-  font-size: 14px;
-}
-
-/* =========================
-   MAIN LAYOUT
-========================= */
-
+/* LAYOUT */
 .app-shell {
   min-height: 100vh;
   display: grid;
@@ -234,16 +209,17 @@ textarea {
   font-weight: 800;
 }
 
-/* =========================
-   PROFESSIONAL DASHBOARD
-========================= */
-
-.dashboard-page {
+/* DASHBOARD + MODULE COMMON */
+.dashboard-page,
+.module-page,
+.resource-add-page {
   display: grid;
   gap: 22px;
 }
 
-.dashboard-hero {
+.dashboard-hero,
+.module-hero,
+.add-resource-hero {
   background: linear-gradient(135deg, #0f172a, #2563eb);
   color: white;
   border-radius: 22px;
@@ -266,19 +242,25 @@ textarea {
   margin-bottom: 14px;
 }
 
-.dashboard-hero h2 {
+.dashboard-hero h2,
+.module-hero h2,
+.add-resource-hero h2 {
   margin: 0;
   font-size: 34px;
 }
 
-.dashboard-hero p {
+.dashboard-hero p,
+.module-hero p,
+.add-resource-hero p {
   margin: 10px 0 0;
-  max-width: 720px;
+  max-width: 760px;
   color: #dbeafe;
   line-height: 1.6;
 }
 
-.dashboard-role-panel {
+.dashboard-role-panel,
+.module-role-card,
+.add-resource-role-card {
   min-width: 190px;
   background: rgba(255, 255, 255, 0.14);
   border: 1px solid rgba(255, 255, 255, 0.22);
@@ -287,24 +269,31 @@ textarea {
   text-align: center;
 }
 
-.dashboard-role-panel span {
+.dashboard-role-panel span,
+.module-role-card span,
+.add-resource-role-card span {
   display: block;
   color: #bfdbfe;
   font-size: 13px;
   margin-bottom: 8px;
 }
 
-.dashboard-role-panel strong {
+.dashboard-role-panel strong,
+.module-role-card strong,
+.add-resource-role-card strong {
   font-size: 20px;
 }
 
-.dashboard-stats-grid {
+/* DASHBOARD */
+.dashboard-stats-grid,
+.module-stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
 }
 
-.dashboard-stat-card {
+.dashboard-stat-card,
+.module-stat-card {
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 18px;
@@ -312,7 +301,8 @@ textarea {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
-.stat-icon {
+/* Dashboard එකේ 01/02/03/04 පේන්න */
+.dashboard-stat-card .stat-icon {
   width: 36px;
   height: 36px;
   border-radius: 12px;
@@ -324,9 +314,21 @@ textarea {
   margin-bottom: 14px;
 }
 
+/* Other module pages වල numbers hide කරන්න */
+.module-stat-card .stat-icon {
+  display: none;
+}
+
 .dashboard-stat-card h3 {
   margin: 0 0 8px;
   font-size: 19px;
+  color: #111827;
+}
+
+.module-stat-card h3 {
+  margin: 0 0 8px;
+  font-size: 26px;
+  color: #111827;
 }
 
 .dashboard-stat-card p {
@@ -334,6 +336,14 @@ textarea {
   color: #6b7280;
   line-height: 1.5;
   font-size: 14px;
+}
+
+.module-stat-card p {
+  margin: 6px 0 0;
+  color: #2563eb;
+  line-height: 1.5;
+  font-size: 15px;
+  font-weight: 800;
 }
 
 .dashboard-section-header {
@@ -359,12 +369,18 @@ textarea {
   gap: 20px;
 }
 
-.dashboard-feature-card {
+.dashboard-feature-card,
+.module-card,
+.add-resource-info-card,
+.add-resource-form-card {
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 22px;
   padding: 24px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.dashboard-feature-card {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -392,7 +408,6 @@ textarea {
 .dashboard-feature-card h3 {
   margin: 0 0 10px;
   font-size: 22px;
-  color: #111827;
 }
 
 .dashboard-feature-card p {
@@ -433,10 +448,57 @@ textarea {
   line-height: 1.6;
 }
 
-/* =========================
-   COMMON PAGE / FORM CARDS
-========================= */
+/* ADD RESOURCE */
+.add-resource-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 22px;
+  align-items: start;
+}
 
+.add-resource-info-card h3,
+.form-heading h3 {
+  margin: 0 0 14px;
+  font-size: 22px;
+  color: #111827;
+}
+
+.form-heading p {
+  margin: 0 0 22px;
+  color: #6b7280;
+}
+
+.rule-item {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 14px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.rule-item:last-child {
+  border-bottom: none;
+}
+
+.rule-item strong {
+  width: 34px;
+  height: 34px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+}
+
+.rule-item p {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+/* FORMS */
 .page-container {
   display: flex;
   justify-content: center;
@@ -458,7 +520,8 @@ textarea {
 }
 
 .form-card h1,
-.table-card h1 {
+.table-card h1,
+.module-card h2 {
   margin-top: 0;
   margin-bottom: 8px;
   font-size: 28px;
@@ -511,10 +574,18 @@ textarea:focus {
   font-size: 14px;
 }
 
-/* =========================
-   BUTTONS
-========================= */
+.module-filter-row {
+  display: grid;
+  grid-template-columns: 1fr 220px 220px;
+  gap: 14px;
+  margin-bottom: 18px;
+}
 
+.module-filter-row.single-filter {
+  grid-template-columns: 260px;
+}
+
+/* BUTTONS */
 .primary-button,
 .secondary-button,
 .danger-button,
@@ -567,10 +638,7 @@ textarea:focus {
   background: #b91c1c;
 }
 
-/* =========================
-   ALERTS
-========================= */
-
+/* ALERTS */
 .success-box {
   background: #dcfce7;
   border: 1px solid #16a34a;
@@ -589,19 +657,17 @@ textarea:focus {
   margin-bottom: 18px;
 }
 
-.info-box {
+.info-box,
+.empty-card {
   background: #e0f2fe;
   border: 1px solid #0284c7;
   color: #075985;
-  padding: 12px;
-  border-radius: 10px;
+  padding: 14px;
+  border-radius: 12px;
   margin-bottom: 18px;
 }
 
-/* =========================
-   TABLES
-========================= */
-
+/* TABLES */
 .table-header {
   display: flex;
   justify-content: space-between;
@@ -633,10 +699,7 @@ th {
   color: #374151;
 }
 
-/* =========================
-   STATUS BADGES
-========================= */
-
+/* STATUS */
 .status {
   display: inline-block;
   padding: 6px 10px;
@@ -685,52 +748,7 @@ th {
   font-size: 14px;
 }
 
-/* =========================
-   SUMMARY / FILTERS
-========================= */
-
-.summary-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  margin-bottom: 22px;
-}
-
-.summary-box {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  padding: 16px;
-}
-
-.summary-box h3 {
-  margin: 0;
-  font-size: 26px;
-  color: #111827;
-}
-
-.summary-box p {
-  margin: 6px 0 0;
-  color: #6b7280;
-}
-
-.filter-row {
-  width: 260px;
-  margin-bottom: 18px;
-}
-
-.calendar-controls {
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
-}
-
-/* =========================
-   AVAILABILITY
-========================= */
-
+/* AVAILABILITY */
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -767,10 +785,7 @@ th {
   margin-top: 10px;
 }
 
-/* =========================
-   EDIT RESOURCE
-========================= */
-
+/* EDIT */
 .edit-section {
   margin-bottom: 28px;
   padding: 22px;
@@ -791,10 +806,7 @@ th {
   gap: 12px;
 }
 
-/* =========================
-   ALTERNATIVE RESOURCES
-========================= */
-
+/* ALTERNATIVES */
 .alternative-item {
   display: flex;
   justify-content: space-between;
@@ -812,10 +824,7 @@ th {
   color: #374151;
 }
 
-/* =========================
-   NOTIFICATIONS
-========================= */
-
+/* NOTIFICATIONS */
 .notification-list {
   display: grid;
   gap: 14px;
@@ -883,9 +892,26 @@ th {
   margin: 12px 0;
 }
 
-/* =========================
-   RESPONSIVE DESIGN
-========================= */
+/* RESPONSIVE */
+@media (max-width: 1100px) {
+  .add-resource-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-hero,
+  .module-hero,
+  .add-resource-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dashboard-role-panel,
+  .module-role-card,
+  .add-resource-role-card {
+    width: 100%;
+    text-align: left;
+  }
+}
 
 @media (max-width: 1000px) {
   .app-shell {
@@ -897,7 +923,8 @@ th {
     min-height: auto;
   }
 
-  .dashboard-stats-grid {
+  .dashboard-stats-grid,
+  .module-stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -905,18 +932,12 @@ th {
     grid-template-columns: 1fr;
   }
 
-  .dashboard-hero {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .dashboard-role-panel {
-    width: 100%;
-    text-align: left;
-  }
-
   .top-header {
     flex-direction: column;
+  }
+
+  .module-filter-row {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -930,23 +951,12 @@ th {
   }
 
   .form-card,
-  .table-card {
+  .table-card,
+  .module-card {
     padding: 22px;
   }
 
   .table-header {
-    flex-direction: column;
-  }
-
-  .summary-row {
-    grid-template-columns: 1fr;
-  }
-
-  .filter-row {
-    width: 100%;
-  }
-
-  .calendar-controls {
     flex-direction: column;
   }
 
@@ -971,15 +981,20 @@ th {
     justify-content: flex-start;
   }
 
-  .dashboard-stats-grid {
+  .dashboard-stats-grid,
+  .module-stats-grid {
     grid-template-columns: 1fr;
   }
 
-  .dashboard-hero {
+  .dashboard-hero,
+  .module-hero,
+  .add-resource-hero {
     padding: 24px;
   }
 
-  .dashboard-hero h2 {
+  .dashboard-hero h2,
+  .module-hero h2,
+  .add-resource-hero h2 {
     font-size: 28px;
   }
 }
