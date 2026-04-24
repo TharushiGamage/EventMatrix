@@ -6,6 +6,7 @@ const dotenv = require("dotenv");
 const resourceRoutes = require("./routes/resourceRoutes");
 const resourceRequestRoutes = require("./routes/resourceRequestRoutes");
 const resourceIssueRoutes = require("./routes/resourceIssueRoutes");
+const resourceNotificationRoutes = require("./routes/resourceNotificationRoutes");
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ app.get("/", (req, res) => {
 app.use("/api/v1/resources", resourceRoutes);
 app.use("/api/v1/resource-requests", resourceRequestRoutes);
 app.use("/api/v1/resource-issues", resourceIssueRoutes);
+app.use("/api/v1/notifications", resourceNotificationRoutes);
 
 mongoose
   .connect(MONGO_URI)
